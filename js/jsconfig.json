@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+    },
+    "include": [
+        "lunalite-pixi-mv.d.ts",
+        "lunalite-pixi-mz.d.ts",
+        "./*",
+        "./plugins_dev/*.js",
+        "plugins_dev/*.js",
+        "rmmv.d.ts",
+        "rmmv-pixi.d.ts"
+    ],
+    "exclude": [
+        "plugins_dev/*"
+    ]
+}
