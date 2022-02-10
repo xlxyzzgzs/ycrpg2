@@ -379,4 +379,53 @@ var SF_Plugins = SF_Plugins || {};
         }
         throw new Error(message);
     };
+
+    //=============================================================================
+    // CallBack Scope Transport
+    //=============================================================================
+
+    function CallBack() {
+        throw new Exception("this is static method");
+    }
+    window.CallBack = CallBack;
+
+    CallBack.initialize = function () {
+        this.clear();
+    }
+
+    // Return closureIndex
+    CallBack.getNew = function () {
+        var closureIndex = this._closureIndex++;
+        return closureIndex;
+    }
+
+    CallBack.setByClosureIndex = function (closureIndex, closureFunction) {
+        this._closureFunction[closureIndex] = closureFunction;
+    }
+
+    CallBack.unregister = function (closureIndex) {
+        delete this._closureFunction[closureIndex];
+    }
+
+    CallBack.callByClosureIndex = function (closureIndex) {
+        if (this._closureFunction[closureIndex]) {
+            this._closureFunction[closureIndex]();
+        }
+    }
+
+    CallBack.convertToString = function (closureIndex) {
+        return "CallBack.callByClosureIndex(" + closureIndex + ")";
+    }
+
+    CallBack.clear = function () {
+        this._closureFunction = {};
+        this._closureIndex = 0;
+    }
+
+    CallBack.registerOneTime = function (closureFunction) {
+        var closureIndex = this.getNew();
+        this.setByClosureIndex(closureIndex, (function () { closureFunction(); this.unregister(closureIndex); }).bind(this));
+        return this.convertToString(closureIndex);
+    }
+
 })();

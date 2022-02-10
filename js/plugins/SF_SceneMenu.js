@@ -84,6 +84,7 @@ var SF_Plugins = SF_Plugins || {};
             'help': [814, 33],
             'cancel': [678, 463],
             'database': [438, 348],
+            'skill': [438, 94]
         };
     }
 
@@ -146,7 +147,7 @@ var SF_Plugins = SF_Plugins || {};
         this.pivot.y = Graphics.boxHeight / 2;
         this.x = Graphics.boxWidth / 2;
         this.y = Graphics.boxHeight / 2;
-        this.rotation = -0.03;
+        // this.rotation = -0.03;
     }
 
     Scene_Menu.prototype.update = function () {
@@ -195,5 +196,8 @@ var SF_Plugins = SF_Plugins || {};
         SceneManager.push(Scene_Database);
     }
 
+    Scene_Menu.prototype.on_skill_button = function () {
+        SceneManager.push(Scene_Skill);
+    }
 
 })();
