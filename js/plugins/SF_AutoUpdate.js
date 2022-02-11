@@ -433,9 +433,9 @@ var SF_Plugins = SF_Plugins || {};
     Scene_AutoUpdate.prototype._onCompareWorkerMessage = function (e) {
         var result = e.data;
         if (result.command === 'delete') {
-            this._deleteFileList.concat(result.file_list);
+            this._deleteFileList = this._deleteFileList.concat(result.file_list);
         } else if (result.command === 'update') {
-            this._updateFileList.concat(result.file_list);
+            this._updateFileList = this._updateFileList.concat(result.file_list);
         } else {
             this._status = "completed";
         }
