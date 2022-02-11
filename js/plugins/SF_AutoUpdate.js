@@ -405,7 +405,7 @@ var SF_Plugins = SF_Plugins || {};
 
     Scene_AutoUpdate.prototype.fetchRemoteFileInfo = function () {
         var success = (function () {
-            this._remoteFileInfo = JsonEx.parse(UpdateUtils.readTextFile(SF_AutoUpdate.remoteFileInfoName));
+            this._remoteFileInfo = JsonEx.parse(FileUtils.readTextFile(SF_AutoUpdate.remoteFileInfoName));
             this._status = "completed";
             this._nextJob = "compare file info";
         }).bind(this);
