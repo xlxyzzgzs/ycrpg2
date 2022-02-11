@@ -70,6 +70,7 @@ var SF_Plugins = SF_Plugins || {};
     *   public void evaluateJavascript(String script) 
     *   public void downloadFullUrl(String fileName, String urlString, String success, String fail) 
     *   public void downloadRelativeUrl(String fileName, String urlString, String success, String fail) 
+    *   public void startUpdateFiles()
     *   public void updateFileCompleted(boolean bool) 
     *   public String getHashInfoJson() 
     *   public void updateFile(String fileName, String success, String fail) 
@@ -86,7 +87,9 @@ var SF_Plugins = SF_Plugins || {};
     SF_AutoUpdate.localFileInfoName = "file_info_local.json";
     SF_AutoUpdate.remoteFileInfoUrl = "https://ycrpg.xyzzgame.com/ycrpg2/file_info_remote.json";
     SF_AutoUpdate.remoteUrlRoot = "https://ycrpg.xyzzgame.com/YCrpg2/";
-    SF_AutoUpdate.emptyFileInfoStr = `{"is_file":false,"is_dir":"true","files":[],"dirs":[],"sha_512":""}`;
+    SF_AutoUpdate.emptyFileInfoStr = `{"is_file":false,"is_dir":"true","children":[],"sha_512":""}`;
+    SF_AutoUpdate.workerFileName = "js/plugins/SF_AutoUpdateWorker.js";
+    SF_AutoUpdate.localStorageKey = "SF_AutoUpdate_UpdateFileCompleted";
 
     SF_AutoUpdate.enableAutoUpdate = false;
 
@@ -103,7 +106,7 @@ var SF_Plugins = SF_Plugins || {};
     }
 
     SF_AutoUpdate.isSupported = function () {
-        return SF_AutoUpdate.enableAutoUpdate && (SF_AutoUpdate.isAndroid() || SF_AutoUpdate.isPC());
+        return SF_AutoUpdate.enableAutoUpdate && (SF_AutoUpdate.isAndroid() || SF_AutoUpdate.isPC()) && !Utils.isOptionValid('test');
     }
 
     if (!SF_AutoUpdate.isSupported()) { return; }
@@ -285,8 +288,12 @@ var SF_Plugins = SF_Plugins || {};
             SF_AutoUpdate.UpdateUtils.downloadFullUrl(fileName, SF_AutoUpdate.remoteUrlRoot + url, success, fail);
         }
 
-        SF_AutoUpdate.UpdateUtils.updateFileCompleted = function (result) {
-            // todo 
+        SF_AutoUpdate.UpdateUtils.updateFileCompleted = function (isSuccess) {
+            localStorage.setItem(SF_AutoUpdate.localStorageKey, JsonEx.stringify(isSuccess));
+            if (isSuccess) {
+                nw.Window.open(`chrome-extension://${chrome.runtime.id}/index.html`);
+                nw.Window.get().close();
+            }
         }
 
         SF_AutoUpdate.UpdateUtils.getHashInfoJson = function () {
@@ -300,6 +307,11 @@ var SF_Plugins = SF_Plugins || {};
         SF_AutoUpdate.UpdateUtils.updateFile = function (fileName, success, fail) {
             SF_AutoUpdate.UpdateUtils.downloadRelativeUrl(fileName, fileName, success, fail);
         }
+
+        SF_AutoUpdate.UpdateUtils.startUpdateFiles = function () {
+            localStorage.setItem(SF_AutoUpdate.localStorageKey, 'false');
+        }
+
     }
 
     //=============================================================================
@@ -319,14 +331,25 @@ var SF_Plugins = SF_Plugins || {};
         Scene_Base.prototype.initialize.call(this);
         this._localFileInfo = JsonEx.parse(UpdateUtils.readTextFile(SF_AutoUpdate.localFileInfoName));
         this._remoteFileInfo = {};
+
         this._updateFileList = [];
         this._updateFileIndex = 0;
         this._updateFileCount = 0;
         this._updateFileName = "";
 
+        this._updateSuccess = false;
+
+        this._deleteFileList = [];
+        this._deleteFileIndex = 0;
+        this._deleteFileCount = 0;
+        this._deleteFileName = "";
+
         this._status = "completed"; // "working", "completed"
-        this._job = ""; // "fetch remote file info", "compare file info", "update file"
+        this._job = ""; // "fetch remote file info", "compare file info", "delete file", "update file"
         this._nextJob = "fetched remote file info";
+
+        this._compareWorker = new Worker(SF_AutoUpdate.workerFileName);
+        this._compareWorker.onmessage = this._onCompareWorkerMessage.bind(this);
     };
 
     Scene_AutoUpdate.prototype.create = function () {
@@ -361,11 +384,21 @@ var SF_Plugins = SF_Plugins || {};
                 break;
             case "compare file info":
                 this.compareFileInfo();
+                this._nextJob = "delete file";
+                break;
+            case "delete file":
+                this.deleteFile();
                 this._nextJob = "update file";
                 break;
             case "update file":
                 this.updateFile();
+                this._nextJob = "update completed";
+                break;
+            case "update completed":
+                this._status = "completed";
                 this._nextJob = "";
+                FileUtils.writeTextFile(SF_AutoUpdate.localFileInfoName, JsonEx.stringify(this._remoteFileInfo));
+                UpdateUtils.updateFileCompleted(this._updateSuccess);
                 break;
         }
     }
@@ -391,7 +424,79 @@ var SF_Plugins = SF_Plugins || {};
     }
 
     Scene_AutoUpdate.prototype.compareFileInfo = function () {
+        this._compareWorker.postMessage({
+            "type": "compare",
+            "localFileInfo": this._localFileInfo,
+            "remoteFileInfo": this._remoteFileInfo
+        });
+    }
 
+    Scene_AutoUpdate.prototype._onCompareWorkerMessage = function (e) {
+        var result = e.data;
+        if (result.command === 'delete') {
+            this._deleteFileList.concat(result.file_list);
+        } else if (result.command === 'update') {
+            this._updateFileList.concat(result.file_list);
+        } else {
+            this._status = "completed";
+        }
+    }
+
+    Scene_AutoUpdate.prototype.deleteFile = function () {
+        UpdateUtils.startUpdateFiles();
+        var update_set = new Set(this._updateFileList);
+        var delete_list = [];
+
+        this._deleteFileList.forEach(function (file_name) {
+            if (!update_set.has(file_name)) {
+                delete_list.push(file_name);
+            }
+        });
+
+        delete_list.forEach(function (file_name) {
+            FileUtils.delete(file_name);
+        });
+
+        this._status = "completed";
+    }
+
+    Scene_AutoUpdate.prototype.updateFile = function () {
+        this._updateFileIndex = 0;
+        this._updateFileCount = this._updateFileList.length;
+        if (this._updateFileCount === 0) {
+            this._status = "completed";
+            this._nextJob = "";
+            return;
+        }
+        this._updateFileName = this._updateFileList[this._updateFileIndex];
+        this.updateFileNext();
+    }
+
+    Scene_AutoUpdate.prototype.updateFileNext = function () {
+        var success = (function () {
+            this._updateFileIndex++;
+            if (this._updateFileIndex >= this._updateFileCount) {
+                this._status = "completed";
+                this._nextJob = "";
+                this._updateSuccess = true;
+            } else {
+                this._updateFileName = this._updateFileList[this._updateFileIndex];
+                this.updateFileNext();
+            }
+        }).bind(this);
+
+        var fail = (function () {
+            this._status = "completed";
+            this._nextJob = "";
+            this._updateSuccess = false;
+        }).bind(this);
+
+        UpdateUtils.downloadRelativeUrl(
+            this._updateFileName,
+            this._updateFileName,
+            CallBack.registerOneTime(success),
+            CallBack.registerOneTime(fail)
+        );
     }
     //=============================================================================
     // SceneManager
@@ -402,7 +507,5 @@ var SF_Plugins = SF_Plugins || {};
         SF_AutoUpdate.SceneManager_initialize.call(this);
         this.addSceneBefore(Scene_AutoUpdate, Scene_Title);
     }
-
-
 
 })();

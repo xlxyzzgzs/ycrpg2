@@ -324,7 +324,7 @@ var $gameMapsExt = null;
     // Try To Export Extra Event to MapExt json
     //=============================================================================
 
-    if (Utils.isNwjs() && SF_ExtraEvent.ExportMapExtraEvent) {
+    if (Utils.isNwjs() && Utils.isOptionValid('test') && SF_ExtraEvent.ExportMapExtraEvent) {
         var fs = require('fs');
         var path = require('path');
         var note_reg = new RegExp(/<SF_EXTRA_EVENT:\s*(\d*)>/i);
