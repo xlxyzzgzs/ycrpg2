@@ -425,8 +425,8 @@ var SF_Plugins = SF_Plugins || {};
     Scene_AutoUpdate.prototype.compareFileInfo = function () {
         this._compareWorker.postMessage({
             "command": "compare",
-            "localFileInfo": this._localFileInfo,
-            "remoteFileInfo": this._remoteFileInfo
+            "local_file_info": this._localFileInfo,
+            "remote_file_info": this._remoteFileInfo
         });
     }
 
