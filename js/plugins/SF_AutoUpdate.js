@@ -335,14 +335,11 @@ var SF_Plugins = SF_Plugins || {};
         this._updateFileList = [];
         this._updateFileIndex = 0;
         this._updateFileCount = 0;
-        this._updateFileName = "";
+        this._updateFile = {};
 
         this._updateSuccess = false;
 
         this._deleteFileList = [];
-        this._deleteFileIndex = 0;
-        this._deleteFileCount = 0;
-        this._deleteFileName = "";
 
         this._status = "completed"; // "working", "completed"
         this._job = ""; // "fetch remote file info", "compare file info", "delete file", "update file"
@@ -443,17 +440,9 @@ var SF_Plugins = SF_Plugins || {};
 
     Scene_AutoUpdate.prototype.deleteFile = function () {
         UpdateUtils.startUpdateFiles();
-        var update_set = new Set(this._updateFileList);
-        var delete_list = [];
 
-        this._deleteFileList.forEach(function (file_name) {
-            if (!update_set.has(file_name)) {
-                delete_list.push(file_name);
-            }
-        });
-
-        delete_list.forEach(function (file_name) {
-            FileUtils.delete(file_name);
+        this._deleteFileList.forEach(function (file_info) {
+            FileUtils.delete(file_info.file_name)
         });
 
         this._status = "completed";
@@ -466,7 +455,7 @@ var SF_Plugins = SF_Plugins || {};
             this._status = "completed";
             return;
         }
-        this._updateFileName = this._updateFileList[this._updateFileIndex];
+        this._updateFile = this._updateFileList[this._updateFileIndex];
         this.updateFileNext();
     }
 
@@ -477,7 +466,7 @@ var SF_Plugins = SF_Plugins || {};
                 this._status = "completed";
                 this._updateSuccess = true;
             } else {
-                this._updateFileName = this._updateFileList[this._updateFileIndex];
+                this._updateFile = this._updateFileList[this._updateFileIndex];
                 this.updateFileNext();
             }
         }).bind(this);
@@ -488,8 +477,14 @@ var SF_Plugins = SF_Plugins || {};
             this._updateSuccess = false;
         }).bind(this);
 
-        if (!FileUtils.exists(FileUtils.getParent(this._updateFileName))) {
-            FileUtils.mkdirs(FileUtils.getParent(this._updateFileName));
+        var file = this._updateFile;
+        if (file.is_dir) {
+            success();
+            return;
+        }
+
+        if (!FileUtils.exists(FileUtils.getParent(file.file_name))) {
+            FileUtils.mkdirs(FileUtils.getParent(file.file_name));
         }
 
         UpdateUtils.downloadRelativeUrl(
