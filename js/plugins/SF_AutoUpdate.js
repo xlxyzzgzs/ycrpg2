@@ -87,7 +87,7 @@ var SF_Plugins = SF_Plugins || {};
     SF_AutoUpdate.localFileInfoName = "file_info_local.json";
     SF_AutoUpdate.remoteFileInfoUrl = "https://ycrpg.xyzzgame.com/ycrpg2/file_info_remote.json";
     SF_AutoUpdate.remoteUrlRoot = "https://ycrpg.xyzzgame.com/YCrpg2/";
-    SF_AutoUpdate.emptyFileInfoStr = `{"is_file":false,"is_dir":"true","children":[],"sha_512":""}`;
+    SF_AutoUpdate.emptyFileInfoStr = `{"is_file":false,"is_dir":true,"children":[],"sha_512":"","file_name":""}`;
     SF_AutoUpdate.workerFileName = "js/plugins/SF_AutoUpdateWorker.js";
     SF_AutoUpdate.localStorageKey = "SF_AutoUpdate_UpdateFileCompleted";
 
