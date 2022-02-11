@@ -420,11 +420,13 @@ var SF_Plugins = SF_Plugins || {};
             this._nextJob = "";
         }).bind(this);
 
+        var callBacks = CallBack.registerOneTimeList([success, fail]);
+
         UpdateUtils.downloadRelativeUrl(
             SF_AutoUpdate.remoteFileInfoName,
             SF_AutoUpdate.remoteFileInfoName,
-            CallBack.registerOneTime(success),
-            CallBack.registerOneTime(fail)
+            callBacks[0],
+            callBacks[1]
         );
     }
 
@@ -495,11 +497,13 @@ var SF_Plugins = SF_Plugins || {};
             FileUtils.mkdirs(FileUtils.getParent(file.file_name));
         }
 
+        var callBacks = CallBack.registerOneTimeList([success, fail]);
+
         UpdateUtils.downloadRelativeUrl(
             file.file_name,
             file.file_name,
-            CallBack.registerOneTime(success),
-            CallBack.registerOneTime(fail)
+            callBacks[0],
+            callBacks[1]
         );
     }
     //=============================================================================

@@ -428,4 +428,27 @@ var SF_Plugins = SF_Plugins || {};
         return this.convertToString(closureIndex);
     }
 
+    CallBack.registerOneTimeList = function (closureFunctionList) {
+        var indexList = [];
+        var result = [];
+
+        for (var i = 0; i < closureFunctionList.length; i++) {
+            var index = this.getNew();
+            indexList.push(index);
+        }
+
+        var removeAllFunc = (function () {
+            for (var i = 0; i < indexList.length; i++) {
+                this.unregister(indexList[i]);
+            }
+        });
+
+        for (var i = 0; i < indexList.length; i++) {
+            this.setByClosureIndex(indexList[i], (function () { closureFunctionList[i](); removeAllFunc(); }).bind(this));
+            result.push(this.convertToString(indexList[i]));
+        }
+
+        return result;
+    }
+
 })();
