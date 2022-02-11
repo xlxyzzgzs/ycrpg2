@@ -65,9 +65,10 @@ var SF_Plugins = SF_Plugins || {};
             if (index == -1) { // if the scene is not in the array
                 this._stack.push(sceneClass);
                 SF_Managers.SceneManager_goto.call(this, beforeSceneList[0]);
-            } else if (index == beforeSceneList.length - 1) {
+            } else if (index === beforeSceneList.length - 1) {
                 SF_Managers.SceneManager_goto.call(this, sceneClass);
             } else {
+                this._stack.push(sceneClass);
                 SF_Managers.SceneManager_goto.call(this, beforeSceneList[index + 1]);
             }
         } else {
