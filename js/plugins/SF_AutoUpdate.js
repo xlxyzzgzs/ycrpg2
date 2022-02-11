@@ -407,7 +407,6 @@ var SF_Plugins = SF_Plugins || {};
         var success = (function () {
             this._remoteFileInfo = JsonEx.parse(FileUtils.readTextFile(SF_AutoUpdate.remoteFileInfoName));
             this._status = "completed";
-            this._nextJob = "compare file info";
         }).bind(this);
 
         var fail = (function () {
@@ -425,7 +424,7 @@ var SF_Plugins = SF_Plugins || {};
 
     Scene_AutoUpdate.prototype.compareFileInfo = function () {
         this._compareWorker.postMessage({
-            "type": "compare",
+            "command": "compare",
             "localFileInfo": this._localFileInfo,
             "remoteFileInfo": this._remoteFileInfo
         });
@@ -465,7 +464,6 @@ var SF_Plugins = SF_Plugins || {};
         this._updateFileCount = this._updateFileList.length;
         if (this._updateFileCount === 0) {
             this._status = "completed";
-            this._nextJob = "";
             return;
         }
         this._updateFileName = this._updateFileList[this._updateFileIndex];
@@ -477,7 +475,6 @@ var SF_Plugins = SF_Plugins || {};
             this._updateFileIndex++;
             if (this._updateFileIndex >= this._updateFileCount) {
                 this._status = "completed";
-                this._nextJob = "";
                 this._updateSuccess = true;
             } else {
                 this._updateFileName = this._updateFileList[this._updateFileIndex];
