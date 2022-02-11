@@ -444,7 +444,9 @@ var SF_Plugins = SF_Plugins || {};
         });
 
         for (var i = 0; i < indexList.length; i++) {
-            this.setByClosureIndex(indexList[i], (function () { closureFunctionList[i](); removeAllFunc(); }).bind(this));
+            this.setByClosureIndex(indexList[i], (function (i) {
+                return (function () { closureFunctionList[i](); removeAllFunc(); });
+            })(i).bind(this));
             result.push(this.convertToString(indexList[i]));
         }
 
