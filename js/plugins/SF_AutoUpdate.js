@@ -329,7 +329,7 @@ var SF_Plugins = SF_Plugins || {};
 
     Scene_AutoUpdate.prototype.initialize = function () {
         Scene_Base.prototype.initialize.call(this);
-        this._localFileInfo = JsonEx.parse(FileUtils.readTextFile(SF_AutoUpdate.localFileInfoName));
+        this._localFileInfo = JsonEx.parse(UpdateUtils.getHashInfoJson());
         this._remoteFileInfo = {};
 
         this._updateFileList = [];
