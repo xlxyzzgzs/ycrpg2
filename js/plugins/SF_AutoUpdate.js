@@ -91,7 +91,7 @@ var SF_Plugins = SF_Plugins || {};
     SF_AutoUpdate.workerFileName = "js/plugins/SF_AutoUpdateWorker.js";
     SF_AutoUpdate.localStorageKey = "SF_AutoUpdate_UpdateFileCompleted";
 
-    SF_AutoUpdate.enableAutoUpdate = false;
+    SF_AutoUpdate.enableAutoUpdate = true;
 
     SF_AutoUpdate.isAndroid = function () {
         return !!window.FileUtils && !!window.UpdateUtils && !SF_AutoUpdate.isPC();
