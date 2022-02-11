@@ -488,8 +488,8 @@ var SF_Plugins = SF_Plugins || {};
         }
 
         UpdateUtils.downloadRelativeUrl(
-            this._updateFileName,
-            this._updateFileName,
+            file.file_name,
+            file.file_name,
             CallBack.registerOneTime(success),
             CallBack.registerOneTime(fail)
         );
