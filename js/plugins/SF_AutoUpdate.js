@@ -488,6 +488,10 @@ var SF_Plugins = SF_Plugins || {};
             this._updateSuccess = false;
         }).bind(this);
 
+        if (!FileUtils.exists(FileUtils.getParent(this._updateFileName))) {
+            FileUtils.mkdirs(FileUtils.getParent(this._updateFileName));
+        }
+
         UpdateUtils.downloadRelativeUrl(
             this._updateFileName,
             this._updateFileName,
