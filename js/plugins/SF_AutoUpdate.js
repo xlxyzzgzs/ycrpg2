@@ -378,6 +378,7 @@ var SF_Plugins = SF_Plugins || {};
     Scene_AutoUpdate.prototype.updateJob = function () {
         if (this._status === "working") { return; }
         if (this._nextJob === "") {
+            CallBack.clear();
             SceneManager.pop();
         }
         this._job = this._nextJob;
