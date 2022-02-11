@@ -124,6 +124,14 @@ var SF_Plugins = SF_Plugins || {};
         var crypto = require('crypto');
         var https = require('https');
 
+        var httpsAgent = new https.Agent({
+            keepAlive: true,
+        });
+
+        var options = {
+            agent: httpsAgent,
+        };
+
         SF_AutoUpdate.FileUtils.evaluateJavascript = function (script) {
             (new Function(script)).call(window);
         }
@@ -274,7 +282,7 @@ var SF_Plugins = SF_Plugins || {};
 
         SF_AutoUpdate.UpdateUtils.downloadFullUrl = function (fileName, url, success, fail) {
             var file = fs.createWriteStream(fileName);
-            https.get(url, function (response) {
+            https.get(url, options, function (response) {
                 response.pipe(file);
                 file.on('finish', function () {
                     file.close(SF_AutoUpdate.UpdateUtils.evaluateJavascript.bind(SF_AutoUpdate.UpdateUtils, success));
