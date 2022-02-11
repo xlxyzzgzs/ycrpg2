@@ -296,10 +296,10 @@ var SF_Plugins = SF_Plugins || {};
             SF_AutoUpdate.UpdateUtils.downloadFullUrl(fileName, SF_AutoUpdate.remoteUrlRoot + url, success, fail);
         }
 
-        SF_AutoUpdate.UpdateUtils.updateFileCompleted = function (isSuccess) {
+        SF_AutoUpdate.UpdateUtils.updateFileCompleted = function (isSuccess, needReload) {
             localStorage.setItem(SF_AutoUpdate.localStorageKey, JsonEx.stringify(isSuccess));
-            if (isSuccess) {
-                nw.Window.open(`chrome-extension://${chrome.runtime.id}/index.html`);
+            if (isSuccess && needReload) {
+                nw.Window.open(`chrome-extension://${chrome.runtime.id}/index.html`, { new_instance: true });
                 nw.Window.get().close();
             }
         }
@@ -403,7 +403,7 @@ var SF_Plugins = SF_Plugins || {};
                 this._status = "completed";
                 this._nextJob = "";
                 FileUtils.writeTextFile(SF_AutoUpdate.localFileInfoName, JsonEx.stringify(this._remoteFileInfo));
-                UpdateUtils.updateFileCompleted(this._updateSuccess);
+                UpdateUtils.updateFileCompleted(this._updateSuccess, this._updateFileCount > 0);
                 break;
         }
     }
@@ -480,9 +480,8 @@ var SF_Plugins = SF_Plugins || {};
         }).bind(this);
 
         var fail = (function () {
-            this._status = "completed";
-            this._nextJob = "";
-            this._updateSuccess = false;
+            // auto try again
+            this.updateFileNext();
         }).bind(this);
 
         var file = this._updateFile;
