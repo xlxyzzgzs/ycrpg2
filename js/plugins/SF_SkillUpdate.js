@@ -23,6 +23,7 @@ SF_Plugins.SF_SkillUpdate.version = 1.0;
 * 
 * When learning a high-priority skill with the same ID, the skill will be 
 * automatically forgotten
+* 当学习一个同ID的高优先级技能时，低优先级技能将自动遗忘
 * 
 * ============================================================================
 * Skill Notes
@@ -35,6 +36,12 @@ SF_Plugins.SF_SkillUpdate.version = 1.0;
 * ID: The skill ID 
 * priority: The skill priority. High-priority skills override low-priority
 * skills
+* 
+* 在技能的注释中添加以下代码，可以设置技能自动更新
+* <SF_SkillUpdate: ID, priority>
+* 
+* ID: 技能ID
+* priority: 技能优先级。高优先级的技能会覆盖低优先级的技能
 * 
 */
 //=============================================================================
