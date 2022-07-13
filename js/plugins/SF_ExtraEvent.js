@@ -24,24 +24,49 @@ var $gameMapsExt = null;
     * 
     * @help
     * ============================================================================
-    * Introduction
+    * Introduction 介绍
     * ============================================================================
     * 
     * This plugin provide extra event.
+    * 这个插件提供额外的事件。
     * 
     * put in event note:
+    * 把这东西放进事件的note中来将这个事件导出
     *  <SF_EXTRA_EVENT: eventExtId>
     * 
     * 
     * ============================================================================
-    * Plugin Commands
+    * Plugin Commands 插件命令
     * ============================================================================
     * 
     * SF_Extra_Event Insert_Event <mapId> <evenExttId> 
     *   Add an event to the map.
+    *   将一个额外事件添加到地图中
     * 
     * SF_Extra_Event Remove_Event <mapId> <eventExtId>
     *   Remove an event from the map.
+    *   将一个额外事件从地图中移除
+    * 
+    * SF_Extra_Event Ext Show_Balloon_Icon <eventExtId> <ballonId> <waitForComplete>
+    *   用来将不在地图上的事件能添加 显示气球图标 的命令
+    *   这个命令会在导出事件的时候将其转换成对应的事件指令
+    *   eventExtId 事件的额外ID
+    *   ballonId 要显示的气球的ID （从1开始计数）
+    *   waifForComplete 是否要等待完成，使用 true 或 false，其余样式会作为false来生成
+    * 
+    * SF_Extra_Event Ext Set_Event_Location <eventExtId> <direct|variables|exchange> <param1> <param2> <direction>
+    *   用来设置额外事件的位置 
+    *   eventExtId 是设置额外事件的对象 
+    *   设置的位置有三种方式 direct variables exchange
+    *   direct是直接指定目标位置，param1和param2就是目标的x,y坐标
+    *   variables是用变量来计算目标的位置 param1和param2就是目标x,y坐标所在的变量标号
+    *   exchange是与地图上的事件进行对换 
+    *       param1为normal或ext代表与普通事件或额外事件对换
+    *       param2则指定事件的Id，使用0则代指自身
+    *   direction则是指定事件的朝向 使用stay, down, left, right, up来代指朝向。
+    * 
+    * 在设置移动路线时，填入脚本$gameMapsExt.set_route_target(eventExtId)来修改本次移动路线
+    * 设置的事件对象，只有最后一次有效。这个脚本是无法执行的，要经过导出转成语义可用的。
     * 
     * ============================================================================
     * Script Calls
@@ -316,6 +341,8 @@ var $gameMapsExt = null;
                     var eventId = Number(args[2]);
                     $gameMapsExt.remove_event_from_need(mapId, eventId);
                     break;
+                case 'ext':
+                    throw new Error("在运行之前要先导出，完成生成过程");
             }
         }
     }
@@ -328,6 +355,8 @@ var $gameMapsExt = null;
         var fs = require('fs');
         var path = require('path');
         var note_reg = new RegExp(/<SF_EXTRA_EVENT:\s*(\d*)>/i);
+
+        var move_route_target = new RegExp(/\$gameMapsExt\.set_route_target\(\s*(\d+)\s*\)/)
 
         function processCommand213(command, map_events) {
             if (command.parameters[0] > 0) {
@@ -372,6 +401,81 @@ var $gameMapsExt = null;
                     }
                 }
             }
+            var list = command.parameters[1]["list"];
+            var target = command.parameters[0];
+            list = list.filter(function (elem) {
+                if (elem.code !== 45) {
+                    return true;
+                }
+                var script = elem.parameters[0];
+                var match = move_route_target.exec(script);
+                if (!match) {
+                    return true;
+                }
+                target = Number(match[1]) + SF_ExtraEvent.EventExtIdStart;
+                return false;
+            })
+            command.parameters[0] = target;
+            command.parameters[1]["list"] = list;
+
+        }
+
+        function toCommand213(command, args, map_event) {
+            var event_id = Number(args[2]) + SF_ExtraEvent.EventExtIdStart
+            command.code = 213;
+            command.parameters = [event_id, Number(args[3]), args[4].toLowerCase() === 'true'];
+        }
+
+        function toCommand203(command, args, map_event) {
+            var event_id = Number(args[2]) + SF_ExtraEvent.EventExtIdStart
+            command.code = 203;
+            command.parameters = [event_id, 0, 0, 0, 0];
+            switch (args[3].toLowerCase()) {
+                case 'direct':
+                    command.parameters[1] = 0;
+                    command.parameters[2] = Number(args[4]);
+                    command.parameters[3] = Number(args[5]);
+                    break;
+                case 'variables':
+                    command.parameters[1] = 1;
+                    command.parameters[2] = Number(args[4]);
+                    command.parameters[3] = Number(args[5]);
+                    break;
+                case 'exchange':
+                    command.parameters[1] = 2;
+                    if (args[4].toLowerCase() === 'normal') {
+                        command.parameters[2] = Number(args[5]);
+                    } else if (args[4].toLowerCase() === 'ext') {
+                        command.parameters[2] = Number(args[5]) + SF_ExtraEvent.EventExtIdStart;
+                    } else {
+                        throw new Error("not support excahnge target");
+                    }
+                    break;
+                default:
+                    throw new Error("not support event location mode");
+            }
+            const dirct_map = {
+                'stay': 0, 'down': 1, 'left': 2, 'right': 3, 'up': 4
+            };
+            command.parameters[4] = dirct_map[args[6].toLowerCase()];
+            if ((typeof (command.parameters[4])).toLowerCase() !== 'number') {
+                throw new Error("not support direction");
+            }
+        }
+
+        function processCommand365(command, map_event) {
+            var args = command.parameters[0].split(" ");
+            var com = args.shift();
+            if (com.toLowerCase() !== 'sf_extra_event' || args[0].toLowerCase() !== 'ext') {
+                return;
+            }
+            switch (args[1].toLowerCase()) {
+                case 'show_balloon_icon':
+                    toCommand213(com, args, map_event);
+                    break;
+                case 'set_event_location':
+                    toCommand203(com, args, map_event);
+            }
         }
 
 
@@ -398,8 +502,22 @@ var $gameMapsExt = null;
                                 processCommand203(command, map_events);
                             } else if (command.code === 205) {
                                 processCommand205(command, map_events);
+                            } else if (command.code === 365) {
+                                processCommand365(command, map_events);
                             }
                         }
+                        pages[j].list = pages[j].list.filter(function (command) {
+                            if (command.code !== 505) {
+                                return true;
+                            }
+                            if (command.parameters[0].code !== 45) {
+                                return true;
+                            }
+                            if (!move_route_target.exec(command.parameters[0].parameters[0])) {
+                                return true;
+                            }
+                            return false;
+                        })
                     }
                 }
             }
