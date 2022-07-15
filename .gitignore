@@ -1,1 +1,15 @@
 .vscode/*
+
+**/*
+
+!**/
+!/js/**/*.js
+!/img/**/*.png
+!/data/**/*.json
+!/audio/**/*.m4a
+!/audio/**/*.ogg
+!/movie/**/*.mp4
+!/movie/**/*.webm
+!/fonts/*.css
+!/fonts/*.tff
+!*.md
