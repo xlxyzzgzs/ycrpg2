@@ -1,6 +1,6 @@
 [
 null,
-{"id":1,"expanded":false,"name":"地球","order":1,"parentId":0,"scrollX":1638,"scrollY":912},
+{"id":1,"expanded":false,"name":"地球","order":1,"parentId":0,"scrollX":819,"scrollY":474.5},
 {"id":2,"expanded":true,"name":"好人大宅","order":17,"parentId":20,"scrollX":1622,"scrollY":1488},
 {"id":3,"expanded":true,"name":"好人家二层","order":19,"parentId":22,"scrollX":1638,"scrollY":912},
 {"id":4,"expanded":true,"name":"好人家地下室","order":20,"parentId":22,"scrollX":1701.818181818182,"scrollY":688.3636363636364},
