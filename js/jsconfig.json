@@ -9,7 +9,8 @@
         "./plugins_dev/*.js",
         "plugins_dev/*.js",
         "rmmv.d.ts",
-        "rmmv-pixi.d.ts"
+        "rmmv-pixi.d.ts",
+        "plugins/*"
     ],
     "exclude": [
         "plugins_dev/*"

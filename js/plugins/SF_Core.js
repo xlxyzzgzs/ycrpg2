@@ -380,6 +380,18 @@ var SF_Plugins = SF_Plugins || {};
         throw new Error(message);
     };
 
+    SF_Core.Utils.isPC = function () {
+        return !!Utils.isNwjs();
+    }
+
+    SF_Core.Utils.isAndroid = function () {
+        return !!window.FileUtils && !!window.UpdateUtils && !SF_AutoUpdate.isPC();
+    }
+
+    SF_Core.Utils.isWeb = function () {
+        return !SF_AutoUpdate.isPC() && !SF_AutoUpdate.isAndroid();
+    }
+
     //=============================================================================
     // CallBack Scope Transport
     //=============================================================================
@@ -451,6 +463,172 @@ var SF_Plugins = SF_Plugins || {};
         }
 
         return result;
+    }
+
+    //=============================================================================
+    // FileUtils
+    //=============================================================================
+
+    if (SF_Core.Utils.isPC()) {
+        var FileUtils = window.FileUtils || {};
+        window.FileUtils = FileUtils;
+
+        var fs = require('fs');
+        var path = require('path');
+        var crypto = require('crypto');
+
+        FileUtils.evaluateJavascript = function (script) {
+            (new Function(script)).call(window);
+        }
+
+        FileUtils.canExecute = function (fileName) {
+            try {
+                fs.accessSync(fileName, fs.X_OK);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        FileUtils.canRead = function (fileName) {
+            try {
+                fs.accessSync(fileName, fs.R_OK);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        FileUtils.canWrite = function (fileName) {
+            try {
+                fs.accessSync(fileName, fs.W_OK);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        FileUtils.createNewFile = function (fileName) {
+            try {
+                fs.writeFileSync(fileName, "");
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        FileUtils.delete = function (fileName) {
+            try {
+                fs.unlinkSync(fileName);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        FileUtils.exists = function (fileName) {
+            try {
+                fs.accessSync(fileName, fs.F_OK);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        FileUtils.getAbsolutePath = function (fileName) {
+            return path.resolve(fileName);
+        }
+
+        FileUtils.getCanonicalPath = function (fileName) {
+            return path.resolve(fileName);
+        }
+
+        FileUtils.getName = function (fileName) {
+            return path.basename(fileName);
+        }
+
+        FileUtils.getParent = function (fileName) {
+            return path.dirname(fileName);
+        }
+
+        FileUtils.getPath = function (fileName) {
+            return path.resolve(fileName);
+        }
+
+        FileUtils.isAbsolute = function (fileName) {
+            return path.isAbsolute(fileName);
+        }
+
+        FileUtils.isDirectory = function (fileName) {
+            return fs.statSync(fileName).isDirectory();
+        }
+
+        FileUtils.isFile = function (fileName) {
+            return fs.statSync(fileName).isFile();
+        }
+
+        FileUtils.lastModified = function (fileName) {
+            return fs.statSync(fileName).mtime.getTime();
+        }
+
+        FileUtils.length = function (fileName) {
+            return fs.statSync(fileName).size;
+        }
+
+        FileUtils.list = function () {
+
+        }
+
+        FileUtils.mkdir = function (fileName) {
+            try {
+                fs.mkdirSync(fileName);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        FileUtils.mkdirs = function (fileName) {
+            try {
+                fs.mkdirSync(fileName, { recursive: true });
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        FileUtils.reanmeTo = function (srcName, dstName) {
+            try {
+                fs.renameSync(oldFileName, newFileName);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        FileUtils.toString = function (fileName) {
+            return path.resolve(fileName);
+        }
+
+        FileUtils.readTextFile = function (fileName) {
+            return fs.readFileSync(fileName, 'utf-8');
+        }
+
+        FileUtils.writeTextFile = function (fileName, text) {
+            return fs.writeFileSync(fileName, text, 'utf-8');
+        }
+
+        FileUtils.getFileHashHex = function (fileName, algorithm) {
+            var hash = crypto.createHash(algorithm || 'SHA512');
+            var data = fs.readFileSync(fileName);
+            hash.update(data);
+            return hash.digest('hex');
+        }
+    }
+
+    if (SF_Core.Utils.isAndroid()) {
+        var FileUtils_List = FileUtils.list;
+        FileUtils.list = function () { }
     }
 
 })();
