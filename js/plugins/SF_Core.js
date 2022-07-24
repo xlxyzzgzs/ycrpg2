@@ -385,11 +385,11 @@ var SF_Plugins = SF_Plugins || {};
     }
 
     SF_Core.Utils.isAndroid = function () {
-        return !!window.FileUtils && !!window.UpdateUtils && !SF_AutoUpdate.isPC();
+        return !!window.FileUtils && !SF_Core.Utils.isPC();
     }
 
     SF_Core.Utils.isWeb = function () {
-        return !SF_AutoUpdate.isPC() && !SF_AutoUpdate.isAndroid();
+        return !SF_Core.Utils.isPC() && !SF_Core.Utils.isAndroid();
     }
 
     //=============================================================================
@@ -628,7 +628,9 @@ var SF_Plugins = SF_Plugins || {};
 
     if (SF_Core.Utils.isAndroid()) {
         var FileUtils_List = FileUtils.list;
-        FileUtils.list = function () { }
+        FileUtils.list = function (name) {
+            return JsonEx.parse(FileUtils_List.call(this, arguments));
+        }
     }
 
 })();

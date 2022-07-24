@@ -9,8 +9,7 @@ Imported.SF_MessageBusts = true;
 var SF_Plugins = SF_Plugins || {};
 
 //=============================================================================
-/**
- /*:
+/*:
  * 
  * @plugindesc Message Busts
  * @author Salted Fish
@@ -28,8 +27,20 @@ var SF_Plugins = SF_Plugins || {};
  * 
  * 举例：如果在“显示文本”的命令中选择脸图的文件为"Actor1"的第二个图，
  * 那么这个插件就会使用 img/faces/large/Actor1_2.png 这张图片作为大号的脸图。
+ * 如果不存在，则会使用默认的脸图。
  * 
- * @param scanFiles
- * @desc 扫描本地文件夹，生成对应的
+ * @requiredAssets data/FaceLarge.json
+ * @param ScanFiles
+ * @text 启动时生成数据文件
+ * @desc 扫描本地文件夹，生成对应的json文件，只对在nwjs中运行的时候生效。
+ * @type boolean
+ * @on 生成
+ * @off 不生成
  * 
  */
+
+let SF_MessageBusts = {};
+SF_Plugins.SF_MessageBusts = SF_MessageBusts;
+
+SF_MessageBusts.Parameters = PluginManager.parameters('SF_MessageBusts');
+SF_MessageBusts.ScanFiles = SF_MessageBusts.Parameters['ScanFiles'].lower()
