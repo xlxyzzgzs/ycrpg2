@@ -47,5 +47,6 @@ var $plugins =
 {"name":"SF_SceneMenu","status":false,"description":"Scene Menu","parameters":{}},
 {"name":"SF_SceneActorSelect","status":true,"description":"v1.0.0 Allows you to select an actor from the scene.","parameters":{}},
 {"name":"SF_SceneSplash","status":true,"description":"v1.0.0 - Scene Splash","parameters":{}},
-{"name":"SF_TestPlugins","status":true,"description":"","parameters":{}}
+{"name":"SF_TestPlugins","status":true,"description":"","parameters":{}},
+{"name":"GALV_MessageBusts","status":true,"description":"(v.2.6) Displays a bust image instead of selected face image","parameters":{"Bust Priority":"1","Bust Position":"1","Text X Offset":"390","Filename Append":""}}
 ];
