@@ -8,8 +8,8 @@
 !/data/**/*.json
 !/audio/**/*.m4a
 !/audio/**/*.ogg
-!/movie/**/*.mp4
-!/movie/**/*.webm
+!/movies/**/*.mp4
+!/movies/**/*.webm
 !/fonts/*.css
 !/fonts/*.tff
 !*.md
