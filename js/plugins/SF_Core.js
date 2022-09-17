@@ -575,8 +575,8 @@ var SF_Plugins = SF_Plugins || {};
             return fs.statSync(fileName).size;
         }
 
-        FileUtils.list = function () {
-
+        FileUtils.list = function (dirName) {
+            return fs.readdirSync(dirName);
         }
 
         FileUtils.mkdir = function (fileName) {
