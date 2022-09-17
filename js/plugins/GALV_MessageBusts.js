@@ -35,16 +35,16 @@
 var Imported = Imported || {};
 Imported.Galv_MessageBusts = true;
 
-var Galv = Galv || {};        // Galv's main object
-Galv.pCmd = Galv.pCmd || {};  // Plugin Command manager
-Galv.MB = Galv.MB || {};      // Galv's stuff
+var Galv = Galv || {}; // Galv's main object
+Galv.pCmd = Galv.pCmd || {}; // Plugin Command manager
+Galv.MB = Galv.MB || {}; // Galv's stuff
 
-Galv.Mstyle = Galv.Mstyle || {};  // compatibility
+Galv.Mstyle = Galv.Mstyle || {}; // compatibility
 
 //-----------------------------------------------------------------------------
 /*:
  * @plugindesc (v.2.6) Displays a bust image instead of selected face image
- * 
+ *
  * @author Galv - galvs-scripts.com
  *
  * @param Bust Priority
@@ -64,6 +64,12 @@ Galv.Mstyle = Galv.Mstyle || {};  // compatibility
  * @default
  *
  * @help
+ *
+ * 修改说明：
+ * 	1. 文件夹路径替换为 img/face/large，图片名称不变
+ * 	2. 预先生成文件相关信息，依赖于 SF_Core.js
+ * 	3. 支持没有图片时自动加载在对话时选择的图片
+ *
  *   Galv's Message Busts
  * ----------------------------------------------------------------------------
  * This plugin displays a bust image from /img/pictures/ folder based on the
@@ -82,7 +88,7 @@ Galv.Mstyle = Galv.Mstyle || {};  // compatibility
  * Make sure to add 'wait' between messages with different character's busts
  * for better looking transitions.
  * Use the 'Plugin' event command to change bust settings. These settings will
- * be in effect until changed, so they can be used for multiple messages. 
+ * be in effect until changed, so they can be used for multiple messages.
  *
  * NOTE: You will need to find your own bust images to use. I can not help
  * you with that. The images in the demo are for demo purposes only.
@@ -113,7 +119,7 @@ Galv.Mstyle = Galv.Mstyle || {};  // compatibility
  *                                           // MIRROR = TRUE or FALSE
  *   BUST STATUS                             // STATUS = TRUE or FALSE
  *
- * 
+ *
  * ----------------------------------------------------------------------------
  * Examples:
  * BUST LEFT FALSE    // Bust will appear on the left and not mirrored.
@@ -138,183 +144,269 @@ Galv.Mstyle = Galv.Mstyle || {};  // compatibility
  * ----------------------------------------------------------------------------
  */
 
-
 //-----------------------------------------------------------------------------
 //  CODE STUFFS
 //-----------------------------------------------------------------------------
 
-(function() {	
+(function () {
+    Galv.MB.prio = Number(
+        PluginManager.parameters("Galv_MessageBusts")["Bust Priority"]
+    );
+    Galv.MB.pos = Number(
+        PluginManager.parameters("Galv_MessageBusts")["Bust Position"]
+    );
+    Galv.MB.w = Number(
+        PluginManager.parameters("Galv_MessageBusts")["Text X Offset"]
+    );
+    Galv.MB.f =
+        PluginManager.parameters("Galv_MessageBusts")["Filename Append"];
 
-	Galv.MB.prio = Number(PluginManager.parameters('Galv_MessageBusts')["Bust Priority"]);
-	Galv.MB.pos = Number(PluginManager.parameters('Galv_MessageBusts')["Bust Position"]);
-	Galv.MB.w = Number(PluginManager.parameters('Galv_MessageBusts')["Text X Offset"]);
-	Galv.MB.f = PluginManager.parameters('Galv_MessageBusts')["Filename Append"];
-	
-	Galv.MB.msgWindow = null;
-	
-if (Galv.MB.prio == 1 && Galv.MB.pos == 0) {
-	// Fix
-	Galv.MB.prio = 0;
-};
-	
-// GALV'S PLUGIN MANAGEMENT. INCLUDED IN ALL GALV PLUGINS THAT HAVE PLUGIN COMMAND CALLS, BUT ONLY RUN ONCE.
-if (!Galv.aliased) {
-	var Galv_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-	Game_Interpreter.prototype.pluginCommand = function(command, args) {
-		if (Galv.pCmd[command]) {
-			Galv.pCmd[command](args);
-			return;
-		};
-		Galv_Game_Interpreter_pluginCommand.call(this, command, args);
-	};
-	Galv.aliased = true; // Don't keep aliasing for other Galv scripts.
-};
+    Galv.MB.msgWindow = null;
 
-// Direct to Plugin Object
-Galv.pCmd.BUST = function(arguments) {
-	Galv.MB.bustPos(arguments);
-};
-// END GALV'S PLUGIN MANAGEMENT
-
-Galv.MB.bustPos = function(pos) {
-	if (pos[0] === "TRUE") {
-		return $gameSystem.bustDisable = false;
-	} else if (pos[0] === "FALSE") {
-		return $gameSystem.bustDisable = true;
-	};
-	
-	$gameSystem.bustPos = 0
-	if (pos[0] === "LEFT") {
-		$gameSystem.bustPos = 0;
-	} else if (pos[0] === "RIGHT") {
-		$gameSystem.bustPos = 1;
-	};
-	if (pos[1] === "TRUE") {
-		$gameSystem.bustMirror = true;
-	} else if (pos[1] === "FALSE") {
-		$gameSystem.bustMirror = false;
-	};
-};
-
-
-	
-// ---------------- WINDOW MESSAGE
-
-Galv.MB.Game_Message_setFaceImage = Game_Message.prototype.setFaceImage;
-Game_Message.prototype.setFaceImage = function(faceName, faceIndex) {
-	switch (faceName) {
-		case 'PartyLeader':
-			var faceName = $gameParty.leader().faceName();
-			break;
-		case 'PartyMember':
-			if ($gameParty.members()[faceIndex]) {
-				var faceName = $gameParty.members()[faceIndex].faceName();
-				var faceIndex = $gameParty.members()[faceIndex].faceIndex();
-			} else {
-				var faceName = "";
-			};
-			break;
-	};
-    Galv.MB.Game_Message_setFaceImage.call(this,faceName,faceIndex);
-};
-
-
-// WINDOW MESSAGE START MESSAGE - MOD
-Galv.MB.Window_Message_startMessage = Window_Message.prototype.startMessage;
-Window_Message.prototype.startMessage = function() {
-	Galv.MB.msgWindow = this;
-	$gameSystem.bustPos = $gameSystem.bustPos || 0;
-	$gameMessage.bustOffset = $gameMessage.bustOffset || Galv.MB.w;
-	Galv.MB.Window_Message_startMessage.call(this);
-	Galv.MB.msgWindow.tempPosType = this._positionType;
-};
-
-
-Galv.MB.Window_Message_processEscapeCharacter = Window_Message.prototype.processEscapeCharacter;
-Window_Message.prototype.processEscapeCharacter = function(code, textState) {
-    switch (code) {
-    case 'BST':
-        this.obtainSpecialParam(textState);
-        break;
+    if (Galv.MB.prio == 1 && Galv.MB.pos == 0) {
+        // Fix
+        Galv.MB.prio = 0;
     }
-	Galv.MB.Window_Message_processEscapeCharacter.call(this, code, textState);
-};
 
+    // GALV'S PLUGIN MANAGEMENT. INCLUDED IN ALL GALV PLUGINS THAT HAVE PLUGIN COMMAND CALLS, BUT ONLY RUN ONCE.
+    if (!Galv.aliased) {
+        var Galv_Game_Interpreter_pluginCommand =
+            Game_Interpreter.prototype.pluginCommand;
+        Game_Interpreter.prototype.pluginCommand = function (command, args) {
+            if (Galv.pCmd[command]) {
+                Galv.pCmd[command](args);
+                return;
+            }
+            Galv_Game_Interpreter_pluginCommand.call(this, command, args);
+        };
+        Galv.aliased = true; // Don't keep aliasing for other Galv scripts.
+    }
 
-Window_Message.prototype.obtainSpecialParam = function(textState) {
-    var arr = /^\[(.*)]/.exec(textState.text.slice(textState.index));
-    if (arr) {
-        textState.index += arr[0].length;
-        var txt = arr[0].slice(1).slice(0, - 1);
-		var array = txt.split(",");
-		$gameMessage.setFaceImage(array[1] || $gameMessage._faceName,Number(array[0] - 1));
+    // Direct to Plugin Object
+    Galv.pCmd.BUST = function (arguments) {
+        Galv.MB.bustPos(arguments);
+    };
+    // END GALV'S PLUGIN MANAGEMENT
+
+    Galv.MB.bustPos = function (pos) {
+        if (pos[0] === "TRUE") {
+            return ($gameSystem.bustDisable = false);
+        } else if (pos[0] === "FALSE") {
+            return ($gameSystem.bustDisable = true);
+        }
+
+        $gameSystem.bustPos = 0;
+        if (pos[0] === "LEFT") {
+            $gameSystem.bustPos = 0;
+        } else if (pos[0] === "RIGHT") {
+            $gameSystem.bustPos = 1;
+        }
+        if (pos[1] === "TRUE") {
+            $gameSystem.bustMirror = true;
+        } else if (pos[1] === "FALSE") {
+            $gameSystem.bustMirror = false;
+        }
+    };
+
+    // ---------------- WINDOW MESSAGE
+
+    Galv.MB.Game_Message_setFaceImage = Game_Message.prototype.setFaceImage;
+    Game_Message.prototype.setFaceImage = function (faceName, faceIndex) {
+        switch (faceName) {
+            case "PartyLeader":
+                var faceName = $gameParty.leader().faceName();
+                break;
+            case "PartyMember":
+                if ($gameParty.members()[faceIndex]) {
+                    var faceName = $gameParty.members()[faceIndex].faceName();
+                    var faceIndex = $gameParty.members()[faceIndex].faceIndex();
+                } else {
+                    var faceName = "";
+                }
+                break;
+        }
+        Galv.MB.Game_Message_setFaceImage.call(this, faceName, faceIndex);
+    };
+
+    // WINDOW MESSAGE START MESSAGE - MOD
+    Galv.MB.Window_Message_startMessage = Window_Message.prototype.startMessage;
+    Window_Message.prototype.startMessage = function () {
+        Galv.MB.msgWindow = this;
+        $gameSystem.bustPos = $gameSystem.bustPos || 0;
+        $gameMessage.bustOffset = $gameMessage.bustOffset || Galv.MB.w;
+        Galv.MB.Window_Message_startMessage.call(this);
+        Galv.MB.msgWindow.tempPosType = this._positionType;
+    };
+
+    Galv.MB.Window_Message_processEscapeCharacter =
+        Window_Message.prototype.processEscapeCharacter;
+    Window_Message.prototype.processEscapeCharacter = function (
+        code,
+        textState
+    ) {
+        switch (code) {
+            case "BST":
+                this.obtainSpecialParam(textState);
+                break;
+        }
+        Galv.MB.Window_Message_processEscapeCharacter.call(
+            this,
+            code,
+            textState
+        );
+    };
+
+    Window_Message.prototype.obtainSpecialParam = function (textState) {
+        var arr = /^\[(.*)]/.exec(textState.text.slice(textState.index));
+        if (arr) {
+            textState.index += arr[0].length;
+            var txt = arr[0].slice(1).slice(0, -1);
+            var array = txt.split(",");
+            $gameMessage.setFaceImage(
+                array[1] || $gameMessage._faceName,
+                Number(array[0] - 1)
+            );
+        } else {
+            return "";
+        }
+    };
+
+    Galv.MB.Window_Message_drawMessageFace =
+        Window_Message.prototype.drawMessageFace;
+    Window_Message.prototype.drawMessageFace = function () {
+        if (!$gameSystem.bustDisable) return;
+        Galv.MB.Window_Message_drawMessageFace.call(this);
+    };
+
+    // ---------------- SPRITESET MAP
+
+    if (Galv.MB.prio == 0) {
+        // UNDER MESSAGE
+        Galv.MB.Spriteset_Map_createUpperLayer =
+            Spriteset_Base.prototype.createUpperLayer;
+        Spriteset_Base.prototype.createUpperLayer = function () {
+            Galv.MB.Spriteset_Map_createUpperLayer.call(this);
+            this.createBusts();
+        };
+
+        // SPRITESET MAP CREATE MSG BG
+        Spriteset_Base.prototype.createBusts = function () {
+            // Create bust image
+            if (this._msgBustSprite) return;
+            this._msgBustSprite = new Sprite_GalvBust();
+            this.addChild(this._msgBustSprite);
+        };
+
+        Galv.MB.Window_Message_newLineX = Window_Message.prototype.newLineX;
+        Window_Message.prototype.newLineX = function () {
+            if ($gameSystem.bustDisable) {
+                return Galv.MB.Window_Message_newLineX.call(this);
+            } else {
+                return 0;
+            }
+        };
     } else {
-        return '';
+        // OVER MESSAGE
+
+        // Add to window_message as child instead, so it displays above
+        Galv.MB.Window_Message_createSubWindows =
+            Window_Message.prototype.createSubWindows;
+        Window_Message.prototype.createSubWindows = function () {
+            Galv.MB.Window_Message_createSubWindows.call(this);
+            if (this._msgBustSprite) return;
+            this._msgBustSprite = new Sprite_GalvBust();
+            this.addChild(this._msgBustSprite);
+        };
+
+        Galv.MB.Window_Message_newLineX = Window_Message.prototype.newLineX;
+        Window_Message.prototype.newLineX = function () {
+            if ($gameSystem.bustDisable) {
+                return Galv.MB.Window_Message_newLineX.call(this);
+            } else if (
+                $gameMessage.faceName() &&
+                Galv.MB.prio == 1 &&
+                $gameMessage._positionType == 2 &&
+                $gameSystem.bustPos == 0
+            ) {
+                return $gameMessage.bustOffset;
+            } else {
+                return 0;
+            }
+        };
     }
-};
 
+    // changed by Salted Fish start
+    Galv.MB.LargeFaceFolder = "img/faces/large";
+    Galv.MB.LargeFaceDataFile = "data/LargeFace.json";
+    Galv.MB.LargeFaceTestDataFile = "data/Test_LargeFace.json";
+    /**
+     * LargeFace.json example
+     *
+     *  {
+     *      "FaceName":{
+     *          "FaceIndex":{
+     *              "FileName":"文件名，不包含后缀。"
+     *          }
+     *      }
+     *  }
+     */
+    //=============================================================================
+    // DataManager
+    //=============================================================================
 
-Galv.MB.Window_Message_drawMessageFace = Window_Message.prototype.drawMessageFace;
-Window_Message.prototype.drawMessageFace = function() {
-	if (!$gameSystem.bustDisable) return;
-	Galv.MB.Window_Message_drawMessageFace.call(this);
-};
+    DataManager._databaseFiles.push({
+        name: "$dataLargeFace",
+        src: "LargeFace.json",
+    });
 
-// ---------------- SPRITESET MAP
+    // scan face image to data file
+    if (SF_Plugins.Core.Utils.isPC() && Utils.isOptionValid("test")) {
+        (function () {
+            var files = FileUtils.list("img/faces/large");
+            var regex = new RegExp(/^(.+)_(\d+)\.png$/gm);
+            var result = {};
+            files.forEach((name) => {
+                var m = regex.exec(name);
+                if (m) {
+                    result[m[1]] = result[m[1]] || {};
+                    result[m[1]][m[2]] = { FileName: `${m[1]}_${m[2]}` };
+                }
+            });
+            FileUtils.writeTextFile(
+                Galv.MB.LargeFaceDataFile,
+                JsonEx.stringify(result)
+            );
+            FileUtils.writeTextFile(
+                Galv.MB.LargeFaceTestDataFile,
+                JsonEx.stringify(result)
+            );
+        })();
+    }
 
-if (Galv.MB.prio == 0) {
-// UNDER MESSAGE
-	Galv.MB.Spriteset_Map_createUpperLayer = Spriteset_Base.prototype.createUpperLayer;
-	Spriteset_Base.prototype.createUpperLayer = function() {
-		Galv.MB.Spriteset_Map_createUpperLayer.call(this);
-		this.createBusts();
-	};
-	
-	// SPRITESET MAP CREATE MSG BG
-	Spriteset_Base.prototype.createBusts = function() {
-		// Create bust image
-		if (this._msgBustSprite) return;
-		this._msgBustSprite = new Sprite_GalvBust();
-		this.addChild(this._msgBustSprite);
-	};
-	
-	Galv.MB.Window_Message_newLineX = Window_Message.prototype.newLineX;
-	Window_Message.prototype.newLineX = function() {
-		if ($gameSystem.bustDisable) {
-			return Galv.MB.Window_Message_newLineX.call(this);
-		} else {
-			return 0;
-		};
-	};
-	
-} else {
-// OVER MESSAGE
-	
-	// Add to window_message as child instead, so it displays above
-	Galv.MB.Window_Message_createSubWindows = Window_Message.prototype.createSubWindows;
-	Window_Message.prototype.createSubWindows = function() {
-		Galv.MB.Window_Message_createSubWindows.call(this);
-		if (this._msgBustSprite) return;
-		this._msgBustSprite = new Sprite_GalvBust();
-		this.addChild(this._msgBustSprite);
-	};
-	
-	
-	Galv.MB.Window_Message_newLineX = Window_Message.prototype.newLineX;
-	Window_Message.prototype.newLineX = function() {
-		if ($gameSystem.bustDisable) {
-			return Galv.MB.Window_Message_newLineX.call(this);
-		} else if ($gameMessage.faceName() && Galv.MB.prio == 1 && $gameMessage._positionType == 2 && $gameSystem.bustPos == 0) {
-			return $gameMessage.bustOffset;
-		} else {
-			return 0;
-		};
-	};
+    Object.defineProperties(Game_System.prototype, {
+        bustDisable: {
+            set: function (value) {
+                this._bustDisable = value;
+            },
+            get: function () {
+                return !(
+                    !this._bustDisable &&
+                    !!$dataLargeFace &&
+                    !!$dataLargeFace[$gameMessage.faceName()] &&
+                    !!$dataLargeFace[$gameMessage.faceName()][
+                        $gameMessage.faceIndex()
+                    ]
+                );
+            },
+        },
+    });
 
-};
+    ImageManager.loadLargeFace = function (filename, hue) {
+        return this.loadBitmap("img/faces/large/", filename, hue, true);
+    };
 
+    // changed by Salted Fish end
 })();
-
 
 // ---------------- SPRITE GALVMSGBG - NEW
 
@@ -325,102 +417,116 @@ function Sprite_GalvBust() {
 Sprite_GalvBust.prototype = Object.create(Sprite.prototype);
 Sprite_GalvBust.prototype.constructor = Sprite_GalvBust;
 
-Sprite_GalvBust.prototype.initialize = function() {
+Sprite_GalvBust.prototype.initialize = function () {
     Sprite.prototype.initialize.call(this);
-	this.name = "";
-	this.opacity = 0;
+    this.name = "";
+    this.opacity = 0;
     this.update();
 };
 
-Sprite_GalvBust.prototype.update = function() {
+Sprite_GalvBust.prototype.update = function () {
     Sprite.prototype.update.call(this);
     if (Galv.MB.msgWindow) this.controlBitmap();
 };
 
-Sprite_GalvBust.prototype.loadBitmap = function() {
-	var name = $gameMessage.faceName() + "_" + ($gameMessage.faceIndex() + 1);
-	if ($gameSystem.bustDisable) {
-		var img = ImageManager.loadPicture('');
-	} else {
-		var img = ImageManager.loadPicture(name + Galv.MB.f);
-	};
-	if (img.isReady()) {
-		if (this.bitmap) {
-			//this._destroyCachedSprite();
-			this.bitmap = null;
-		};
-		this.bitmap = img;
-		this.name = name;
-		this.hasBust = true;
-	};
+Sprite_GalvBust.prototype.loadBitmap = function () {
+    var name = $gameMessage.faceName() + "_" + ($gameMessage.faceIndex() + 1);
+    if ($gameSystem.bustDisable) {
+        var img = ImageManager.loadLargeFace("");
+    } else {
+        var img = ImageManager.loadLargeFace(name + Galv.MB.f);
+    }
+    if (img.isReady()) {
+        if (this.bitmap) {
+            //this._destroyCachedSprite();
+            this.bitmap = null;
+        }
+        this.bitmap = img;
+        this.name = name;
+        this.hasBust = true;
+    }
 };
 
-Sprite_GalvBust.prototype.controlBitmap = function() {
-	if ($gameMessage.faceName() && this.name !== $gameMessage.faceName() + "_" + ($gameMessage.faceIndex() + 1)) {
-    	this.loadBitmap();  // If image changed, reload bitmap
-	};
-	
-	if (Galv.MB.msgWindow.openness <= 0 || !this.hasBust || $gameSystem.bustDisable) {
-		this.opacity = 0;
-		this.name = "";
-		this.hasBust = false;
-		return;
-	};
+Sprite_GalvBust.prototype.controlBitmap = function () {
+    if (
+        $gameMessage.faceName() &&
+        this.name !==
+            $gameMessage.faceName() + "_" + ($gameMessage.faceIndex() + 1)
+    ) {
+        this.loadBitmap(); // If image changed, reload bitmap
+    }
 
-	if ($gameSystem.bustMirror) {
-		this.scale.x = -1;
-		var offset = this.bitmap.width;
-	} else {
-		this.scale.x = 1;
-		var offset = 0;
-	};
+    if (
+        Galv.MB.msgWindow.openness <= 0 ||
+        !this.hasBust ||
+        $gameSystem.bustDisable
+    ) {
+        this.opacity = 0;
+        this.name = "";
+        this.hasBust = false;
+        return;
+    }
 
-	this.opacity = $gameMessage.faceName() ? Galv.MB.msgWindow._openness : this.opacity - 32;
-	
-	// Control image position
-	switch (Galv.MB.msgWindow.tempPosType) {
-	case 0:
-		this.y = this.baseY();
-		break;
-	case 1:
-	//top and middle
-		this.y =  this.baseY() - Galv.MB.msgWindow.y;
-		break;
-	case 2:
-	//bottom
-		if (Galv.MB.prio == 1) {
-			this.y = Galv.MB.msgWindow.height - this.bitmap.height;
-		} else if (Galv.MB.pos === 1) {
-			this.y = this.baseY();
-		} else {
-			this.y = this.baseY() - Galv.MB.msgWindow.height;
-		};
-		break;
-	};
-	
-	if ($gameSystem.bustPos == 1) {
-		// if on the right
-		if (Galv.MB.prio == 1) {
-			this.x = Galv.MB.msgWindow.width - this.bitmap.width + offset;
-		} else {
-			this.x = Galv.MB.msgWindow.x + Galv.MB.msgWindow.width - this.bitmap.width + offset;
-		};
-	} else {
-		// else on the left
-		if (Galv.MB.prio == 1) {
-			this.x = 0 + offset;
-		} else {
-			this.x = Galv.MB.msgWindow.x + offset;
-		};
-	};
+    if ($gameSystem.bustMirror) {
+        this.scale.x = -1;
+        var offset = this.bitmap.width;
+    } else {
+        this.scale.x = 1;
+        var offset = 0;
+    }
+
+    this.opacity = $gameMessage.faceName()
+        ? Galv.MB.msgWindow._openness
+        : this.opacity - 32;
+
+    // Control image position
+    switch (Galv.MB.msgWindow.tempPosType) {
+        case 0:
+            this.y = this.baseY();
+            break;
+        case 1:
+            //top and middle
+            this.y = this.baseY() - Galv.MB.msgWindow.y;
+            break;
+        case 2:
+            //bottom
+            if (Galv.MB.prio == 1) {
+                this.y = Galv.MB.msgWindow.height - this.bitmap.height;
+            } else if (Galv.MB.pos === 1) {
+                this.y = this.baseY();
+            } else {
+                this.y = this.baseY() - Galv.MB.msgWindow.height;
+            }
+            break;
+    }
+
+    if ($gameSystem.bustPos == 1) {
+        // if on the right
+        if (Galv.MB.prio == 1) {
+            this.x = Galv.MB.msgWindow.width - this.bitmap.width + offset;
+        } else {
+            this.x =
+                Galv.MB.msgWindow.x +
+                Galv.MB.msgWindow.width -
+                this.bitmap.width +
+                offset;
+        }
+    } else {
+        // else on the left
+        if (Galv.MB.prio == 1) {
+            this.x = 0 + offset;
+        } else {
+            this.x = Galv.MB.msgWindow.x + offset;
+        }
+    }
 };
 
-Sprite_GalvBust.prototype.baseY = function() {
-	if (Galv.Mstyle.target) {
-		return Galv.MB.msgWindow.y + Galv.MB.msgWindow.height - this.bitmap.height;
-	} else {
-		return Graphics.boxHeight - this.bitmap.height + 20;
-	};
+Sprite_GalvBust.prototype.baseY = function () {
+    if (Galv.Mstyle.target) {
+        return (
+            Galv.MB.msgWindow.y + Galv.MB.msgWindow.height - this.bitmap.height
+        );
+    } else {
+        return Graphics.boxHeight - this.bitmap.height + 20;
+    }
 };
-
-
