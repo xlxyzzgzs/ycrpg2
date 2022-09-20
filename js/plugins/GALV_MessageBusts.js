@@ -149,17 +149,10 @@ Galv.Mstyle = Galv.Mstyle || {}; // compatibility
 //-----------------------------------------------------------------------------
 
 (function () {
-    Galv.MB.prio = Number(
-        PluginManager.parameters("Galv_MessageBusts")["Bust Priority"]
-    );
-    Galv.MB.pos = Number(
-        PluginManager.parameters("Galv_MessageBusts")["Bust Position"]
-    );
-    Galv.MB.w = Number(
-        PluginManager.parameters("Galv_MessageBusts")["Text X Offset"]
-    );
-    Galv.MB.f =
-        PluginManager.parameters("Galv_MessageBusts")["Filename Append"];
+    Galv.MB.prio = Number(PluginManager.parameters("Galv_MessageBusts")["Bust Priority"]);
+    Galv.MB.pos = Number(PluginManager.parameters("Galv_MessageBusts")["Bust Position"]);
+    Galv.MB.w = Number(PluginManager.parameters("Galv_MessageBusts")["Text X Offset"]);
+    Galv.MB.f = PluginManager.parameters("Galv_MessageBusts")["Filename Append"];
 
     Galv.MB.msgWindow = null;
 
@@ -170,8 +163,7 @@ Galv.Mstyle = Galv.Mstyle || {}; // compatibility
 
     // GALV'S PLUGIN MANAGEMENT. INCLUDED IN ALL GALV PLUGINS THAT HAVE PLUGIN COMMAND CALLS, BUT ONLY RUN ONCE.
     if (!Galv.aliased) {
-        var Galv_Game_Interpreter_pluginCommand =
-            Game_Interpreter.prototype.pluginCommand;
+        var Galv_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
         Game_Interpreter.prototype.pluginCommand = function (command, args) {
             if (Galv.pCmd[command]) {
                 Galv.pCmd[command](args);
@@ -238,22 +230,14 @@ Galv.Mstyle = Galv.Mstyle || {}; // compatibility
         Galv.MB.msgWindow.tempPosType = this._positionType;
     };
 
-    Galv.MB.Window_Message_processEscapeCharacter =
-        Window_Message.prototype.processEscapeCharacter;
-    Window_Message.prototype.processEscapeCharacter = function (
-        code,
-        textState
-    ) {
+    Galv.MB.Window_Message_processEscapeCharacter = Window_Message.prototype.processEscapeCharacter;
+    Window_Message.prototype.processEscapeCharacter = function (code, textState) {
         switch (code) {
             case "BST":
                 this.obtainSpecialParam(textState);
                 break;
         }
-        Galv.MB.Window_Message_processEscapeCharacter.call(
-            this,
-            code,
-            textState
-        );
+        Galv.MB.Window_Message_processEscapeCharacter.call(this, code, textState);
     };
 
     Window_Message.prototype.obtainSpecialParam = function (textState) {
@@ -262,17 +246,13 @@ Galv.Mstyle = Galv.Mstyle || {}; // compatibility
             textState.index += arr[0].length;
             var txt = arr[0].slice(1).slice(0, -1);
             var array = txt.split(",");
-            $gameMessage.setFaceImage(
-                array[1] || $gameMessage._faceName,
-                Number(array[0] - 1)
-            );
+            $gameMessage.setFaceImage(array[1] || $gameMessage._faceName, Number(array[0] - 1));
         } else {
             return "";
         }
     };
 
-    Galv.MB.Window_Message_drawMessageFace =
-        Window_Message.prototype.drawMessageFace;
+    Galv.MB.Window_Message_drawMessageFace = Window_Message.prototype.drawMessageFace;
     Window_Message.prototype.drawMessageFace = function () {
         if (!$gameSystem.bustDisable) return;
         Galv.MB.Window_Message_drawMessageFace.call(this);
@@ -282,8 +262,7 @@ Galv.Mstyle = Galv.Mstyle || {}; // compatibility
 
     if (Galv.MB.prio == 0) {
         // UNDER MESSAGE
-        Galv.MB.Spriteset_Map_createUpperLayer =
-            Spriteset_Base.prototype.createUpperLayer;
+        Galv.MB.Spriteset_Map_createUpperLayer = Spriteset_Base.prototype.createUpperLayer;
         Spriteset_Base.prototype.createUpperLayer = function () {
             Galv.MB.Spriteset_Map_createUpperLayer.call(this);
             this.createBusts();
@@ -309,8 +288,7 @@ Galv.Mstyle = Galv.Mstyle || {}; // compatibility
         // OVER MESSAGE
 
         // Add to window_message as child instead, so it displays above
-        Galv.MB.Window_Message_createSubWindows =
-            Window_Message.prototype.createSubWindows;
+        Galv.MB.Window_Message_createSubWindows = Window_Message.prototype.createSubWindows;
         Window_Message.prototype.createSubWindows = function () {
             Galv.MB.Window_Message_createSubWindows.call(this);
             if (this._msgBustSprite) return;
@@ -372,14 +350,8 @@ Galv.Mstyle = Galv.Mstyle || {}; // compatibility
                     result[m[1]][m[2]] = { FileName: `${m[1]}_${m[2]}` };
                 }
             });
-            FileUtils.writeTextFile(
-                Galv.MB.LargeFaceDataFile,
-                JsonEx.stringify(result)
-            );
-            FileUtils.writeTextFile(
-                Galv.MB.LargeFaceTestDataFile,
-                JsonEx.stringify(result)
-            );
+            FileUtils.writeTextFile(Galv.MB.LargeFaceDataFile, JsonEx.stringify(result));
+            FileUtils.writeTextFile(Galv.MB.LargeFaceTestDataFile, JsonEx.stringify(result));
         })();
     }
 
@@ -393,9 +365,7 @@ Galv.Mstyle = Galv.Mstyle || {}; // compatibility
                     !this._bustDisable &&
                     !!$dataLargeFace &&
                     !!$dataLargeFace[$gameMessage.faceName()] &&
-                    !!$dataLargeFace[$gameMessage.faceName()][
-                        $gameMessage.faceIndex()
-                    ]
+                    !!$dataLargeFace[$gameMessage.faceName()][$gameMessage.faceIndex() + 1]
                 );
             },
         },
@@ -448,19 +418,11 @@ Sprite_GalvBust.prototype.loadBitmap = function () {
 };
 
 Sprite_GalvBust.prototype.controlBitmap = function () {
-    if (
-        $gameMessage.faceName() &&
-        this.name !==
-            $gameMessage.faceName() + "_" + ($gameMessage.faceIndex() + 1)
-    ) {
+    if ($gameMessage.faceName() && this.name !== $gameMessage.faceName() + "_" + ($gameMessage.faceIndex() + 1)) {
         this.loadBitmap(); // If image changed, reload bitmap
     }
 
-    if (
-        Galv.MB.msgWindow.openness <= 0 ||
-        !this.hasBust ||
-        $gameSystem.bustDisable
-    ) {
+    if (Galv.MB.msgWindow.openness <= 0 || !this.hasBust || $gameSystem.bustDisable) {
         this.opacity = 0;
         this.name = "";
         this.hasBust = false;
@@ -475,9 +437,7 @@ Sprite_GalvBust.prototype.controlBitmap = function () {
         var offset = 0;
     }
 
-    this.opacity = $gameMessage.faceName()
-        ? Galv.MB.msgWindow._openness
-        : this.opacity - 32;
+    this.opacity = $gameMessage.faceName() ? Galv.MB.msgWindow._openness : this.opacity - 32;
 
     // Control image position
     switch (Galv.MB.msgWindow.tempPosType) {
@@ -505,11 +465,7 @@ Sprite_GalvBust.prototype.controlBitmap = function () {
         if (Galv.MB.prio == 1) {
             this.x = Galv.MB.msgWindow.width - this.bitmap.width + offset;
         } else {
-            this.x =
-                Galv.MB.msgWindow.x +
-                Galv.MB.msgWindow.width -
-                this.bitmap.width +
-                offset;
+            this.x = Galv.MB.msgWindow.x + Galv.MB.msgWindow.width - this.bitmap.width + offset;
         }
     } else {
         // else on the left
@@ -523,9 +479,7 @@ Sprite_GalvBust.prototype.controlBitmap = function () {
 
 Sprite_GalvBust.prototype.baseY = function () {
     if (Galv.Mstyle.target) {
-        return (
-            Galv.MB.msgWindow.y + Galv.MB.msgWindow.height - this.bitmap.height
-        );
+        return Galv.MB.msgWindow.y + Galv.MB.msgWindow.height - this.bitmap.height;
     } else {
         return Graphics.boxHeight - this.bitmap.height + 20;
     }
