@@ -341,7 +341,7 @@ Galv.Mstyle = Galv.Mstyle || {}; // compatibility
     if (SF_Plugins.Core.Utils.isPC() && Utils.isOptionValid("test")) {
         (function () {
             var files = FileUtils.list("img/faces/large");
-            var regex = new RegExp(/^(.+)_(\d+)\.png$/gm);
+            var regex = /^(.+)_(\d+)\.png$/m;
             var result = {};
             files.forEach((name) => {
                 var m = regex.exec(name);
