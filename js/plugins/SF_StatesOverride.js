@@ -63,7 +63,7 @@ SF_Plugins.SF_StateOverride.version = 1.0;
 
 SF_Plugins.SF_StateOverride.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
 DataManager.isDatabaseLoaded = function () {
-    if (!SF_Plugins.SF_SkillUpdate.DataManager_isDatabaseLoaded.call(this)) return false;
+    if (!SF_Plugins.SF_StateOverride.DataManager_isDatabaseLoaded.call(this)) return false;
     if (!this.SF_StateOverride_isDatabaseLoaded($dataStates)) return false;
     return true;
 };
@@ -115,26 +115,4 @@ Game_Battler.prototype.addState = function (stateId) {
         }, this);
     }
     SF_Plugins.SF_StateOverride.GameBattler_addState.call(this, stateId);
-};
-
-SF_Plugins.SF_StateOverride.GameBattler_isStateAddable = Game_Battler.prototype.isStateAddable;
-Game_Battler.prototype.isStateAddable = function (stateId) {
-    if (!SF_Plugins.SF_StateOverride.GameBattler_isStateAddable.call(this, stateId)) {
-        return false;
-    }
-
-    // 判断是否存在优先级更高的状态
-    var needAddState = $dataStates[stateId];
-    var isAddable = true;
-    if (needAddState.SF_StateOverride_ID != undefined) {
-        this.states().forEach(function (state) {
-            if (
-                state.SF_StateOverride_ID === needAddState.SF_StateOverride_ID &&
-                state.SF_StateOverride_Priority > needAddState.SF_StateOverride_Priority
-            ) {
-                isAddable = false;
-            }
-        });
-    }
-    return isAddable;
 };
