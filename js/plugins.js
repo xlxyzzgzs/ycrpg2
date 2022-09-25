@@ -12,7 +12,7 @@ var $plugins =
 {"name":"SF_Scenes","status":true,"description":"scenes lib for salted fish plugins","parameters":{}},
 {"name":"--------------------","status":true,"description":"------------------------------------------------------------","parameters":{}},
 {"name":"SF_SkipLoadError","status":true,"description":"try to skip load errors","parameters":{}},
-{"name":"SF_AutoUpdate","status":true,"description":"v1.0.0 - Automatically update the game.","parameters":{}},
+{"name":"SF_AutoUpdate","status":false,"description":"v1.0.0 - Automatically update the game.","parameters":{}},
 {"name":"SF_WindowScrollCommand","status":true,"description":"v1.0 Allows you to scroll text in selected commands.","parameters":{}},
 {"name":"SF_InputBindControl","status":true,"description":"v1.0 support add anf remove input event listener","parameters":{}},
 {"name":"SF_AutoRevive","status":true,"description":"v1.0.0 - Automatically revive dead party members.","parameters":{}},
