@@ -4,7 +4,7 @@
 //=============================================================================
 "use strict";
 var Imported = Imported || {};
-Imported.SF_StateOverride = True;
+Imported.SF_StateOverride = true;
 
 var SF_Plugins = SF_Plugins || {};
 //=============================================================================
