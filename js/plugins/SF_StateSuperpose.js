@@ -4,7 +4,7 @@
 //=============================================================================
 "use strict";
 var Imported = Imported || {};
-Imported.SF_StateSuperpose = True;
+Imported.SF_StateSuperpose = true;
 
 var SF_Plugins = SF_Plugins || {};
 //=============================================================================
@@ -91,7 +91,8 @@ Game_Battler.prototype.addState = function (stateId) {
         var turns = this._stateTurns[stateId];
         this.states().forEach(function (state) {
             if (state.SF_StateSuperpose_ID === stateSuperpose_ID) {
-                this._stateTurns[stateId] = turns;
+                this.addState(state.id);
+                this._stateTurns[state.id] = turns;
             }
         }, this);
     }
