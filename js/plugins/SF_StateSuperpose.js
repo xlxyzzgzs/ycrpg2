@@ -84,14 +84,14 @@ DataManager.SF_StateSuperpose_isDatabaseLoaded = function (group) {
 //=============================================================================
 SF_Plugins.SF_StateSuperpose.GameBattler_addState = Game_Battler.prototype.addState;
 Game_Battler.prototype.addState = function (stateId) {
-    SF_Plugins.SF_StateOverride.GameBattler_addState.call(this, stateId);
+    SF_Plugins.SF_StateSuperpose.GameBattler_addState.call(this, stateId);
 
     var stateSuperpose_ID = $dataStates[stateId].SF_StateSuperpose_ID;
     if (this.result().isStateAdded(stateId) && stateSuperpose_ID !== undefined) {
         var turns = this._stateTurns[stateId];
         this.states().forEach(function (state) {
             if (state.SF_StateSuperpose_ID === stateSuperpose_ID) {
-                this.addState(state.id);
+                SF_Plugins.SF_StateSuperpose.GameBattler_addState.call(this, stateId);
                 this._stateTurns[state.id] = turns;
             }
         }, this);
