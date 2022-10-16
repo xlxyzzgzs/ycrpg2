@@ -53,6 +53,6 @@ null,
 {"id":51,"expanded":true,"name":"豆豆主星B","order":38,"parentId":34,"scrollX":811,"scrollY":566.5},
 {"id":52,"expanded":true,"name":"熔岩洞窟：1F","order":39,"parentId":51,"scrollX":1637,"scrollY":813.5},
 {"id":53,"expanded":true,"name":"熔岩洞窟：B1","order":40,"parentId":52,"scrollX":1567,"scrollY":542.5},
-{"id":54,"expanded":false,"name":"熔岩洞窟：B2","order":41,"parentId":53,"scrollX":1013,"scrollY":622.5},
+{"id":54,"expanded":false,"name":"熔岩洞窟：B2","order":41,"parentId":53,"scrollX":997,"scrollY":614.5},
 {"id":55,"expanded":true,"name":"好人家一层（彩蛋）","order":21,"parentId":22,"scrollX":994.1999999999999,"scrollY":637.1999999999999}
 ]
