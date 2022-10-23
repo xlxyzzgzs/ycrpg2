@@ -11,6 +11,7 @@ var $plugins =
 {"name":"SF_Windows","status":true,"description":"window base for salted fish plugins","parameters":{}},
 {"name":"SF_Scenes","status":true,"description":"scenes lib for salted fish plugins","parameters":{}},
 {"name":"--------------------","status":true,"description":"------------------------------------------------------------","parameters":{}},
+{"name":"SF_LoadOgg","status":true,"description":"强制加载 ogg 音频文件","parameters":{}},
 {"name":"SF_SkipLoadError","status":true,"description":"try to skip load errors","parameters":{}},
 {"name":"SF_AutoUpdate","status":false,"description":"v1.0.0 - Automatically update the game.","parameters":{}},
 {"name":"SF_WindowScrollCommand","status":true,"description":"v1.0 Allows you to scroll text in selected commands.","parameters":{}},
