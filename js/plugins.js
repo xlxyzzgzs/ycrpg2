@@ -53,5 +53,6 @@ var $plugins =
 {"name":"SF_SceneSplash","status":true,"description":"v1.0.0 - Scene Splash","parameters":{}},
 {"name":"SF_TestPlugins","status":true,"description":"","parameters":{}},
 {"name":"GALV_MessageBusts","status":true,"description":"(v.2.6) Displays a bust image instead of selected face image","parameters":{"Bust Priority":"1","Bust Position":"1","Text X Offset":"390","Filename Append":""}},
-{"name":"Namepop","status":true,"description":"Namepop Ver 1.03 NPC名称显示","parameters":{}}
+{"name":"Namepop","status":true,"description":"Namepop Ver 1.03 NPC名称显示","parameters":{}},
+{"name":"YEP_EventEncounterAid","status":true,"description":"v1.00 事件遭遇助手","parameters":{}}
 ];
