@@ -92,7 +92,7 @@ var SF_Plugins = SF_Plugins || {};
         if (this._errorPrinter && !this._errorShowed && SF_SkipLoadError.FileLoadErrorList.indexOf(url) === -1) {
             SceneManager.stop();
             if (this._errorPrinter.innerHTML !== "") {
-                tempht = this._errorPrinter.innerHTML.match(/<font color="white">(.*)<\/font>/i)[1] + "<br/>";
+                let tempht = this._errorPrinter.innerHTML.match(/<font color="white">(.*)<\/font>/i)[1] + "<br/>";
                 this._errorPrinter.innerHTML = '<font color="yellow"><b>' + '文件加载失败，请上报问题附带截图:' + '</b></font><br>' +
                     '<font color="white">' + tempht + 'Failed to load: ' + url + '</font><br>';
             } else {
