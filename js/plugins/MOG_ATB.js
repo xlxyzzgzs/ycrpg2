@@ -493,7 +493,7 @@ Game_BattlerBase.prototype.removeGuardState = function(stateId) {
     this.states().forEach(function(state) {
 		    for (var i = 0; i < state.traits.length; i++) {
 				 var effect = state.traits[i]
-				 if (effect.dataId === 1) {
+				 if (effect.code === Game_BattlerBase.TRAIT_SPECIAL_FLAG && effect.dataId === 1) {
 					 this.eraseState(state.id)
 				 };
 			};
