@@ -103,8 +103,9 @@ DataManager.processStatesCustomAddtionNotetags = function (group) {
     for (var n = 1; n < group.length; n++) {
         var obj = group[n];
         var notedata = obj.note.split(/[\r\n]+/);
-        obj.SF_StatesCustomAddtion_Before = "";
         var mode = "none";
+
+        obj.SF_StatesCustomAddtion_Before = "";
         for (var i = 0; i < notedata.length; i++) {
             var line = notedata[i];
             if (line.match(note1)) {
@@ -115,10 +116,10 @@ DataManager.processStatesCustomAddtionNotetags = function (group) {
                 obj.SF_StatesCustomAddtion_Before += line + "\n";
             }
         }
-    }
 
-    if (obj.SF_StatesCustomAddtion_Before) {
-        obj.SF_StatesCustomAddtion_Before = new Function("target", "stateId", obj.SF_StatesCustomAddtion_Before);
+        if (obj.SF_StatesCustomAddtion_Before) {
+            obj.SF_StatesCustomAddtion_Before = new Function("target", "stateId", obj.SF_StatesCustomAddtion_Before);
+        }
     }
 
     return true;
@@ -129,8 +130,9 @@ DataManager.processStatesCustomAddtionNotetags = function (group) {
 //=============================================================================
 SF_Plugins.SF_StatesCustomAddtion.Game_Battler_addState = Game_Battler.prototype.addState;
 Game_Battler.prototype.addState = function (stateId) {
-    if (this.SF_StatesCustomAddtion_Before) {
-        var result = this.SF_StatesCustomAddtion_Before(this, stateId);
+    var state = $dataStates[stateId];
+    if (state.SF_StatesCustomAddtion_Before) {
+        var result = state.SF_StatesCustomAddtion_Before.call(this, this, stateId);
 
         if (result.result) return;
 
