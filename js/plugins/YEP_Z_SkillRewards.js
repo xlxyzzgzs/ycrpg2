@@ -242,8 +242,10 @@ Yanfly.LunSkRew.version = 1.00;
  * can add new notetag effects that can be used by the plugin or alter the
  * effects of currently existing notetag effects from the plugin parameters
  * entry: Effect Code. It should look something like this:
- *
- * ---
+ * 
+ * 对于了解 JavaScript 并拥有 RPG Maker MV 1.5.0+ 的有经验的用户，您可以添加插件
+ * 可以使用的新注释标签效果，或者从插件参数条目更改当前存在的注释标签效果：效果代码。
+ * 它应该看起来像这样：
  *
  * // ----------
  * // Flat Gains
