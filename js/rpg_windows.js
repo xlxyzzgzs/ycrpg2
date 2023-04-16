@@ -2267,7 +2267,7 @@ Window_EquipStatus.prototype.windowHeight = function () {
 };
 
 Window_EquipStatus.prototype.numVisibleRows = function () {
-    return 10;
+    return 8;
 };
 
 Window_EquipStatus.prototype.setActor = function (actor) {
