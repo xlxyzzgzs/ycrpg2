@@ -1,4 +1,4 @@
-﻿//=============================================================================
+//=============================================================================
 // Yanfly Engine Plugins - Visual ATB Gauge
 // YEP_X_VisualATBGauge.js
 //=============================================================================
@@ -8,42 +8,54 @@ Imported.YEP_X_VisualATBGauge = true;
 
 var Yanfly = Yanfly || {};
 Yanfly.VATB = Yanfly.VATB || {};
+Yanfly.VATB.version = 1.04
 
 //=============================================================================
  /*:
- * @plugindesc v1.03 时间槽外观☁️
+ * @plugindesc v1.04 (Requires YEP_BattleSysATB.js) Provides a visible ATB
+ * gauge for your enemies!
  * @author Yanfly Engine Plugins
  *
  * @param Show Gauges
- * @text 显示槽
+ * @type boolean
+ * @on Show
+ * @off Hide
  * @desc Show individual gauges?
  * NO - false     YES - true
  * @default true
  *
  * @param Minimum Gauge Width
- * @text 最小槽宽度
+ * @type number
+ * @min 1
  * @desc This is the minimum width in pixels for ATB Gauges.
  * @default 144
  *
  * @param Always Show
- * @text 一直显示
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Always show ATB Gauge or hide them during actions?
  * HIDE - false     SHOW - true
  * @default true
  *
  * @param Gauge Position
- * @text 槽位置
+ * @type boolean
+ * @on Above
+ * @off Below
  * @desc Where do you wish to show the ATB gauge?
  * BELOW - false     ABOVE - true
  * @default false
  *
  * @param Y Buffer
- * @text Y缓冲器
+ * @type number
+ * @min 0
  * @desc How much do you wish to shift the gauge Y position?
  * @default -32
  *
  * @param Use Thick Gauges
- * @text 使用厚量规
+ * @type boolean
+ * @on Thick
+ * @off Normal
  * @desc Use the thick gauges provided by this plugin?
  * Default - false     Thick - true
  * @default true
@@ -53,35 +65,36 @@ Yanfly.VATB = Yanfly.VATB || {};
  * Introduction
  * ============================================================================
  *
- * 对于Yanfly的ATB战斗系统插件，你现在可以让你的敌人也有行动槽啦！
- * 这个拓展插件需要ATB插件支持。行动槽可以显示在敌人下方。
- * 本插件需要YEP_BattleEngineCore和YEP_X_BattleSysATB两个前置插件请
- * 确保启用该插件时，将其放置于上述两个插件下边。
+ * This plugin requires YEP_BattleEngineCore and YEP_X_BattleSysATB.
+ * Make sure this plugin is located under YEP_BattleEngineCore and
+ * YEP_X_BattleSysATB in the plugin list.
  *
- * 本插件将会在ATB战斗模式下，在你敌人的上方或下方显示ATB行动槽。
+ * This plugin will show the ATB Gauge for enemies if the current battle system
+ * is ATB. The gauges can be shown either below or above the enemies.
  *
  * ============================================================================
  * Notetags
  * ============================================================================
  *
  * The following are some notetags you can use to adjust the appearance of
- * the enemy's ATB Gauge.下面的注释命令会帮助你进一步定制本插件的功能。
+ * the enemy's ATB Gauge.
  *
  * Enemy Notetags:
  *   <Show ATB Gauge>
  *   <Hide ATB Gauge>
- *   这个命令将开启或关闭敌人的ATB行动槽显示，让你可以自己控制。
+ *   This will cause the ATB Gauge to be shown or hidden ignoring the default
+ *   settings found in the parameters.
  *
  *   <ATB Gauge Width: x>
  *   This allows you to set the enemy's ATB Gauge width to x instead of having
  *   it match the enemy's battler graphic width.
- *   你可以自定义该敌人行动槽的宽度，这通常用于你的敌人绘图不规则，
- *   而行动槽规格统一导致的显示奇葩问题，比如你可以给史莱姆等小型单位
- *   设定更小的行动槽，使其看起来更美观一点。
  *
  * ============================================================================
  * Changelog
  * ============================================================================
+ *
+ * Version 1.04:
+ * - Updated for RPG Maker MV version 1.5.0.
  *
  * Version 1.03:
  * - Updated for RPG Maker MV version 1.1.0.

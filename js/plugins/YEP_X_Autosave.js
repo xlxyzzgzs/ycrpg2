@@ -369,7 +369,7 @@ Yanfly.Autosave.DataManager_setupNewGame = DataManager.setupNewGame;
 DataManager.setupNewGame = function() {
   Yanfly.Autosave.DataManager_setupNewGame.call(this);
   StorageManager.setCurrentAutosaveSlot(this._lastAccessedId);
-  $gameTemp._autosaveNewGame = true;
+  $gameTemp._autosaveNewGame = false;
   $gameTemp._autosaveLoading = false;
 };
 
@@ -400,7 +400,7 @@ StorageManager.getCurrentAutosaveSlot = function() {
 };
 
 StorageManager.setCurrentAutosaveSlot = function(savefileId) {
-  this._currentAutosaveSlot = savefileId;
+  this._currentAutosaveSlot = 1;
 };
 
 StorageManager.performAutosave = function() {
@@ -592,6 +592,37 @@ Scene_Map.prototype.performAutosave = function() {
   $gameSystem.onBeforeSave();
   DataManager.saveGameWithoutRescue(StorageManager.getCurrentAutosaveSlot());
   if (this._autosaveMsgWindow) this._autosaveMsgWindow.reveal();
+};
+
+
+//=============================================================================
+// Window_SavefileList
+//=============================================================================
+Yanfly.Autosave.Window_SavefileList_drawItem = Window_SavefileList.prototype.drawItem;
+Window_SavefileList.prototype.drawItem = function(index) {
+  var id = index + 1;
+  var valid = DataManager.isThisGameFile(id);
+  var rect = this.itemRect(index);
+  this.resetTextColor();
+  //if (this._mode === 'load') this.changePaintOpacity(valid);
+  this.changePaintOpacity(valid);
+  var icon = valid ? Yanfly.Param.SaveIconSaved : Yanfly.Param.SaveIconEmpty;
+  this.drawIcon(icon, rect.x + 2, rect.y + 2);
+  if(id === 1){ //First is AutoSaved
+    this.drawText("自动存档",rect.x + Window_Base._iconWidth + 4, rect.y, 180);
+  } else {
+    this.drawFileId(id-1, rect.x + Window_Base._iconWidth + 4, rect.y);
+  }
+};
+
+//=============================================================================
+// Window_SaveAction
+//=============================================================================
+Yanfly.Autosave.Window_SaveAction_isSaveEnabled = Window_SaveAction.prototype.isSaveEnabled;
+Window_SaveAction.prototype.isSaveEnabled = function() {
+  if (this._mode !== 'save') return false;
+  if (this._currentFile === 1)return false;
+  return $gameSystem.isSaveEnabled();
 };
 
 //=============================================================================
