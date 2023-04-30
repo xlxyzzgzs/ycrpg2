@@ -537,7 +537,8 @@ Window_BattleStatus.prototype.drawItem = function(index) {
 Window_BattleStatus.prototype.drawBasicArea = function(rect, actor) {
     if (Imported.YEP_X_BattleSysATB && Yanfly.Param.ATBGaugeStyle) {
       if (BattleManager.isATB()) {
-        this.drawActorAtbGauge(actor, rect.x - 2, rect.y, rect.width + 2);
+        var atb_rect = this.gaugeAreaRect(0);
+        this.drawActorAtbGauge(actor, rect.x, atb_rect.y + atb_rect.height - this.lineHeight(), rect.width);
       }
     }
     var iw = Window_Base._iconWidth;
@@ -559,13 +560,14 @@ Window_BattleStatus.prototype.drawGaugeArea = function(rect, actor) {
     var wy = rect.y + rect.height - this.lineHeight();
     var wymod = (Imported.YEP_CoreEngine) ? Yanfly.Param.GaugeHeight : 6;
     var wymod = Math.max(16, wymod);
-    this.drawActorHp(actor, rect.x, wy - wymod, rect.width);
+    this.drawActorHp(actor, rect.x, wy - wymod * 2, rect.width);
     if (this.getGaugesDrawn(actor) <= 2) {
       this.drawActorMp(actor, rect.x, wy, rect.width);
     } else {
-      var ww = rect.width / 2;
-      this.drawActorMp(actor, rect.x, wy, ww);
-      this.drawActorTp(actor, rect.x + ww, wy, ww);
+      var ww = Math.floor(rect.width / 2);
+      var pad = rect.width - ww * 2;
+      this.drawActorMp(actor, rect.x, wy - wymod, ww);
+      this.drawActorTp(actor, rect.x + ww + pad, wy - wymod, ww);
     }
     this._enableYBuffer = false;
 };
@@ -585,7 +587,7 @@ Window_BattleStatus.prototype.getGaugesDrawn = function(actor) {
 
 Window_BattleStatus.prototype.gaugeAreaRect = function(index) {
     var rect = this.itemRectForText(index);
-    rect.height = this.contents.height - this.lineHeight() * 2;
+    rect.height = this.contents.height - this.lineHeight() * 3;
     rect.y = this.contents.height - rect.height;
     return rect;
 };
