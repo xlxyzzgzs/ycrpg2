@@ -464,6 +464,17 @@ Window_ActorCommand.prototype.processCancel = function () {
 //=============================================================================
 // Window_BattleStatus
 //=============================================================================
+Yanfly.BSW.Window_BattleStatus_initialize = Window_BattleStatus.prototype.initialize;
+Window_BattleStatus.prototype.initialize = function () {
+    this._guageHeight = Imported.YEP_CoreEngine ? this.gaugeHeight() : 6;
+    this._guageHeight = Math.max(16, this._guageHeight);
+    this._actorsStateIcon = []; // [index] = [nextRenderStartIndex ,icons]
+    this._actorsStateIconMaxTick = 90;
+    this._actorsStateIconCurrentTick = 0;
+    this._actorsStateIconNum = 4;
+    Yanfly.BSW.Window_BattleStatus_initialize.call(this);
+};
+
 Window_BattleStatus.prototype.windowWidth = function () {
     return Graphics.boxWidth;
 };
@@ -528,47 +539,88 @@ Window_BattleStatus.prototype.itemHeight = function () {
 
 Window_BattleStatus.prototype.drawItem = function (index) {
     var actor = $gameParty.battleMembers()[index];
-    this.drawBasicArea(this.basicAreaRect(index), actor);
-    this.drawGaugeArea(this.gaugeAreaRect(index), actor);
-    this.drawStateArea(this.basicAreaRect(index), actor);
-};
-
-Window_BattleStatus.prototype.drawBasicArea = function (rect, actor) {
-    if (Imported.YEP_X_BattleSysATB && Yanfly.Param.ATBGaugeStyle) {
-        if (BattleManager.isATB()) {
-            var atb_rect = this.gaugeAreaRect(0);
-            this.drawActorAtbGauge(actor, rect.x, atb_rect.y + atb_rect.height - this.lineHeight(), rect.width);
-        }
-    }
-    var iw = Window_Base._iconWidth;
-    this.drawActorActionIcon(actor, rect.x, rect.y);
-    this.resetFontSettings();
-    this.contents.fontSize = Yanfly.Param.BSWNameFontSize;
-    this.drawActorName(actor, rect.x + iw + 4, rect.y, rect.width);
-};
-
-Window_BattleStatus.prototype.basicAreaRect = function (index) {
     var rect = this.itemRectForText(index);
-    rect.height = this.lineHeight() * 2;
+
+    this.drawGuages(index, actor);
+    // this.drawActorActionIcon(actor, rect.x + rect.width - Window_Base._iconWidth, rect.y);
+
+    this._actorsStateIcon[index] = [0, actor.allIcons()];
+    this.drawActorIcons(index);
+};
+
+Window_BattleStatus.prototype.drawGuages = function (index, actor) {
+    this.contents.fontSize = Yanfly.Param.BSWParamFontSize;
+    this._enableYBuffer = true;
+
+    var tpRect = this.tpGaugeRect(index, actor);
+    var hpRect = this.hpGaugeRect(index, actor);
+    var mpRect = this.mpGaugeRect(index, actor);
+    var atbRect = this.atbGaugeRect(index, actor);
+
+    this.drawActorHp(actor, hpRect.x, hpRect.y, hpRect.width);
+    if (this.getGaugesDrawn(actor) <= 2) {
+        this.drawActorMp(actor, mpRect.x, mpRect.y, mpRect.width);
+    } else {
+        this.drawActorMp(actor, mpRect.x, mpRect.y, mpRect.width);
+        this.drawActorTp(actor, tpRect.x, tpRect.y, tpRect.width);
+    }
+
+    this.drawActorAtbGaugeVertical(actor, atbRect.x, atbRect.y, atbRect.height);
+    this._enableYBuffer = false;
+};
+
+Window_BattleStatus.prototype.tpGaugeRect = function (index) {
+    var rect = this.itemRectForText(index);
+    rect.width -= Window_Base._iconWidth;
+    rect.height = this._guageHeight;
     return rect;
 };
 
-Window_BattleStatus.prototype.drawGaugeArea = function (rect, actor) {
-    this.contents.fontSize = Yanfly.Param.BSWParamFontSize;
-    this._enableYBuffer = true;
-    var wy = rect.y + rect.height - this.lineHeight();
-    var wymod = Imported.YEP_CoreEngine ? Yanfly.Param.GaugeHeight : 6;
-    var wymod = Math.max(16, wymod);
-    this.drawActorHp(actor, rect.x, wy - wymod * 2, rect.width);
-    if (this.getGaugesDrawn(actor) <= 2) {
-        this.drawActorMp(actor, rect.x, wy, rect.width);
-    } else {
-        var ww = Math.floor(rect.width / 2);
-        var pad = rect.width - ww * 2;
-        this.drawActorMp(actor, rect.x, wy - wymod, ww);
-        this.drawActorTp(actor, rect.x + ww + pad, wy - wymod, ww);
+Window_BattleStatus.prototype.hpGaugeRect = function (index) {
+    var rect = this.itemRectForText(index);
+
+    rect.y = rect.height - this.lineHeight() - this._guageHeight * 2 - (this.lineHeight() - this._guageHeight);
+    rect.height = this._guageHeight;
+    rect.width = rect.width - this.lineHeight();
+    return rect;
+};
+
+Window_BattleStatus.prototype.mpGaugeRect = function (index) {
+    var rect = this.itemRectForText(index);
+    rect.y = rect.height - this.lineHeight() - this._guageHeight * 1 - (this.lineHeight() - this._guageHeight);
+    rect.height = this._guageHeight;
+    rect.width = rect.width - this.lineHeight();
+    return rect;
+};
+
+Window_BattleStatus.prototype.atbGaugeRect = function (index) {
+    var rect = this.itemRectForText(index);
+    rect.x = rect.x + rect.width - this.lineHeight();
+    rect.y = this.lineHeight();
+
+    rect.width = this._guageHeight;
+    rect.height = rect.height - this.lineHeight();
+    return rect;
+};
+
+Window_BattleStatus.prototype.stateAreaRect = function (index) {
+    var rect = this.itemRectForText(index);
+    rect.y = rect.height - this.lineHeight();
+    rect.height = Window_Base._iconHeight;
+    rect.width = rect.width - this.lineHeight();
+    return rect;
+};
+
+Window_BattleStatus.prototype.drawBasicArea = function (rect, actor) {
+    if (Imported.YEP_X_BattleSysATB && Yanfly.Param.ATBGaugeStyle && BattleManager.isATB()) {
+        this.drawActorAtbGaugeVertical(actor, rect.x, rect.y, rect.height);
     }
-    this._enableYBuffer = false;
+};
+
+Window_BattleStatus.prototype.basicAreaRect = function (index) {
+    if (Imported.YEP_X_BattleSysATB && Yanfly.Param.ATBGaugeStyle && BattleManager.isATB()) {
+        return this.atbGaugeRect(index);
+    }
 };
 
 Window_BattleStatus.prototype.drawStateArea = function (rect, actor) {
@@ -582,13 +634,6 @@ Window_BattleStatus.prototype.getGaugesDrawn = function (actor) {
     var value = 2;
     if ($dataSystem.optDisplayTp) value += 1;
     return value;
-};
-
-Window_BattleStatus.prototype.gaugeAreaRect = function (index) {
-    var rect = this.itemRectForText(index);
-    rect.height = this.contents.height - this.lineHeight() * 3;
-    rect.y = this.contents.height - rect.height;
-    return rect;
 };
 
 Window_BattleStatus.prototype.drawStatusFace = function (index) {
@@ -685,6 +730,79 @@ Window_BattleStatus.prototype._refreshCursor = function () {
 
     bitmap.fillAll("rgba(250, 250, 240, 0.6)");
 };
+
+Yanfly.BSW.Window_BattleStatus_update = Window_BattleStatus.prototype.update;
+Window_BattleStatus.prototype.update = function () {
+    Yanfly.BSW.Window_BattleStatus_update.call(this);
+    this.updateStateIcons();
+};
+
+Window_BattleStatus.prototype.updateStateIcons = function () {
+    this._actorsStateIconCurrentTick++;
+    if (this._actorsStateIconCurrentTick < this._actorsStateIconMaxTick) return;
+
+    this._actorsStateIconCurrentTick = 0;
+    for (var index = 0; index < $gameParty.battleMembers().length; index++) {
+        this.drawActorIcons(index);
+    }
+};
+
+Window_BattleStatus.prototype.drawActorIcons = function (index) {
+    var startIcons = this._actorsStateIcon[index][0];
+    var icons = this._actorsStateIcon[index][1];
+    var rect = this.stateAreaRect(index);
+
+    this.contents.clearRect(rect.x, rect.y, rect.width, rect.height);
+    if (icons.length <= 0) {
+        return;
+    }
+
+    var iconWidth = Window_Base._iconWidth;
+    var x = rect.x + 2;
+    var y = rect.y;
+    for (var i = 0; i < this._actorsStateIconNum; i++) {
+        if (icons[i + startIcons] === undefined) continue;
+        var icon = icons[i + startIcons];
+        this.drawIcon(icon, x, y);
+        x += iconWidth;
+    }
+
+    this._actorsStateIcon[index][0] += this._actorsStateIconNum;
+    if (this._actorsStateIcon[index][0] >= icons.length) {
+        this._actorsStateIcon[index][0] = 0;
+    }
+};
+
+Window_BattleStatus.prototype.drawActorTp = function (actor, x, y, width) {
+    this.changeTextColor(this.systemColor());
+    this.drawText(TextManager.tpA, x, y, 44);
+    this.changeTextColor(this.tpColor(actor));
+    this.drawText(actor.tp, x + 50, y, 64, "left");
+};
+
+Window_BattleStatus.prototype.drawActorAtbGaugeVertical = function (actor, wx, wy, wh) {
+    wh = wh || 96;
+    if (!actor) return;
+    var color1 = this.atbGaugeColor1(actor);
+    var color2 = this.atbGaugeColor2(actor);
+    if (actor.atbRate() < 1) {
+        var rate = actor.atbRate();
+    } else if (actor.atbRate() >= 1 && actor.atbChargeRate() >= 0) {
+        var rate = 1;
+    } else {
+        var rate = 0;
+    }
+    this.drawGaugeVertical(wx, wy, wh, rate, color1, color2);
+    if (actor.atbChargeRate() > 0) this.drawAtbChargeGaugeVertical(actor, wx, wy, wh);
+};
+
+Window_BattleStatus.prototype.drawAtbChargeGaugeVertical = function (actor, wx, wy, wh) {
+    var color1 = this.textColor(Yanfly.Param.ATBColorChar1);
+    var color2 = this.textColor(Yanfly.Param.ATBColorChar2);
+    var rate = actor.atbChargeRate();
+    this.drawGaugeVertical(wx, wy, wh * rate, 1, color1, color2);
+};
+
 //=============================================================================
 // Scene_Battle
 //=============================================================================
