@@ -780,6 +780,10 @@ Window_BattleStatus.prototype.drawActorTp = function (actor, x, y, width) {
     this.drawText(actor.tp, x + 50, y, 64, "left");
 };
 
+Window_BattleStatus.prototype.tpColor = function (actor) {
+    return "rgba(255, 255, 0, 1)";
+};
+
 Window_BattleStatus.prototype.drawActorAtbGaugeVertical = function (actor, wx, wy, wh) {
     wh = wh || 96;
     if (!actor) return;
