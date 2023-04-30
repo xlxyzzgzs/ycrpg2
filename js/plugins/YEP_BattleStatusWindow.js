@@ -11,7 +11,7 @@ Yanfly.BSW = Yanfly.BSW || {};
 Yanfly.BSW.version = 1.09;
 
 //=============================================================================
- /*:
+/*:
  * @plugindesc v1.09 A simple battle status window that shows the
  * faces of your party members in horizontal format.
  * @author Yanfly Engine Plugins
@@ -210,28 +210,28 @@ Yanfly.BSW.version = 1.09;
 // Parameter Variables
 //=============================================================================
 
-Yanfly.Parameters = PluginManager.parameters('YEP_BattleStatusWindow');
+Yanfly.Parameters = PluginManager.parameters("YEP_BattleStatusWindow");
 Yanfly.Param = Yanfly.Param || {};
 Yanfly.Icon = Yanfly.Icon || {};
 
-Yanfly.Icon.NoAction = Number(Yanfly.Parameters['No Action Icon']);
-Yanfly.Param.BSWNameFontSize = Number(Yanfly.Parameters['Name Font Size']);
-Yanfly.Param.BSWParamFontSize = Number(Yanfly.Parameters['Param Font Size']);
-Yanfly.Param.BSWParamYBuffer = Number(Yanfly.Parameters['Param Y Buffer']);
-Yanfly.Param.BSWCurrentMax = String(Yanfly.Parameters['Param Current Max']);
+Yanfly.Icon.NoAction = Number(Yanfly.Parameters["No Action Icon"]);
+Yanfly.Param.BSWNameFontSize = Number(Yanfly.Parameters["Name Font Size"]);
+Yanfly.Param.BSWParamFontSize = Number(Yanfly.Parameters["Param Font Size"]);
+Yanfly.Param.BSWParamYBuffer = Number(Yanfly.Parameters["Param Y Buffer"]);
+Yanfly.Param.BSWCurrentMax = String(Yanfly.Parameters["Param Current Max"]);
 Yanfly.Param.BSWCurrentMax = eval(Yanfly.Param.BSWCurrentMax);
-Yanfly.Param.BSWAdjustCol = eval(String(Yanfly.Parameters['Adjust Columns']));
-Yanfly.Param.BSWStateIconRow = Number(Yanfly.Parameters['State Icons Row']);
+Yanfly.Param.BSWAdjustCol = eval(String(Yanfly.Parameters["Adjust Columns"]));
+Yanfly.Param.BSWStateIconRow = Number(Yanfly.Parameters["State Icons Row"]);
 
-Yanfly.Param.BSWLfRt = eval(String(Yanfly.Parameters['Left / Right']));
-Yanfly.Param.BSWPageUpDn = eval(String(Yanfly.Parameters['PageUp / PageDown']));
-Yanfly.Param.BSWTurnSkip = eval(String(Yanfly.Parameters['Allow Turn Skip']));
+Yanfly.Param.BSWLfRt = eval(String(Yanfly.Parameters["Left / Right"]));
+Yanfly.Param.BSWPageUpDn = eval(String(Yanfly.Parameters["PageUp / PageDown"]));
+Yanfly.Param.BSWTurnSkip = eval(String(Yanfly.Parameters["Allow Turn Skip"]));
 
-Yanfly.Param.BSWShowAni = eval(String(Yanfly.Parameters['Show Animations']));
-Yanfly.Param.BSWShowSprite = eval(String(Yanfly.Parameters['Show Sprites']));
-Yanfly.Param.BSWAlignAni = eval(String(Yanfly.Parameters['Align Animations']));
-Yanfly.Param.BSWXOffset = Number(Yanfly.Parameters['X Offset']);
-Yanfly.Param.BSWYOffset = Number(Yanfly.Parameters['Y Offset']);
+Yanfly.Param.BSWShowAni = eval(String(Yanfly.Parameters["Show Animations"]));
+Yanfly.Param.BSWShowSprite = eval(String(Yanfly.Parameters["Show Sprites"]));
+Yanfly.Param.BSWAlignAni = eval(String(Yanfly.Parameters["Align Animations"]));
+Yanfly.Param.BSWXOffset = Number(Yanfly.Parameters["X Offset"]);
+Yanfly.Param.BSWYOffset = Number(Yanfly.Parameters["Y Offset"]);
 Yanfly.Param.ATBGaugeStyle = 1;
 
 //=============================================================================
@@ -239,7 +239,7 @@ Yanfly.Param.ATBGaugeStyle = 1;
 //=============================================================================
 
 Yanfly.BSW.BattleManager_startInput = BattleManager.startInput;
-BattleManager.startInput = function() {
+BattleManager.startInput = function () {
     Yanfly.BSW.BattleManager_startInput.call(this);
     this.refreshStatus();
 };
@@ -249,25 +249,25 @@ BattleManager.startInput = function() {
 //=============================================================================
 
 Yanfly.BSW.Game_Action_clear = Game_Action.prototype.clear;
-Game_Action.prototype.clear = function() {
+Game_Action.prototype.clear = function () {
     Yanfly.BSW.Game_Action_clear.call(this);
     this.subject().refresh();
 };
 
 Yanfly.BSW.Game_Action_setSkill = Game_Action.prototype.setSkill;
-Game_Action.prototype.setSkill = function(skillId) {
+Game_Action.prototype.setSkill = function (skillId) {
     Yanfly.BSW.Game_Action_setSkill.call(this, skillId);
     this.subject().refresh();
 };
 
 Yanfly.BSW.Game_Action_setItem = Game_Action.prototype.setItem;
-Game_Action.prototype.setItem = function(itemId) {
+Game_Action.prototype.setItem = function (itemId) {
     Yanfly.BSW.Game_Action_setItem.call(this, itemId);
     this.subject().refresh();
 };
 
 Yanfly.BSW.Game_Action_setItemObject = Game_Action.prototype.setItemObject;
-Game_Action.prototype.setItemObject = function(object) {
+Game_Action.prototype.setItemObject = function (object) {
     Yanfly.BSW.Game_Action_setItemObject.call(this, object);
     this.subject().refresh();
 };
@@ -277,41 +277,38 @@ Game_Action.prototype.setItemObject = function(object) {
 //=============================================================================
 
 Yanfly.BSW.Game_Actor_isSpriteVisible = Game_Actor.prototype.isSpriteVisible;
-Game_Actor.prototype.isSpriteVisible = function() {
+Game_Actor.prototype.isSpriteVisible = function () {
     if (Yanfly.Param.BSWShowAni && !$gameSystem.isSideView()) {
-      return true;
+        return true;
     }
     return Yanfly.BSW.Game_Actor_isSpriteVisible.call(this);
 };
 
 Yanfly.BSW.Game_Actor_changeClass = Game_Actor.prototype.changeClass;
-Game_Actor.prototype.changeClass = function(classId, keepExp) {
+Game_Actor.prototype.changeClass = function (classId, keepExp) {
     Yanfly.BSW.Game_Actor_changeClass.call(this, classId, keepExp);
     this.battleStatusWindowRefresh();
 };
 
-Yanfly.BSW.Game_Actor_setCharacterImage = 
-    Game_Actor.prototype.setCharacterImage;
-Game_Actor.prototype.setCharacterImage = function(name, index) {
+Yanfly.BSW.Game_Actor_setCharacterImage = Game_Actor.prototype.setCharacterImage;
+Game_Actor.prototype.setCharacterImage = function (name, index) {
     Yanfly.BSW.Game_Actor_setCharacterImage.call(this, name, index);
     this.battleStatusWindowRefresh();
 };
 
-Yanfly.BSW.Game_Actor_setFaceImage =
-    Game_Actor.prototype.setFaceImage;
-Game_Actor.prototype.setFaceImage = function(faceName, faceIndex) {
+Yanfly.BSW.Game_Actor_setFaceImage = Game_Actor.prototype.setFaceImage;
+Game_Actor.prototype.setFaceImage = function (faceName, faceIndex) {
     Yanfly.BSW.Game_Actor_setFaceImage.call(this, faceName, faceIndex);
     this.battleStatusWindowRefresh();
 };
 
-Yanfly.BSW.Game_Actor_setBattlerImage =
-    Game_Actor.prototype.setBattlerImage;
-Game_Actor.prototype.setBattlerImage = function(battlerName) {
+Yanfly.BSW.Game_Actor_setBattlerImage = Game_Actor.prototype.setBattlerImage;
+Game_Actor.prototype.setBattlerImage = function (battlerName) {
     Yanfly.BSW.Game_Actor_setBattlerImage.call(this, battlerName);
     this.battleStatusWindowRefresh();
 };
 
-Game_Actor.prototype.battleStatusWindowRefresh = function() {
+Game_Actor.prototype.battleStatusWindowRefresh = function () {
     if (!$gameParty.inBattle()) return;
     if (!$gameParty.battleMembers().contains(this)) return;
     BattleManager.refreshStatus();
@@ -321,32 +318,31 @@ Game_Actor.prototype.battleStatusWindowRefresh = function() {
 // Sprite_Actor
 //=============================================================================
 
-Yanfly.BSW.Sprite_Actor_createMainSprite =
-    Sprite_Actor.prototype.createMainSprite;
-Sprite_Actor.prototype.createMainSprite = function() {
+Yanfly.BSW.Sprite_Actor_createMainSprite = Sprite_Actor.prototype.createMainSprite;
+Sprite_Actor.prototype.createMainSprite = function () {
     Yanfly.BSW.Sprite_Actor_createMainSprite.call(this);
     if ($gameSystem.isSideView()) return;
     if (Yanfly.Param.BSWShowSprite) {
-      this._effectTarget = this._mainSprite || this;
+        this._effectTarget = this._mainSprite || this;
     } else {
-      this._effectTarget = this;
+        this._effectTarget = this;
     }
 };
 
 Yanfly.BSW.Sprite_Actor_setActorHome = Sprite_Actor.prototype.setActorHome;
-Sprite_Actor.prototype.setActorHome = function(index) {
+Sprite_Actor.prototype.setActorHome = function (index) {
     if (Yanfly.Param.BSWAlignAni && !$gameSystem.isSideView()) {
-      this.setActorHomeFrontView(index);
+        this.setActorHomeFrontView(index);
     } else {
-      Yanfly.BSW.Sprite_Actor_setActorHome.call(this, index);
+        Yanfly.BSW.Sprite_Actor_setActorHome.call(this, index);
     }
 };
 
-Sprite_Actor.prototype.setActorHomeFrontView = function(index) {
+Sprite_Actor.prototype.setActorHomeFrontView = function (index) {
     if (Imported.YEP_BattleEngineCore) {
-      var statusHeight = Yanfly.Param.BECCommandRows;
+        var statusHeight = Yanfly.Param.BECCommandRows;
     } else {
-      var statusHeight = 4;
+        var statusHeight = 4;
     }
     statusHeight *= Window_Base.prototype.lineHeight.call(this);
     statusHeight += Window_Base.prototype.standardPadding.call(this) * 2;
@@ -355,12 +351,12 @@ Sprite_Actor.prototype.setActorHomeFrontView = function(index) {
     screenW -= windowW;
     windowW /= 2;
     if (Yanfly.Param.BSWAdjustCol) {
-      var size = $gameParty.battleMembers().length;
+        var size = $gameParty.battleMembers().length;
     } else {
-      var size = $gameParty.maxBattleMembers();
+        var size = $gameParty.maxBattleMembers();
     }
-    
-    var homeX = screenW / size * index + windowW + screenW / (size * 2);
+
+    var homeX = (screenW / size) * index + windowW + screenW / (size * 2);
     homeX += Yanfly.Param.BSWXOffset;
     var homeY = Graphics.boxHeight - statusHeight;
     homeY += Yanfly.Param.BSWYOffset;
@@ -369,7 +365,7 @@ Sprite_Actor.prototype.setActorHomeFrontView = function(index) {
 };
 
 Yanfly.BSW.Sprite_Actor_update = Sprite_Actor.prototype.update;
-Sprite_Actor.prototype.update = function() {
+Sprite_Actor.prototype.update = function () {
     Yanfly.BSW.Sprite_Actor_update.call(this);
     if (!this._actor) return;
     if ($gameSystem.isSideView()) return;
@@ -377,7 +373,7 @@ Sprite_Actor.prototype.update = function() {
     this.hideAllSideviewSprites();
 };
 
-Sprite_Actor.prototype.hideAllSideviewSprites = function() {
+Sprite_Actor.prototype.hideAllSideviewSprites = function () {
     this._mainSprite.visible = false;
     this._shadowSprite.visible = false;
     this._weaponSprite.visible = false;
@@ -388,10 +384,10 @@ Sprite_Actor.prototype.hideAllSideviewSprites = function() {
 // Window_Base
 //=============================================================================
 
-Window_Base.prototype.drawActorActionIcon = function(actor, wx, wy) {
+Window_Base.prototype.drawActorActionIcon = function (actor, wx, wy) {
     var icon = Yanfly.Icon.NoAction;
     if (actor.currentAction() && actor.currentAction().item()) {
-      icon = actor.currentAction().item().iconIndex || Yanfly.Icon.NoAction;
+        icon = actor.currentAction().item().iconIndex || Yanfly.Icon.NoAction;
     }
     this.drawIcon(icon, wx + 2, wy + 2);
 };
@@ -400,66 +396,66 @@ Window_Base.prototype.drawActorActionIcon = function(actor, wx, wy) {
 // Window_PartyCommand
 //=============================================================================
 
-Window_PartyCommand.prototype.processHandling = function() {
+Window_PartyCommand.prototype.processHandling = function () {
     if (this.isOpenAndActive() && Yanfly.Param.BSWPageUpDn) {
-      if (this.isHandled('pagedown') && Input.isRepeated('pagedown')) {
-        return this.processPagedown();
-      }
+        if (this.isHandled("pagedown") && Input.isRepeated("pagedown")) {
+            return this.processPagedown();
+        }
     }
     Window_Selectable.prototype.processHandling.call(this);
     if (this.isOpenAndActive() && Yanfly.Param.BSWLfRt) {
-      if (this.isHandled('right') && Input.isRepeated('right')) {
-        this.processRight();
-      }
+        if (this.isHandled("right") && Input.isRepeated("right")) {
+            this.processRight();
+        }
     }
 };
 
-Window_PartyCommand.prototype.processRight = function() {
+Window_PartyCommand.prototype.processRight = function () {
     SoundManager.playCursor();
     this.updateInputData();
     this.deactivate();
-    this.callHandler('right');
+    this.callHandler("right");
 };
 
 //=============================================================================
 // Window_ActorCommand
 //=============================================================================
 
-Window_ActorCommand.prototype.processHandling = function() {
+Window_ActorCommand.prototype.processHandling = function () {
     if (this.isOpenAndActive() && Yanfly.Param.BSWPageUpDn) {
-      if (this.isHandled('pageup') && Input.isRepeated('pageup')) {
-        return this.processPageup();
-      } else if (this.isHandled('pagedown') && Input.isRepeated('pagedown')) {
-        return this.processPagedown();
-      }
+        if (this.isHandled("pageup") && Input.isRepeated("pageup")) {
+            return this.processPageup();
+        } else if (this.isHandled("pagedown") && Input.isRepeated("pagedown")) {
+            return this.processPagedown();
+        }
     }
     Window_Selectable.prototype.processHandling.call(this);
     if (this.isOpenAndActive() && Yanfly.Param.BSWLfRt) {
-      if (this.isHandled('left') && Input.isRepeated('left')) {
-        this.processLeft();
-      } else if (this.isHandled('right') && Input.isRepeated('right')) {
-        this.processRight();
-      }
+        if (this.isHandled("left") && Input.isRepeated("left")) {
+            this.processLeft();
+        } else if (this.isHandled("right") && Input.isRepeated("right")) {
+            this.processRight();
+        }
     }
 };
 
-Window_ActorCommand.prototype.processLeft = function() {
+Window_ActorCommand.prototype.processLeft = function () {
     SoundManager.playCursor();
     this.updateInputData();
     this.deactivate();
-    this.callHandler('left');
+    this.callHandler("left");
 };
 
-Window_ActorCommand.prototype.processRight = function() {
+Window_ActorCommand.prototype.processRight = function () {
     if (SceneManager._scene.isAllowRightCommand()) {
-      SoundManager.playCursor();
+        SoundManager.playCursor();
     }
     this.updateInputData();
     this.deactivate();
-    this.callHandler('right');
+    this.callHandler("right");
 };
 
-Window_ActorCommand.prototype.processCancel = function() {
+Window_ActorCommand.prototype.processCancel = function () {
     var action = BattleManager.inputtingAction();
     if (action) action.clear();
     Window_Command.prototype.processCancel.call(this);
@@ -468,14 +464,17 @@ Window_ActorCommand.prototype.processCancel = function() {
 //=============================================================================
 // Window_BattleStatus
 //=============================================================================
+Window_BattleStatus.prototype.windowWidth = function () {
+    return Graphics.boxWidth;
+};
 
-Window_BattleStatus.prototype.createContents = function() {
+Window_BattleStatus.prototype.createContents = function () {
     this.createFaceContents();
     this._currentMax = Yanfly.Param.BSWCurrentMax;
     Window_Selectable.prototype.createContents.call(this);
 };
 
-Window_BattleStatus.prototype.createFaceContents = function() {
+Window_BattleStatus.prototype.createFaceContents = function () {
     this._faceContents = new Sprite();
     var ww = this.contentsWidth();
     var wy = this.contentsHeight();
@@ -484,62 +483,62 @@ Window_BattleStatus.prototype.createFaceContents = function() {
     this._faceContents.move(this.standardPadding(), this.standardPadding());
 };
 
-Window_BattleStatus.prototype.drawAllItems = function() {
+Window_BattleStatus.prototype.drawAllItems = function () {
     Window_Selectable.prototype.drawAllItems.call(this);
     this.drawAllFaces();
 };
 
-Window_BattleStatus.prototype.drawAllFaces = function() {
+Window_BattleStatus.prototype.drawAllFaces = function () {
     for (var i = 0; i < $gameParty.battleMembers().length; ++i) {
-      var member = $gameParty.battleMembers()[i];
-      var bitmap = ImageManager.loadFace(member.faceName());
-      if (bitmap.width <= 0) return setTimeout(this.drawAllFaces.bind(this), 5);
+        var member = $gameParty.battleMembers()[i];
+        var bitmap = ImageManager.loadFace(member.faceName());
+        if (bitmap.width <= 0) return setTimeout(this.drawAllFaces.bind(this), 5);
     }
     this._faceContents.bitmap.clear();
     for (var i = 0; i < this.maxItems(); ++i) {
-      this.drawStatusFace(i);
+        this.drawStatusFace(i);
     }
 };
 
-Window_BattleStatus.prototype.maxRows = function() {
+Window_BattleStatus.prototype.maxRows = function () {
     var rows = 1;
     return rows;
 };
 
-Window_BattleStatus.prototype.maxCols = function() {
+Window_BattleStatus.prototype.maxCols = function () {
     if (Yanfly.Param.BSWAdjustCol) {
-      return this.maxItems();
+        return this.maxItems();
     } else {
-      return $gameParty.maxBattleMembers();
+        return $gameParty.maxBattleMembers();
     }
     return cols;
 };
 
-Window_BattleStatus.prototype.itemWidth = function() {
+Window_BattleStatus.prototype.itemWidth = function () {
     return this.contents.width / this.maxCols();
 };
 
-Window_BattleStatus.prototype.spacing = function() {
+Window_BattleStatus.prototype.spacing = function () {
     return 0;
 };
 
-Window_BattleStatus.prototype.itemHeight = function() {
+Window_BattleStatus.prototype.itemHeight = function () {
     return this.lineHeight() * this.numVisibleRows();
 };
 
-Window_BattleStatus.prototype.drawItem = function(index) {
+Window_BattleStatus.prototype.drawItem = function (index) {
     var actor = $gameParty.battleMembers()[index];
     this.drawBasicArea(this.basicAreaRect(index), actor);
     this.drawGaugeArea(this.gaugeAreaRect(index), actor);
     this.drawStateArea(this.basicAreaRect(index), actor);
 };
 
-Window_BattleStatus.prototype.drawBasicArea = function(rect, actor) {
+Window_BattleStatus.prototype.drawBasicArea = function (rect, actor) {
     if (Imported.YEP_X_BattleSysATB && Yanfly.Param.ATBGaugeStyle) {
-      if (BattleManager.isATB()) {
-        var atb_rect = this.gaugeAreaRect(0);
-        this.drawActorAtbGauge(actor, rect.x, atb_rect.y + atb_rect.height - this.lineHeight(), rect.width);
-      }
+        if (BattleManager.isATB()) {
+            var atb_rect = this.gaugeAreaRect(0);
+            this.drawActorAtbGauge(actor, rect.x, atb_rect.y + atb_rect.height - this.lineHeight(), rect.width);
+        }
     }
     var iw = Window_Base._iconWidth;
     this.drawActorActionIcon(actor, rect.x, rect.y);
@@ -548,51 +547,51 @@ Window_BattleStatus.prototype.drawBasicArea = function(rect, actor) {
     this.drawActorName(actor, rect.x + iw + 4, rect.y, rect.width);
 };
 
-Window_BattleStatus.prototype.basicAreaRect = function(index) {
+Window_BattleStatus.prototype.basicAreaRect = function (index) {
     var rect = this.itemRectForText(index);
     rect.height = this.lineHeight() * 2;
     return rect;
 };
 
-Window_BattleStatus.prototype.drawGaugeArea = function(rect, actor) {
+Window_BattleStatus.prototype.drawGaugeArea = function (rect, actor) {
     this.contents.fontSize = Yanfly.Param.BSWParamFontSize;
     this._enableYBuffer = true;
     var wy = rect.y + rect.height - this.lineHeight();
-    var wymod = (Imported.YEP_CoreEngine) ? Yanfly.Param.GaugeHeight : 6;
+    var wymod = Imported.YEP_CoreEngine ? Yanfly.Param.GaugeHeight : 6;
     var wymod = Math.max(16, wymod);
     this.drawActorHp(actor, rect.x, wy - wymod * 2, rect.width);
     if (this.getGaugesDrawn(actor) <= 2) {
-      this.drawActorMp(actor, rect.x, wy, rect.width);
+        this.drawActorMp(actor, rect.x, wy, rect.width);
     } else {
-      var ww = Math.floor(rect.width / 2);
-      var pad = rect.width - ww * 2;
-      this.drawActorMp(actor, rect.x, wy - wymod, ww);
-      this.drawActorTp(actor, rect.x + ww + pad, wy - wymod, ww);
+        var ww = Math.floor(rect.width / 2);
+        var pad = rect.width - ww * 2;
+        this.drawActorMp(actor, rect.x, wy - wymod, ww);
+        this.drawActorTp(actor, rect.x + ww + pad, wy - wymod, ww);
     }
     this._enableYBuffer = false;
 };
 
-Window_BattleStatus.prototype.drawStateArea = function(rect, actor) {
-  var row = Yanfly.Param.BSWStateIconRow;
-  if (row === undefined) row = 1;
-  var wy = rect.y + (this.lineHeight() * row);
-  this.drawActorIcons(actor, rect.x + 2, wy, rect.width);
+Window_BattleStatus.prototype.drawStateArea = function (rect, actor) {
+    var row = Yanfly.Param.BSWStateIconRow;
+    if (row === undefined) row = 1;
+    var wy = rect.y + this.lineHeight() * row;
+    this.drawActorIcons(actor, rect.x + 2, wy, rect.width);
 };
 
-Window_BattleStatus.prototype.getGaugesDrawn = function(actor) {
+Window_BattleStatus.prototype.getGaugesDrawn = function (actor) {
     var value = 2;
     if ($dataSystem.optDisplayTp) value += 1;
     return value;
 };
 
-Window_BattleStatus.prototype.gaugeAreaRect = function(index) {
+Window_BattleStatus.prototype.gaugeAreaRect = function (index) {
     var rect = this.itemRectForText(index);
     rect.height = this.contents.height - this.lineHeight() * 3;
     rect.y = this.contents.height - rect.height;
     return rect;
 };
 
-Window_BattleStatus.prototype.drawStatusFace = function(index) {
+Window_BattleStatus.prototype.drawStatusFace = function (index) {
     var actor = $gameParty.battleMembers()[index];
     var rect = this.itemRect(index);
     var ww = Math.min(rect.width - 8, Window_Base._faceWidth);
@@ -602,7 +601,7 @@ Window_BattleStatus.prototype.drawStatusFace = function(index) {
     this.drawActorFace(actor, wx, wy, ww, wh);
 };
 
-Window_BattleStatus.prototype.drawFace = function(fn, fi, x, y, width, height) {
+Window_BattleStatus.prototype.drawFace = function (fn, fi, x, y, width, height) {
     width = width || Window_Base._faceWidth;
     height = height || Window_Base._faceHeight;
     var bitmap = ImageManager.loadFace(fn);
@@ -612,138 +611,155 @@ Window_BattleStatus.prototype.drawFace = function(fn, fi, x, y, width, height) {
     var sh = Math.min(height, ph);
     var dx = Math.floor(x + Math.max(width - pw, 0) / 2);
     var dy = Math.floor(y + Math.max(height - ph, 0) / 2);
-    var sx = fi % 4 * pw + (pw - sw) / 2;
+    var sx = (fi % 4) * pw + (pw - sw) / 2;
     var sy = Math.floor(fi / 4) * ph + (ph - sh) / 2;
     this._faceContents.bitmap.blt(bitmap, sx, sy, sw, sh, dx, dy);
 };
 
-Window_BattleStatus.prototype.updateTransform = function() {
+Window_BattleStatus.prototype.updateTransform = function () {
     Window_Selectable.prototype.updateTransform.call(this);
     this.updateFaceContents();
 };
 
-Window_BattleStatus.prototype.updateFaceContents = function() {
+Window_BattleStatus.prototype.updateFaceContents = function () {
     var w = this._width - this._padding * 2;
     var h = this._height - this._padding * 2;
     if (w > 0 && h > 0) {
-      this._faceContents.setFrame(this.origin.x, this.origin.y, w, h);
-      this._faceContents.visible = this.isOpen();
+        this._faceContents.setFrame(this.origin.x, this.origin.y, w, h);
+        this._faceContents.visible = this.isOpen();
     } else {
-      this._faceContents.visible = false;
+        this._faceContents.visible = false;
     }
 };
 
-Window_BattleStatus.prototype.drawText = function(text, wx, wy, ww, align) {
+Window_BattleStatus.prototype.drawText = function (text, wx, wy, ww, align) {
     if (this._enableYBuffer) {
-      wy += Yanfly.Param.BSWParamYBuffer;
-      wx += 2;
-      ww -= 4;
+        wy += Yanfly.Param.BSWParamYBuffer;
+        wx += 2;
+        ww -= 4;
     }
     Window_Selectable.prototype.drawText.call(this, text, wx, wy, ww, align);
 };
 
-Window_BattleStatus.prototype.drawCurrentAndMax = function(current, max, x, y,
-                                                   width, color1, color2) {
+Window_BattleStatus.prototype.drawCurrentAndMax = function (current, max, x, y, width, color1, color2) {
     if (this._currentMax) {
-      Window_Selectable.prototype.drawCurrentAndMax.call(this, current, max,
-        x, y, width, color1, color2);
+        Window_Selectable.prototype.drawCurrentAndMax.call(this, current, max, x, y, width, color1, color2);
     } else {
-      this.changeTextColor(color1);
-      var value = Yanfly.Util.toGroup(current);
-      this.drawText(value, x, y, width, 'right');
+        this.changeTextColor(color1);
+        var value = Yanfly.Util.toGroup(current);
+        this.drawText(value, x, y, width, "right");
     }
 };
 
-Window_BattleStatus.prototype.drawItemGaugeIcon = function(iconIndex, wx, wy) {
-    var bitmap = ImageManager.loadSystem('IconSet');
+Window_BattleStatus.prototype.drawItemGaugeIcon = function (iconIndex, wx, wy) {
+    var bitmap = ImageManager.loadSystem("IconSet");
     var pw = Window_Base._iconWidth;
     var ph = Window_Base._iconHeight;
-    var sx = iconIndex % 16 * pw;
+    var sx = (iconIndex % 16) * pw;
     var sy = Math.floor(iconIndex / 16) * ph;
-    var iconWidth = (Imported.YEP_CoreEngine) ? Yanfly.Param.GaugeHeight : 32;
-    var iconHeight = (Imported.YEP_CoreEngine) ? Yanfly.Param.GaugeHeight : 32;
+    var iconWidth = Imported.YEP_CoreEngine ? Yanfly.Param.GaugeHeight : 32;
+    var iconHeight = Imported.YEP_CoreEngine ? Yanfly.Param.GaugeHeight : 32;
     wy += Window_Base._iconHeight - iconHeight;
     this.contents.blt(bitmap, sx, sy, pw, ph, wx, wy, iconWidth, iconHeight);
     return iconWidth;
 };
 
+Window_BattleStatus.prototype._refreshCursor = function () {
+    var pad = this._padding;
+    var x = this._cursorRect.x + pad - this.origin.x;
+    var y = this._cursorRect.y + pad - this.origin.y;
+    var w = this._cursorRect.width;
+    var h = this._cursorRect.height;
+    var m = 4;
+    var x2 = Math.max(x, pad);
+    var y2 = Math.max(y, pad);
+    var ox = x - x2;
+    var oy = y - y2;
+    var w2 = Math.min(w, this._width - pad - x2);
+    var h2 = Math.min(h, this._height - pad - y2);
+    var bitmap = new Bitmap(w2, h2);
+
+    this._windowCursorSprite.bitmap = bitmap;
+    this._windowCursorSprite.setFrame(0, 0, w2, h2);
+    this._windowCursorSprite.move(x2, y2);
+
+    bitmap.fillAll("rgba(250, 250, 240, 0.6)");
+};
 //=============================================================================
 // Scene_Battle
 //=============================================================================
 
-Yanfly.BSW.Scene_Battle_createPartyCommandWindow =
-    Scene_Battle.prototype.createPartyCommandWindow;
-Scene_Battle.prototype.createPartyCommandWindow = function() {
+Yanfly.BSW.Scene_Battle_createPartyCommandWindow = Scene_Battle.prototype.createPartyCommandWindow;
+Scene_Battle.prototype.createPartyCommandWindow = function () {
     Yanfly.BSW.Scene_Battle_createPartyCommandWindow.call(this);
     var win = this._partyCommandWindow;
     if (Yanfly.Param.BSWLfRt) {
-      win.setHandler('right', this.commandFight.bind(this));
+        win.setHandler("right", this.commandFight.bind(this));
     }
     if (Yanfly.Param.BSWPageUpDn) {
-      win.setHandler('pagedown', this.commandFight.bind(this));
-    };
+        win.setHandler("pagedown", this.commandFight.bind(this));
+    }
 };
 
-Yanfly.BSW.Scene_Battle_createActorCommandWindow =
-    Scene_Battle.prototype.createActorCommandWindow;
-Scene_Battle.prototype.createActorCommandWindow = function() {
+Yanfly.BSW.Scene_Battle_createActorCommandWindow = Scene_Battle.prototype.createActorCommandWindow;
+Scene_Battle.prototype.createActorCommandWindow = function () {
     Yanfly.BSW.Scene_Battle_createActorCommandWindow.call(this);
     var win = this._actorCommandWindow;
     if (Yanfly.Param.BSWLfRt) {
-      win.setHandler('left', this.selectPreviousCommand.bind(this));
-      win.setHandler('right', this.selectRightCommand.bind(this));
+        win.setHandler("left", this.selectPreviousCommand.bind(this));
+        win.setHandler("right", this.selectRightCommand.bind(this));
     }
     if (Yanfly.Param.BSWPageUpDn) {
-      win.setHandler('pageup', this.selectPreviousCommand.bind(this));
-      win.setHandler('pagedown', this.selectRightCommand.bind(this));
-    };
+        win.setHandler("pageup", this.selectPreviousCommand.bind(this));
+        win.setHandler("pagedown", this.selectRightCommand.bind(this));
+    }
 };
 
-Scene_Battle.prototype.clearInputtingAction = function() {
+Scene_Battle.prototype.clearInputtingAction = function () {
     var action = BattleManager.inputtingAction();
     if (action) action.clear();
 };
 
 Yanfly.BSW.Scene_Battle_onActorCancel = Scene_Battle.prototype.onActorCancel;
-Scene_Battle.prototype.onActorCancel = function() {
+Scene_Battle.prototype.onActorCancel = function () {
     Yanfly.BSW.Scene_Battle_onActorCancel.call(this);
     this.clearInputtingAction();
 };
 
 Yanfly.BSW.Scene_Battle_onEnemyCancel = Scene_Battle.prototype.onEnemyCancel;
-Scene_Battle.prototype.onEnemyCancel = function() {
+Scene_Battle.prototype.onEnemyCancel = function () {
     Yanfly.BSW.Scene_Battle_onEnemyCancel.call(this);
     this.clearInputtingAction();
 };
 
 Yanfly.BSW.Scene_Battle_onSkillCancel = Scene_Battle.prototype.onSkillCancel;
-Scene_Battle.prototype.onSkillCancel = function() {
+Scene_Battle.prototype.onSkillCancel = function () {
     Yanfly.BSW.Scene_Battle_onSkillCancel.call(this);
     this.clearInputtingAction();
 };
 
 Yanfly.BSW.Scene_Battle_onItemCancel = Scene_Battle.prototype.onItemCancel;
-Scene_Battle.prototype.onItemCancel = function() {
+Scene_Battle.prototype.onItemCancel = function () {
     Yanfly.BSW.Scene_Battle_onItemCancel.call(this);
     this.clearInputtingAction();
 };
 
-Scene_Battle.prototype.selectRightCommand = function() {
+Scene_Battle.prototype.selectRightCommand = function () {
     if (!this.isAllowRightCommand()) {
-      return this._actorCommandWindow.activate();
+        return this._actorCommandWindow.activate();
     }
     if (Imported.YEP_BattleEngineCore && BattleManager.isTickBased()) {
-      if (BattleManager.actor()) BattleManager.actor().onTurnStart();
+        if (BattleManager.actor()) BattleManager.actor().onTurnStart();
     }
     this.selectNextCommand();
 };
 
-Scene_Battle.prototype.isAllowRightCommand = function() {
-  if (Yanfly.Param.BSWTurnSkip) return true;
-  if (Imported.YEP_BattleEngineCore && BattleManager.isTickBased()) {
-    return false;
-  }
-  return true;
+Scene_Battle.prototype.isAllowRightCommand = function () {
+    if (Yanfly.Param.BSWTurnSkip) return true;
+    if (Imported.YEP_BattleEngineCore && BattleManager.isTickBased()) {
+        return false;
+    }
+    return true;
 };
 
 //=============================================================================
@@ -753,10 +769,10 @@ Scene_Battle.prototype.isAllowRightCommand = function() {
 Yanfly.Util = Yanfly.Util || {};
 
 if (!Yanfly.Util.toGroup) {
-    Yanfly.Util.toGroup = function(inVal) {
+    Yanfly.Util.toGroup = function (inVal) {
         return inVal;
-    }
-};
+    };
+}
 
 //=============================================================================
 // End of File

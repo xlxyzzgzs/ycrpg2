@@ -1,4 +1,4 @@
-﻿//=============================================================================
+//=============================================================================
 // Yanfly Engine Plugins - Battle Engine Core
 // YEP_BattleEngineCore.js
 //=============================================================================
@@ -8,476 +8,630 @@ Imported.YEP_BattleEngineCore = true;
 
 var Yanfly = Yanfly || {};
 Yanfly.BEC = Yanfly.BEC || {};
-Yanfly.BEC.version = 1.43;
+Yanfly.BEC.version = 1.50;
 
 //=============================================================================
  /*:
- * @plugindesc v1.43a 战斗引擎核心☁️
+ * @plugindesc v1.50 Have more control over the flow of the battle system
+ * with this plugin and alter various aspects to your liking.
  * @author Yanfly Engine Plugins
  *
  * @param ---General---
- * @text ---全局---
  * @default
  *
  * @param Action Speed
- * @text 动作速度
+ * @parent ---General---
  * @desc This is the formula used for an action's base speed.
  * Default: agi + Math.randomInt(Math.floor(5 + agi / 4))
  * @default agi
  *
  * @param Default System
- * @text 默认系统
+ * @parent ---General---
+ * @type select
+ * @option Default Turn Battle
+ * @value dtb
+ * @option Active Turn Battle (plugin required)
+ * @value atb
+ * @option Charge Turn Battle (plugin required)
+ * @value ctb
+ * @option Standard Turn Battle (plugin required)
+ * @value stb
  * @desc This is the default battle system your game uses.
  * Default: dtb
  * @default dtb
  *
  * @param ---Escape---
- * @text ---逃跑---
  * @default
  *
  * @param Escape Ratio
- * @text 默认逃跑率
+ * @parent ---Escape---
  * @desc This is the formula used to determine escape success.
  * Default: 0.5 * $gameParty.agility() / $gameTroop.agility()
  * @default 0.5 * $gameParty.agility() / $gameTroop.agility()
  *
  * @param Fail Escape Boost
- * @text 失败+逃跑率
+ * @parent ---Escape---
+ * @type number
+ * @decimals 2
  * @desc Each time the player fails escape, increase the success
- * rate by this much. Default: 0.1
- * @default 0.1
+ * rate by this much. Default: 0.10
+ * @default 0.10
  *
  * @param ---Animation---
- * @text ---动画---
  * @default
  *
  * @param Animation Base Delay
- * @text 动画基本延迟
+ * @parent ---Animation---
+ * @type number
+ * @min 0
  * @desc This sets the base delay in between animations.
  * Default: 8
  * @default 0
  *
  * @param Animation Next Delay
- * @text 动画下一个延迟
+ * @parent ---Animation---
+ * @type number
+ * @min 0
  * @desc This sets the sequential delay in between animations.
  * Default: 12
  * @default 0
  *
  * @param Certain Hit Animation
- * @text 特定命中动画
+ * @parent ---Animation---
+ * @type number
+ * @min 0
  * @desc Default animation to play for certain hit skills.
  * Use 0 if you wish for no animation.
- * @default 120
+ * @default 0
  *
  * @param Physical Animation
- * @text 物理技能动画
+ * @parent ---Animation---
+ * @type number
+ * @min 0
  * @desc Default animation to play for physical skills.
  * Use 0 if you wish for no animation.
  * @default 52
  *
  * @param Magical Animation
- * @text 魔法技能动画
+ * @parent ---Animation---
+ * @type number
+ * @min 0
  * @desc Default animation to play for magical skills.
  * Use 0 if you wish for no animation.
  * @default 51
  *
  * @param Enemy Attack Animation
- * @text 敌人攻击动画
+ * @parent ---Animation---
+ * @type number
+ * @min 0
  * @desc This is the default attack animation played by enemies.
  * Default: 0
  * @default 39
  *
  * @param Reflect Animation
- * @text 魔法反射动画
+ * @parent ---Animation---
+ * @type number
+ * @min 0
  * @desc The animation used when magic attacks are reflected.
  * @default 42
  *
  * @param Motion Waiting
- * @text 运动等待
+ * @parent ---Animation---
+ * @type boolean
+ * @on After
+ * @off During
  * @desc Play animations after performing an action or during?
  * During - false     After - true     Default: false
  * @default false
  *
  * @param ---Frontview---
- * @text ---正视图---
  * @default
  *
  * @param Front Position X
+ * @parent ---Frontview---
  * @desc This formula determines the actor's home X position.
  * Default: 0
  * @default Graphics.boxWidth / 8 + Graphics.boxWidth / 4 * index
  *
  * @param Front Position Y
+ * @parent ---Frontview---
  * @desc This formula determines the actor's home Y position.
  * Default: 0
  * @default Graphics.boxHeight - 180
  *
  * @param Front Actor Sprite
- * @text 显示前角色精灵
+ * @parent ---Frontview---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Show the actor battle sprite in frontview?
  * NO - false     YES - true     Default - false
  * @default false
  *
  * @param Front Sprite Priority
- * @text 前精灵优先级
+ * @parent ---Frontview---
+ * @type select
+ * @option Normal
+ * @value 0
+ * @option Actors on Top
+ * @value 1
+ * @option Enemies on Top
+ * @value 2
  * @desc Give actor sprites the priority of always being on top?
  * 0 - Normal   1 - Actors on Top   2 - Enemies on Top
  * @default 1
  *
  * @param ---Sideview---
- * @text ---侧视图---
  * @default
  *
  * @param Home Position X
+ * @parent ---Sideview---
  * @desc This formula determines the actor's home X position.
  * Default: 600 + index * 32
  * @default screenWidth - 16 - (maxSize + 2) * 32 + index * 32
  *
  * @param Home Position Y
+ * @parent ---Sideview---
  * @desc This formula determines the actor's home Y position.
  * Default: 280 + index * 48
  * @default screenHeight - statusHeight - maxSize * 48 + (index+1) * 48 - 32
  *
  * @param Side Sprite Priority
- * @text 侧精灵优先级
+ * @parent ---Sideview---
+ * @type select
+ * @option Normal
+ * @value 0
+ * @option Actors on Top
+ * @value 1
+ * @option Enemies on Top
+ * @value 2
  * @desc Give actor sprites the priority of always being on top?
  * 0 - Normal   1 - Actors on Top   2 - Enemies on Top
  * @default 1
  *
  * @param ---Sprites---
- * @text ---精灵---
  * @default
  *
  * @param Default X Anchor
+ * @parent ---Sprites---
+ * @type number
+ * @decimals 2
  * @desc Default value used for your sprites's X Anchor.
- * Default: 0.5
- * @default 0.5
+ * Default: 0.50
+ * @default 0.50
  *
  * @param Default Y Anchor
+ * @parent ---Sprites---
+ * @type number
+ * @decimals 2
  * @desc Default value used for your sprites's Y Anchor.
- * Default: 1.0
- * @default 1.0
+ * Default: 1.00
+ * @default 1.00
  *
  * @param Step Distance
- * @text 步距
- * @desc 这是一个单位为采取行动而向前走的距离。
+ * @parent ---Sprites---
+ * @type number
+ * @desc This is the distance a unit steps forward for actions.
  * Default: 48
  * @default 48
  *
  * @param Flinch Distance
- * @text 退缩距离
- * @desc 在侧视图中，当一个单位受到伤害或闪避时，它将
- * 以像素为单位缩小一定距离。
+ * @parent ---Sprites---
+ * @type number
+ * @desc In sideview, when a unit takes damage or dodges, it will
+ * flinch a certain distance in pixels.
  * @default 12
  *
  * @param Show Shadows
- * @text 显示阴影
+ * @parent ---Sprites---
+ * @type boolean
+ * @on Show Shadows
+ * @off Hide Shadows
  * @desc Do you wish to have shadows appear under actors?
  * NO - false     YES - true
  * @default true
  *
  * @param ---Damage Popups---
- * @text ---伤害弹出窗口---
  * @default
  *
  * @param Popup Duration
- * @text 弹出窗口持续时间
+ * @parent ---Damage Popups---
+ * @type number
+ * @min 1
  * @desc Adjusts how many frames a popup will stay visible for.
  * Default: 90
  * @default 128
  *
  * @param Newest Popup Bottom
- * @text 最新窗口底部弹出
+ * @parent ---Damage Popups---
+ * @type boolean
+ * @on Newest at bottom
+ * @off Newest at top
  * @desc Places the newest popup at the bottom of a group.
  * NO - false     YES - true
  * @default true
  *
  * @param Popup Overlap Rate
- * @text 弹出重叠率
+ * @parent ---Damage Popups---
+ * @type number
+ * @decimals 1
  * @desc When multiple damage popups appear, they cover each other.
  * Use this to change the buffer rate amount for each sprite.
  * @default 0.9
  *
  * @param Critical Popup
- * @text 关键弹出窗口
+ * @parent ---Damage Popups---
  * @desc Adjusts the popup's flashing color for critical hits.
  * Default: 255, 0, 0, 160
  * @default 255, 0, 0, 160
  *
  * @param Critical Duration
- * @text 临界持续时间
- * @desc 闪烁将保留多少帧用于关键帧
- * How many frames the flashing will remain for a critical.
+ * @parent ---Damage Popups---
+ * @type number
+ * @min 1
+ * @desc How many frames the flashing will remain for a critical.
  * Default: 60
  * @default 60
  *
  * @param ---Tick-Settings---
- * @text ---Tick 设置---
  * @default
  *
  * @param Timed States
- * @text 定时状态
+ * @parent ---Tick-Settings---
+ * @type boolean
+ * @on Time-Based States
+ * @off Turn-Based States
  * @desc If the battle system is Tick-based, use time instead of
  * turns for states? NO - false   YES - true
  * @default false
  *
  * @param Timed Buffs
- * @text 定时增益
+ * @parent ---Tick-Settings---
+ * @type boolean
+ * @on Time-Based Buffs
+ * @off Turn-Based Buffs
  * @desc If the battle system is Tick-based, use time instead of
  * turns for buffs? NO - false   YES - true
  * @default false
  *
  * @param Turn Time
- * @text 转弯时间
- * @desc 必须经过多少个记号才能等于一圈？
- * How many ticks must past to equal 1 turn?
+ * @parent ---Tick-Settings---
+ * @type number
+ * @min 1
+ * @desc How many ticks must past to equal 1 turn?
  * @default 100
  * 
  * @param AI Self Turns
- * @text AI自转
+ * @parent ---Tick-Settings---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Set AI to be based on their own individual turns?
  * NO - false     YES - true
  * @default true
  *
  * @param ---Window Settings---
- * @text ---窗口设置---
  * @default
  *
  * @param Lower Windows
- * @text 底部窗口
+ * @parent ---Window Settings---
+ * @type boolean
+ * @on Bottom Layout
+ * @off Default Layout
  * @desc Places the skill and item windows at the screen's bottom.
  * OFF - false     ON - true
  * @default true
  *
  * @param Window Rows
- * @text 窗口行
+ * @parent ---Window Settings---
+ * @number
+ * @min 1
  * @desc For lower windows, how many rows of items do you wish for
  * the windows to display?
  * @default 4
  *
  * @param Command Window Rows
- * @text 命令窗口行
+ * @parent ---Window Settings---
+ * @type number
+ * @min 1
  * @desc Sets the number of rows for each command window to display.
  * Default: 4
  * @default 4
  *
  * @param Command Alignment
-* @text 命令对齐
+ * @parent ---Window Settings---
+ * @type combo
+ * @option left
+ * @option center
+ * @option right
  * @desc Sets the text alignment for the Party/Actor Commands.
  * Default: left
  * @default center
  *
  * @param Start Actor Command
- * @text 启用角色命令
+ * @parent ---Window Settings---
+ * @type boolean
+ * @on Actor Command Window
+ * @off Party Command Window
  * @desc Starts turn with the Actor Command Window instead of Party.
  * OFF - false     ON - true
  * @default true
  *
  * @param Current Max
- * @text 显示HP/MP的当前最大值
+ * @parent ---Window Settings---
+ * @type boolean
+ * @on Current / Max
+ * @off Just Current
  * @desc Display the entire current / max value of HP/MP?
  * NO - false     YES - true     Default: true
  * @default false
  *
  * @param ---Selection Help---
- * @text ---选择帮助---
  * @default
  *
  * @param Mouse Over
- * @text 鼠标悬停
+ * @parent ---Selection Help---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Allows you to mouse over the enemies to auto-select them.
  * OFF - false     ON - true
  * @default true
  *
  * @param Select Help Window
- * @text 选择帮助窗口
+ * @parent ---Selection Help---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc When selecting actors and enemies, show the help window?
  * NO - false     YES - true
  * @default true
  *
  * @param User Help Text
- * @text 用户帮助文本
+ * @parent ---Selection Help---
  * @desc The singular form of 'User' used in a help window.
- * @default 用户
+ * @default User
  *
  * @param Ally Help Text
- * @text 队友帮助文本*单
+ * @parent ---Selection Help---
  * @desc The singular form of 'Ally' used in a help window.
- * @default 队友
+ * @default Ally
  *
  * @param Allies Help Text
- * @text 队友帮助文本*复
+ * @parent ---Selection Help---
  * @desc The plural form of 'Allies' used in a help window.
- * @default 全体队友
+ * @default Allies
  *
  * @param Enemy Help Text
- * @text 敌人帮助文本*单
+ * @parent ---Selection Help---
  * @desc The singular form of 'Enemy' used in a help window.
- * @default 敌人
+ * @default Enemy
  *
  * @param Enemies Help Text
- * @text 敌人帮助文本*复
+ * @parent ---Selection Help---
  * @desc The plural form of 'Enemy' used in a help window.
- * @default 全体敌人
+ * @default Enemies
  *
  * @param All Help Text
- * @text 所有帮助文字
+ * @parent ---Selection Help---
  * @desc When selecting a entire group of targets.
  * %1 - Target Group (Allies or Enemies)
- * @default %1
+ * @default All %1
  *
  * @param Random Help Text
- * @text 随机目标帮助文字
+ * @parent ---Selection Help---
  * @desc When selecting a random selection of targets.
  * %1 - Target Group (Allies or Enemies)     %2 - Number
- * @default %2 随机 %1
+ * @default %2 Random %1
  *
  * @param ---Enemy Select---
- * @text ---敌人选择---
  * @default
  *
  * @param Visual Enemy Select
- * @text 视觉敌人选择
+ * @parent ---Enemy Select---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Replaces the enemy selection screen with a more visual one.
  * OFF - false     ON - true
  * @default true
  *
  * @param Show Enemy Name
- * @text 显示敌人名称
+ * @parent ---Enemy Select---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Show enemy names with Visual Enemy Select.
  * OFF - false     ON - true
  * @default true
  *
  * @param Show Select Box
- * @text 显示敌人选择框
+ * @parent ---Enemy Select---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Show a selection box when selecting enemies.
  * OFF - false     ON - true
  * @default false
  *
  * @param Enemy Font Size
- * @text 敌人字体大小
+ * @parent ---Enemy Select---
+ * @type number
+ * @min 1
  * @desc Changes the font size used to display enemy names.
  * Default: 28
  * @default 20
  *
  * @param Enemy Auto Select
- * @text 初始自动选择敌人
+ * @parent ---Enemy Select---
  * @desc Changes what enemy is automatically selected at first.
  * LEFT - 0     RIGHT - this.furthestRight()
  * @default this.furthestRight()
  *
  * @param ---Actor Select---
- * @text ---角色选择---
  * @default
  *
  * @param Visual Actor Select
- * @text 视觉角色选择
+ * @parent ---Actor Select---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Allows you to click the actor on screen to select it.
  * OFF - false     ON - true
  * @default true
  *
  * @param ---Battle Log---
- * @text ---战斗日志---
  * @default
  *
  * @param Show Emerge Text
- * @text 显示出现文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows the battle start text for enemies appearing.
  * OFF - false     ON - true
  * @default false
  *
  * @param Show Pre-Emptive Text
- * @text 显示优先文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows the text for getting a pre-emptive attack.
  * OFF - false     ON - true
  * @default true
  *
  * @param Show Surprise Text
- * @text 显示惊喜文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows the text for getting a surprise attack.
  * OFF - false     ON - true
  * @default true
  *
  * @param Optimize Speed
- * @text 优化速度
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Cuts log base line process to optimize the battle speed.
  * OFF - false     ON - true
  * @default true
  *
  * @param Show Action Text
- * @text 显示操作文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on Full
+ * @off Simple
  * @desc Displays full action text or a simplified version of it.
  * SIMPLE - false     FULL - true
  * @default false
  *
  * @param Show State Text
- * @text 显示状态文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows all text regarding states.
  * OFF - false     ON - true
  * @default false
  *
  * @param Show Buff Text
- * @text 显示Buff文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows all text regarding buffs.
  * OFF - false     ON - true
  * @default false
  *
  * @param Show Counter Text
- * @text 显示反击文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding counter attacks.
  * OFF - false     ON - true
  * @default true
  *
  * @param Show Reflect Text
- * @text 显示反射文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding reflected spells.
  * OFF - false     ON - true
  * @default true
  *
  * @param Show Substitute Text
- * @text 显示替代伤害文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding substituted damage.
  * OFF - false     ON - true
  * @default true
  *
  * @param Show Fail Text
- * @text 显示攻击失败文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding failed attacks.
  * OFF - false     ON - true
  * @default false
  *
  * @param Show Critical Text
- * @text 显示暴击文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding critical hits.
  * OFF - false     ON - true
  * @default false
  *
  * @param Show Miss Text
- * @text 显示Miss文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding missed attacks.
  * OFF - false     ON - true
  * @default false
  *
  * @param Show Evasion Text
- * @text 显示闪避文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding evaded attacks.
  * OFF - false     ON - true
  * @default false
  *
  * @param Show HP Text
- * @text 显示HP文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding HP damage or heals.
  * OFF - false     ON - true
  * @default false
  *
  * @param Show MP Text
- * @text 显示MP文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding MP damage or heals.
  * OFF - false     ON - true
  * @default false
  *
  * @param Show TP Text
- * @text 显示TP文本
+ * @parent ---Battle Log---
+ * @type boolean
+ * @on YES
+ * @off NO
  * @desc Shows text regarding TP damage or heals.
  * OFF - false     ON - true
  * @default false
@@ -487,143 +641,175 @@ Yanfly.BEC.version = 1.43;
  * Introduction
  * ============================================================================
  *
- * RPG Maker MV默认的战斗系统已经支持流行的横版战斗，我们可以使用战斗核心
- * 引擎来增加更多的特点和能力
- * 这个插件改变了战斗系统的很多方面，使其看起来更像现代的角色扮演游戏，而
- * 不是过时笨重的那种。这改变了战斗界面的文本的显示以及出现方式。
+ * This plugin alters the various aspects of the default battle system,
+ * allowing it to be more streamlined like most modern RPG's and less clunky
+ * like older RPG's. This ranges from choosing what text will appear in the
+ * battle log window at the top and how it will be displayed.
  *
  * ============================================================================
  * Battle Messages
  * ============================================================================
  *
- * 当改变了战斗过程中的选项和信息时候，插入下面的标签就可以让信息在战斗记
- * 录里居中
+ * When changing "Terms" and the "Messages" that appear in battle, inserting
+ * the following tag anywhere in the message will cause the message to center
+ * itself in the battle log.
  *
  *   <CENTER>
- *   这个标签可以覆盖所有的战斗记录窗口，并且将视为一种居中战斗文本信息的指令。
+ *   This tag must be all caps in order for the battle log window to recognize
+ *   it as an instruction to center the displayed battle text message.
  *
- *   SParam公式*有几个记事标签，你可以用来改变某些技能和项目的出现方式，
- *  因为你不想在名字中出现像“哈罗德攻击”这样的名字。
+ * There are a couple of notetags you can use to change the way certain skills
+ * and items will show up incase you don't want a name like 'Harold's Attack'
+ * to appear in the name.
  *
- *  技能和物品标签：
+ * Skill and Item Notetags:
  *
  *   <Display Text: x>
- *   这会将显示的文本更改为x。
+ *   This will change the text displayed to x.
  *
  *   <Display Icon: x>
- *   这会将显示的图标更改为x。
+ *   This will change the icon displayed to x.
  *
  * ============================================================================
  * Battle Windows
  * ============================================================================
  *
- * 为了使战斗系统的导航更加简便，这里有很多选项来调整战斗系统的角色窗口之
- * 后出现。
+ * There's various options to adjust the window settings found in the battle
+ * system to make navigating the battle system more intuitive. Such options
+ * include starting the turns with the Actor Command Window instead of the
+ * Party Command Window (the Fight/Escape Window). The Party Command Window is
+ * still accessible but only by pressing cancel on the first actor's window.
  *
  * ============================================================================
  * Battle Order
  * ============================================================================
  *
- * 这个战斗回合系统也被修复，这样，任何有敏捷值改变的情况的战斗，将会在当
- * 前回合生效而不是下个回合。行动速度计算也被调整过，移除了过去速度计算公
- * 式带有随机的因素，让敏捷值可以更加实际的作为一个战术上的因素。
+ * The battle turn order is also fixed, too. This way, any battlers that Have
+ * their AGI value changed over the course of battle will reflect those changes
+ * during the current turn rather than the following turn. The action speed
+ * calculation can also be adjusted and finetuned to have the random factor of
+ * its speed calculation formula removed, too, making AGI actually worthwhile
+ * as a tactical parameter.
  *
  * Skill and Item Notetag:
  *   <speed: +x>
  *   <speed: -x>
- *  这可以让您突破编辑器的限制-2000和2000允许您
- *  控制你的动作速度。
+ *   This lets you break past the editor's limit of -2000 and 2000 allowing you
+ *   to set the speed of your actions with more control.
  *
  * ============================================================================
  * Multiple Hits
  * ============================================================================
  *
- * 如果伤害标签在行动中消失，多重伤害系统不会中断。这个通过切换永久状态来
- * 实现的。如果要使用这个特性，请确保数据库中存在一个永久状态；如果不想使
- * 用，请将永久状态参数ID改为0。
+ * Multi-hit action will no longer end prematurely if the target dies midway
+ * through the action. This is done through toggling immortal states. To make
+ * use of feature, make sure your database has an Immortal State somewhere. If
+ * you do not wish to use this feature, set the Parameter for Immortal State ID
+ * to 0 instead.
  *
  * ============================================================================
  * Popup Revamp
  * ============================================================================
  *
- * 尽管伤害数值的弹出系统和原版MV看起来一样，但是他们的进程是完全不同的。
- * 在之前，弹出系统在1帧只会弹出一次，但现在，我们可以在同1帧显示所有伤害
- * ，这使其看起来更加平滑。
-
+ * Although the damage popups may still look the same as the default ones from
+ * MV, the process in which they're created is now different to streamline the
+ * damage popup process. Before, popups would only appear one a time with a
+ * frame's different at minimum in order for them to show. Now, any actions
+ * that occur at the same frame will now all show popups at the same frame,
+ * making for smoother and less clunky damage popups.
  *
  * ============================================================================
  * Common Events
  * ============================================================================
  *
- * 无论敌人队伍是否存活，公共事件将会在每次行动结束的时候执行，通过恰当的
- * 放置行动序列标签，你可以让技能的公共事件在一个行动当中执行。但是，请注
- * 意如果你让一个行动在另一个行动当中执行，剩余的行动序列将会变成空的来取
- * 代新的行动。
+ * Common Events will now occur at the end of each action regardless of whether
+ * or not the enemy party is still alive. With proper placing of the action
+ * sequence tags, you can make the skill's common event occur in the middle of
+ * an action, too. However, keep in mind if you force an action in the middle
+ * of another action, the remainder of the former action's sequence list will
+ * become null and void in favor of the new forced action.
  *
  * ============================================================================
  * Casting Animations
  * ============================================================================
  *
- * 角色动作将会协助提供给玩家，让他们明白战斗者是谁，以及技能使用类型。这
- * 个插件可以让技能拥有动作，这些动作是可以为单独技能自定调整的
+ * Casting Animations help provide visual hints for players either by letting
+ * them know which battler is going to perform an action or what type of skill
+ * that action will be. This plugin enables skills to have casting animations
+ * that can be modified universally or customized for each individual skill.
  *
  * Skill Notetag:
  *   <Cast Animation: x>
- *   设置技能动作ID，设置0将会取消动作
+ *   Sets the skill's cast animation to animation ID x. Setting x to zero will
+ *   cause the skill to not have any animaton at all.
  *
  * ============================================================================
  * Changing Battle Systems
  * ============================================================================
  *
- * 当玩家不在战斗时，你可以通过插件命令改变战斗系统。如果只使用这个插件
- * 这里只包含了默认的战斗系统
+ * While the player is not in battle, you can change the battle system using a
+ * Plugin Command. With only this plugin, there is only one battle system
+ * included: the default battle system.
  *
  * Plugin Command:
- *   setBattleSys DTB      设置战斗为默认回合制
+ *   setBattleSys DTB      Sets battle system to Default Turn Battle.
  *
- * 未来其他插件将会包含其他战斗系统
+ * Other future plugins may include other battle systems that may utilize the
+ * Battle Engine Core.
  *
  * ============================================================================
  * Sideview Actions
  * ============================================================================
  *
- * 在软件默认的战斗系统里，竖向和横向的战斗方式都没有显示反击，显示魔法攻
- * 击，或者任何战斗者的替换队员。这个战斗系统核心引擎可以提供给横版战斗模
- * 式的游戏更好的战斗队员显示效果。
+ * In RPG Maker MV's default battle system, both the sideview and the frontview
+ * settings do not display counterattacks, reflected magic attacks, nor any
+ * case of substituting for battle members. The Battle Engine Core provides
+ * games that are using the sideview settings small amounts of animations to
+ * relay information to the player in a more visual sense.
  *
- * 魔法攻击也将会显示一个相应的动画，来告诉玩家已经准备好战斗。这个动画可
- * 以用参数改变，但是角色，职业，敌人，武器，装备和状态可以根据需要显示独
- * 有的动画。
+ * Magic Reflection will also display a reflection animation to indicate the
+ * battler has reflection properties. This animation can be changed in the
+ * parameters, but certain actors, classes, enemies, weapons, armors, and
+ * states can display a unique kind of animation for reflection if desired.
  *
  * Actor, Class, Enemy, Weapon, Armor, and State Notetag:
  *   <Reflect Animation ID: x>
- *   改变角色的动画为X。这将影响角色，职业，敌人，武器，装备及状态等等
+ *   Changes the user's reflect animation to x. This will take priority in the
+ *   following order: Actor, Class, Enemy, Weapon, Armor, State, Default.
  *
- * 有时，你不希望你的敌人可以移动，或者你不希望某个角色移动。他们只是固定
- * 的。为了完成这件事，你可以使用下面这个标签禁止参与战斗者移动。
+ * Sometimes, you don't want your enemies to be able to move. Or you don't want
+ * certain actors to be able to move. They're just stationary for whatever
+ * reason. To accomplish that, you can use this notetag to forbid the battler
+ * from moving.
  *
  * Actor, Class, Enemy, Weapon, Armor, and State Notetag:
  *   <Sprite Cannot Move>
- *   阻止了参与战斗者移动。这将影响角色，职业，敌人，武器，装备及状态等等。
- *   如果敌人在其行动的时候不能移动，他将会像竖版战斗那样闪烁。
+ *   Prevents the battler's sprite from moving. This will take priority in the
+ *   following order: Actor, Class, Enemy, Weapon, Armor, and State. If an
+ *   enemy is unable to move when it performs an action, it will flash white as
+ *   if it normally does in front view.
  *
  * ============================================================================
  * Custom Sideview Battler Anchor
  * ============================================================================
  *
- * 横向战斗时，角色图通常被置于中间，并且固定在脚部，而不是所有的横版战斗
- * 都会这样。用这个事件，对于那些不遵从标准的角色，我们可以用不同的手段固
- * 定他们。
+ * Sideview battlers are generally centered horizontally, and grounded at their
+ * feet. However, not all sideview battler spritesheets work this way. In the
+ * event you have a sideview battler that doesn't conform to those standards,
+ * you can 'anchor' them a different way.
  *
  * Actor, Class, Weapon, Armor, State Notetags:
  *   <Anchor X: y.z>
  *   <Anchor Y: y.z>
- *   这个设置了角色横向战斗时，侧视图的位置。系统默认值中，X=0.5,Y=1.0。如
- *   果你希望X可以向左一点，你需要设置它小于5.或者设置大于5来使其向右。为了
- *   提高Y方向，你需要设置小于1.0的值。请不断调整直到你完成了最正确的设置。
+ *   This sets the anchor location for the actor's sideview battler at y.z.
+ *   By default, the X anchor is 0.5 while the Y anchor is 1.0. If you want
+ *   the X anchor to be a bit more to the left, make it less than 0.5. Make it
+ *   more than 0.5 to make the X anchor more towards the right. To raise the
+ *   Y anchor, set the number value to less than 1.0. Keep adjusting until you
+ *   find that perfect anchor setting.
  *
-*如果一个锚有多个特性，产生不同的锚，它将是
-*在类似于以下顺序的优先级列表中使用：
+ * If an anchor has multiple traits that yield different anchors, it will be
+ * used in a priority list akin to this order:
  *
  *   States
  *   Weapons
@@ -632,71 +818,94 @@ Yanfly.BEC.version = 1.43;
  *   Actor
  *   Default
  *
- *  优先级越高，优先级越高。
- *  
- *   ============================================================================
- *  敌人攻击动画
- *   ============================================================================
- *  
- *  为了给你的敌人提供独特的攻击动画，你可以使用这个标签：
- *  
+ * The higher it is on the priority list, the higher its priority.
+ *
+ * ============================================================================
+ * Enemy Attack Animation
+ * ============================================================================
+ *
+ * To give your enemies unique attack animations, you can use this notetag:
+ *
  * Enemy Notetag:
  *   <Attack Animation: x>
- *  将x替换为要设置为
- *  敌人的默认攻击动画。
- *  
- *   ============================================================================
- *  自动状态删除条件
- *   ============================================================================
- *  
- *  默认情况下，角色扮演者MV的战斗系统会自动移除状态
- *  三种不同的情况：无、动作结束、转身结束。
- *  
- *  无和转弯端按预期工作。然而，行动结束了，然而
- *  各州在战斗开始时撤军，而不是在战斗结束时撤军。
- *  这是改变和更新，只发生在战斗的行动结束。
- *  
- *  现在又增加了两个自动条件：动作开始和转弯开始。
- *  可以使用以下注释标记添加和实现这些注释：
+ *   Replace x with the ID of the battle animation you wish to set as the
+ *   enemy's default attack animation.
+ *
+ * ============================================================================
+ * Automatic State Removal Conditions
+ * ============================================================================
+ *
+ * By default, RPG Maker MV's battle system has automatic state removal under
+ * three different conditions: none, action end, turn end.
+ *
+ * None and Turn End are working as intended. However, Action End, however, had
+ * the states removed at the start of the battler's action rather than the end.
+ * This is changed and updated to occur only at the end of a battler's action.
+ *
+ * Two more automatic conditions are now added: Action Start and Turn Start.
+ * These can be added and implemented using the following notetags:
  *
  * State Notetags:
  *   <Action Start: x>
  *   <Action Start: x to y>
- *  这将导致此状态更新其在开始时剩余的回合数
- *  行动。x是它将持续的圈数。如果你用x到y，在
- *  应用该状态，该状态将被随机数圈移除
- *  从x到y。
+ *   This will cause this state to update its turns remaining at the start of
+ *   an action. x is the number of turns it will last. If you use x to y, upon
+ *   applying the state, the state will be removed a random number of turns
+ *   from x to y.
  *
  *   <Turn Start: x>
  *   <Turn Start: x to y>
- *  这将导致状态更新其在循环开始时剩余的轮数
- *  战斗回合。x是它将持续的圈数。如果你用x到y，
- *  在应用状态时，状态将被随机删除
- *  从x转到y。
- *  
- *  有行动结束的状态对他们来说有一个独特的特征，如果施法者
- *  状态是当前活跃的战斗者（主体），如果状态是
- *  应用于用户本身，他们将获得一个“自由转身”。“自由转弯”是
- *  以减轻用户因某个动作而损失1个回合的持续时间
- *  结束时间，他们将失去在国家统治下的好处
- *  转弯的时机。
- *  
- *   ============================================================================
- *  动作序列
- *   ============================================================================
- *  
- *  Yanfly引擎插件-战斗引擎核心包括
- *  使用自定义动作序列。动作顺序是
- *  该游戏创造了一个定制的视觉和机械技能。
- *  然而，战斗引擎的核心将只包括最基本的行动
- *  因此，有关如何创建自定义操作序列的说明
- *  将包含在此插件的未来扩展插件的帮助文件中。
+ *   This will cause the state to update its turns remaining at the start of a
+ *   battle turn. x is the number of turns it will last. If you use x to y,
+ *   upon applying the state, the state will be removed a random number of
+ *   turns from x to y.
+ *
+ * States with Action End have a unique trait to them where if the caster of
+ * the state is the current active battler (subject) and if the state is then
+ * applied on the user itself, they will gain a 'free turn'. The 'free turn' is
+ * to mitigate the user from losing 1 duration of the turn since with an Action
+ * End timing, they would lose the benefit of being under the state for that
+ * turn's timing.
+ *
+ * ============================================================================
+ * Action Sequences
+ * ============================================================================
+ *
+ * The Yanfly Engine Plugins - Battle Engine Core includes the capability of
+ * using custom action sequences. Action sequences are basic instructions for
+ * the game to creating a customized skill both visually and mechanically.
+ * The Battle Engine Core, however, will only include the most basic of action
+ * sequences so the instructions on how to create a custom action sequence will
+ * be included in the Help file on future extension plugins for this plugin.
  *
  * ============================================================================
  * Changelog
  * ============================================================================
  *
- * Version 1.43a:
+ * Version 1.50:
+ * - Action sequences allow for unlimited arguments now.
+ *
+ * Version 1.49:
+ * - Added failsafe for 'furthestRight()' errors.
+ *
+ * Version 1.48:
+ * - Optimization update.
+ *
+ * Version 1.47:
+ * - Bypass the isDevToolsOpen() error when bad code is inserted into a script
+ * call or custom Lunatic Mode code segment due to updating to MV 1.6.1.
+ *
+ * Version 1.46:
+ * - Updated for RPG Maker MV version 1.6.1.
+ *
+ * Version 1.45:
+ * - Updated for RPG Maker MV version 1.5.0.
+ *
+ * Version 1.44:
+ * - Fixed a bug where the enemy name windows disappear if you change scenes
+ * mid-way through battle and return to it.
+ *
+ * Version 1.43b:
  * - Bug fixed to prevent crash if non-existent actions are used.
  * - Optimization update.
  *
@@ -1043,6 +1252,7 @@ Yanfly.Param.BECShowEnemyName = eval(Yanfly.Param.BECShowEnemyName);
 Yanfly.Param.BECShowSelectBox = String(Yanfly.Parameters['Show Select Box']);
 Yanfly.Param.BECShowSelectBox = eval(Yanfly.Param.BECShowSelectBox);
 Yanfly.Param.BECEnemyAutoSel = String(Yanfly.Parameters['Enemy Auto Select']);
+Yanfly.Param.BECEnemyAutoSel = Yanfly.Param.BECEnemyAutoSel;
 Yanfly.Param.BECCommandAlign = String(Yanfly.Parameters['Command Alignment']);
 Yanfly.Param.BECCommandRows = Number(Yanfly.Parameters['Command Window Rows']);
 Yanfly.Param.BECAniBaseDel = Number(Yanfly.Parameters['Animation Base Delay']);
@@ -1222,48 +1432,20 @@ DataManager.addActionEffects = function(obj, array) {
     obj.repeats = 1;
 };
 
-Yanfly.BEC.SeqType6 =
-  /[ ]*(.*):[ ](.*),[ ](.*),[ ](.*),[ ](.*),[ ](.*),[ ](.*)/i;
-Yanfly.BEC.SeqType5 =
-  /[ ]*(.*):[ ](.*),[ ](.*),[ ](.*),[ ](.*),[ ](.*)/i;
-Yanfly.BEC.SeqType4 =
-  /[ ]*(.*):[ ](.*),[ ](.*),[ ](.*),[ ](.*)/i;
-Yanfly.BEC.SeqType3 =
-  /[ ]*(.*):[ ](.*),[ ](.*),[ ](.*)/i;
-Yanfly.BEC.SeqType2 =
-  /[ ]*(.*):[ ](.*),[ ](.*)/i;
-Yanfly.BEC.SeqType1 =
-  /[ ]*(.*):[ ](.*)/i;
-Yanfly.BEC.SeqType0 =
-  /[ ]*(.*)/i;
 DataManager.convertSequenceLine = function(obj, line, actionType) {
   if (actionType <= 0 || actionType > 5) return;
   Yanfly.BEC.SeqType;
   var seqArgs;
-  if (line.match(Yanfly.BEC.SeqType6)) {
-    Yanfly.BEC.SeqType = RegExp.$1;
-    seqArgs =
-      [RegExp.$2, RegExp.$3, RegExp.$4, RegExp.$5, RegExp.$6, RegExp.$7];
-  } else if (line.match(Yanfly.BEC.SeqType5)) {
-    Yanfly.BEC.SeqType = RegExp.$1;
-    seqArgs = [RegExp.$2, RegExp.$3, RegExp.$4, RegExp.$5, RegExp.$6];
-  } else if (line.match(Yanfly.BEC.SeqType4)) {
-    Yanfly.BEC.SeqType = RegExp.$1;
-    seqArgs = [RegExp.$2, RegExp.$3, RegExp.$4, RegExp.$5];
-  } else if (line.match(Yanfly.BEC.SeqType3)) {
-    Yanfly.BEC.SeqType = RegExp.$1;
-    seqArgs = [RegExp.$2, RegExp.$3, RegExp.$4];
-  } else if (line.match(Yanfly.BEC.SeqType2)) {
-    Yanfly.BEC.SeqType = RegExp.$1;
-    seqArgs = [RegExp.$2, RegExp.$3];
-  } else if (line.match(Yanfly.BEC.SeqType1)) {
-    Yanfly.BEC.SeqType = RegExp.$1;
-    seqArgs = [RegExp.$2];
-  } else if (line.match(Yanfly.BEC.SeqType0)) {
-    Yanfly.BEC.SeqType = RegExp.$1;
-    seqArgs = [];
+  if (line.match(/[ ]*(.*):[ ](.*)/i)) {
+    Yanfly.BEC.SeqType = RegExp.$1.trim();
+    seqArgs = RegExp.$2.split(',');
+    var length = seqArgs.length;
+    for (var i = 0; i < length; ++i) {
+      seqArgs[i] = seqArgs[i].trim();
+    }
   } else {
-    return;
+    Yanfly.BEC.SeqType = line.trim();
+    seqArgs = [];
   }
   var array = [Yanfly.BEC.SeqType, seqArgs];
   if (actionType === 1) obj.setupActions[obj.setupActions.length] = array;
@@ -1699,10 +1881,14 @@ BattleManager.getNextSubject = function() {
         var battler = this._actionBattlers.shift();
         if (!battler) return null;
         if (battler.isBattleMember() && battler.isAlive()) {
-            this._performedBattlers.push(battler);
+            this.pushPerformedBattler(battler);
             return battler;
         }
     }
+};
+
+BattleManager.pushPerformedBattler = function(battler) {
+  this._performedBattlers.push(battler);
 };
 
 BattleManager.update = function() {
@@ -2397,7 +2583,9 @@ BattleManager.makeActionTargets = function(string) {
           if (this._targets.contains(target)) continue;
 
           if (target.isDead()) {
-            if (Imported.YEP_X_AnimatedSVEnemies && target.isEnemy()) {
+            if (Imported.KELYEP_DragonBones && target.isEnemy() && target.hasDragonBone) {
+              continue;
+            } else if (Imported.YEP_X_AnimatedSVEnemies && target.isEnemy()) {
               if (target.hasSVBattler() && !target.sideviewCollapse()) {
                 // Ignore
               } else {
@@ -2572,6 +2760,8 @@ BattleManager.actionIfConditions = function(actionName, actionArgs) {
   var subject = this._subject;
   var user = this._subject;
   var target = this._targets[0];
+  var critical = false;
+  if (target && target.result()) critical = target.result().critical;
   var targets = this._targets;
   var action = this._action;
   var item = this._action.item();
@@ -3029,6 +3219,7 @@ Yanfly.BEC.Sprite_Enemy_update = Sprite_Enemy.prototype.update;
 Sprite_Enemy.prototype.update = function() {
     Yanfly.BEC.Sprite_Enemy_update.call(this);
     this.addVisualSelectWindow();
+    this.checkExistInSceneChildren()
 };
 
 Sprite_Enemy.prototype.addVisualSelectWindow = function() {
@@ -3049,6 +3240,17 @@ Yanfly.BEC.Sprite_Enemy_setBattler = Sprite_Enemy.prototype.setBattler;
 Sprite_Enemy.prototype.setBattler = function(battler) {
     Yanfly.BEC.Sprite_Enemy_setBattler.call(this, battler);
     if (this._visualSelectWindow) this._visualSelectWindow.setBattler(battler);
+};
+
+Sprite_Enemy.prototype.checkExistInSceneChildren = function() {
+    if (!this._visualSelect) return;
+    if (!SceneManager._scene) return;
+    var scene = SceneManager._scene;
+    if (!scene._windowLayer) return;
+    if (!scene.children.contains(this._visualSelectWindow)) {
+      this._addedVisualSelect = true;
+      scene.addChild(this._visualSelectWindow);
+    }
 };
 
 //=============================================================================
@@ -3089,6 +3291,14 @@ Sprite_Damage.prototype.setup = function(target) {
 Sprite_Damage.prototype.setupCriticalEffect = function() {
     this._flashColor = eval('[' + Yanfly.Param.BECCritPopup + ']');
     this._flashDuration = Yanfly.Param.BECCritDur;
+};
+
+Yanfly.BEC.Sprite_Damage_update = Sprite_Damage.prototype.update;
+Sprite_Damage.prototype.update = function() {
+    Yanfly.BEC.Sprite_Damage_update.call(this);
+    if (this._duration <= 0 && this.parent) {
+        this.parent.removeChild(this);
+    }
 };
 
 //=============================================================================
@@ -3524,15 +3734,17 @@ Game_Battler.prototype.regenerateAll = function() {
     this.clearResult();
     var lifeState = this.isAlive();
     Yanfly.BEC.Game_Battler_regenerateAll.call(this);
-    if (!BattleManager.timeBasedStates()) this.updateStateTurns();
-    if (!BattleManager.timeBasedBuffs()) {
-      this.updateBuffTurns();
-      this.removeBuffsAuto();
+    if ($gameParty.inBattle()) {
+      if (!BattleManager.timeBasedStates()) this.updateStateTurns();
+      if (!BattleManager.timeBasedBuffs()) {
+        this.updateBuffTurns();
+        this.removeBuffsAuto();
+      }
+      if (this.isDead() && lifeState === true) {
+        this.performCollapse();
+      }
+      this.startDamagePopup();
     }
-    if (this.isDead() && lifeState === true) {
-      this.performCollapse();
-    }
-    if ($gameParty.inBattle()) this.startDamagePopup();
 };
 
 Game_Battler.prototype.addImmortal = function() {
@@ -4607,13 +4819,30 @@ Window_BattleActor.prototype.autoSelect = function() {
     if (!action) return;
     this._inputLock = false;
     this._selectDead = false;
+    this.setCursorAll(false);
     if (action.isForUser()) {
       this.select(BattleManager.actor().index());
       this._inputLock = true;
+    } else if (action.isForAll()) {
+      this._inputLock = true;
+      this.setCursorAll(true);
     } else if (action.isForDeadFriend()) {
       this._selectDead = true;
       this.autoSelectFirstDeadActor();
-      if (action.isForAll()) this._inputLock = true;
+    }
+    this.updateCursor();
+};
+
+Window_BattleActor.prototype.updateCursor = function() {
+    if (this._cursorAll) {
+        var allRowsHeight = this.maxRows() * this.itemHeight();
+        this.setCursorRect(0, 0, this.contents.width, allRowsHeight);
+        this.setTopRow(0);
+    } else if (this.isCursorVisible()) {
+        var rect = this.itemRect(this.index());
+        this.setCursorRect(rect.x, rect.y, rect.width, rect.height);
+    } else {
+        this.setCursorRect(0, 0, 0, 0);
     }
 };
 
@@ -4772,7 +5001,7 @@ Window_BattleEnemy.prototype.refresh = function() {
 
 Window_BattleEnemy.prototype.sortTargets = function() {
     this._enemies.sort(function(a, b) {
-        if (a.spritePosX() == b.spritePosX()) {
+        if (a.spritePosX() === b.spritePosX()) {
           return a.spritePosY() - b.spritePosY();
         }
         return a.spritePosX() - b.spritePosX();
@@ -4780,7 +5009,12 @@ Window_BattleEnemy.prototype.sortTargets = function() {
 };
 
 Window_BattleEnemy.prototype.autoSelect = function() {
-    var selectIndex = eval(Yanfly.Param.BECEnemyAutoSel);
+    if (Yanfly.Param.BECEnemyAutoSel === 0 ||
+    Yanfly.Param.BECEnemyAutoSel === '0') {
+      var selectIndex = 0;
+    } else {
+      var selectIndex = this.furthestRight();
+    }
     this.select(selectIndex);
 };
 
@@ -5388,6 +5622,7 @@ Yanfly.Util.displayError = function(e, code, message) {
   console.log(message);
   console.log(code || 'NON-EXISTENT');
   console.error(e);
+  if (Utils.RPGMAKER_VERSION && Utils.RPGMAKER_VERSION >= "1.6.0") return;
   if (Utils.isNwjs() && Utils.isOptionValid('test')) {
     if (!require('nw.gui').Window.get().isDevToolsOpen()) {
       require('nw.gui').Window.get().showDevTools();
