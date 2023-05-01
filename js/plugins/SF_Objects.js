@@ -41,7 +41,10 @@ var SF_Plugins = SF_Plugins || {};
             result.clear();
             result.used = this.testApply(target);
             result.missed = false;
-            result.evaded = !result.missed && Math.random() >= this.attackHit(target) - this.itemEva(target);
+            result.evaded =
+                !result.missed &&
+                !this.isCertainHit() &&
+                Math.random() >= this.attackHit(target) - this.itemEva(target);
             result.physical = this.isPhysical();
             result.drain = this.isDrain();
             if (result.isHit()) {
