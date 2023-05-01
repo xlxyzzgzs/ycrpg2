@@ -1,0 +1,50 @@
+name: PC 打包使用
+run-name: ${{ gitea.actor }} 正在打包新版 PC
+on:
+  workflow_dispatch:
+    inputs:
+      gameVersion:
+        description: '游戏版本'
+        required: true
+      nwjsVersion:
+        description: 'nw.js 版本'
+        required: true
+        default: '0.75.1'
+
+jobs:
+  PC-Build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        include:
+          - target_arch: 'win-x64'
+            compress_form: 'zip'
+          - target_arch: 'win-ia32'
+            compress_form: 'zip'
+          - target_arch: 'osx-x64'
+            compress_form: 'zip'
+          - target_arch: 'linux-x64'
+            compress_form: 'tar.gz'
+          - target_arch: 'linux-ia32'
+            compress_form: 'tar.gz'
+    steps:
+      - name: Download nwjs
+        run: |
+          export NWJS_VERSION=${{ github.event.inputs.nwjsVersion }}
+          export NWJS_ARCH=${{ matrix.target_arch }}
+          export NWJS_COMPRESS_FORM=${{ matrix.compress_form }}
+          wget https://dl.nwjs.io/v${NWJS_VERSION}/nwjs-v${NWJS_VERSION}-${NWJS_ARCH}.${NWJS_COMPRESS_FORM}
+
+      - name: Extract nwjs
+        run: |
+          export NWJS_VERSION=${{ github.event.inputs.nwjsVersion }}
+          export NWJS_ARCH=${{ matrix.target_arch }}
+          export NWJS_COMPRESS_FORM=${{ matrix.compress_form }}
+          if [ "${NWJS_COMPRESS_FORM}" = "zip" ]; then
+            unzip nwjs-v${NWJS_VERSION}-${NWJS_ARCH}.${NWJS_COMPRESS_FORM}
+          else
+            tar -xzf nwjs-v${NWJS_VERSION}-${NWJS_ARCH}.${NWJS_COMPRESS_FORM}
+          fi
+
+          ls -l

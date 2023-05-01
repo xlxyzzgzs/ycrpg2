@@ -13,3 +13,4 @@
 !/fonts/*.css
 !/fonts/*.tff
 !*.md
+!/.gitea/**/*.yaml
