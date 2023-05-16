@@ -42,7 +42,7 @@ null,
 {"id":40,"expanded":false,"name":"炼金商店","order":25,"parentId":36,"scrollX":819,"scrollY":474.5},
 {"id":41,"expanded":false,"name":"世界之门","order":42,"parentId":32,"scrollX":1589,"scrollY":829.5},
 {"id":42,"expanded":true,"name":"魔王城","order":30,"parentId":35,"scrollX":772,"scrollY":963},
-{"id":43,"expanded":false,"name":"巨龟岩台号控制室","order":68,"parentId":1,"scrollX":1522,"scrollY":2075},
+{"id":43,"expanded":false,"name":"巨龟岩台号控制室","order":68,"parentId":1,"scrollX":1418.6666666666667,"scrollY":1918.6666666666667},
 {"id":44,"expanded":true,"name":"走廊","order":69,"parentId":43,"scrollX":1522,"scrollY":3450},
 {"id":45,"expanded":false,"name":"走廊","order":70,"parentId":44,"scrollX":1522,"scrollY":3851},
 {"id":46,"expanded":true,"name":"魔王城堡：1F","order":31,"parentId":42,"scrollX":1323,"scrollY":1690.5},
@@ -71,6 +71,7 @@ null,
 {"id":69,"expanded":false,"name":"物品商店","order":29,"parentId":36,"scrollX":819,"scrollY":474.5},
 {"id":70,"expanded":true,"name":"天文台","order":17,"parentId":64,"scrollX":811,"scrollY":484.5},
 {"id":71,"expanded":true,"name":"豆豆星海底","order":36,"parentId":35,"scrollX":3091.2,"scrollY":1912.8},
-{"id":72,"expanded":false,"name":"次元间隙","order":72,"parentId":1,"scrollX":2810.6666666666665,"scrollY":2544},
-{"id":73,"expanded":false,"name":"王八坨子","order":73,"parentId":1,"scrollX":1029.3333333333333,"scrollY":789.3333333333334}
+{"id":72,"expanded":false,"name":"次元间隙","order":72,"parentId":1,"scrollX":2789.3333333333335,"scrollY":2533.3333333333335},
+{"id":73,"expanded":false,"name":"王八坨子","order":73,"parentId":1,"scrollX":1029.3333333333333,"scrollY":789.3333333333334},
+{"id":74,"expanded":false,"name":"扭曲森林","order":74,"parentId":1,"scrollX":1029.3333333333333,"scrollY":625.3333333333334}
 ]
