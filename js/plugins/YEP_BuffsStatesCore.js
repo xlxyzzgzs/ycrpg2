@@ -241,7 +241,8 @@ Yanfly.BSC.version = 1.12;
  *   Modifies already applied state x turns on target by y value. If this
  *   brings the state to 0 or below turns, the state is removed. If you are
  *   using named states and have multiple states with the same name, priority
- *   改变状态持续时间。如果你使用名字来设置，当重名时，优先考虑ID最高的
+ *   改变已附加的状态持续回合数，结算回合数小于零时移除状态。如果你使用名字来设置，
+ *   当重名时，优先考虑ID最高的。
  *
  * Enemy Notetags:
  *   <Show State Turns>
@@ -267,6 +268,8 @@ Yanfly.BSC.version = 1.12;
  *   Replace 'stat' with 'maxhp', 'maxmp', 'atk', 'def', 'mat', 'mdf', 'agi',
  *   or 'luk' without the quotes. Whatever the 'turn' variable returns is what
  *   the turn count will be set to for the stat buff.
+ *   将“stat”替换为“maxhp”、“maxmp”、“atk”、“def”、“mat”、“mdf”、“agi”、“luk”，
+ *   不带引号。无论“turn”变量返回什么，都会为属性增益设置回合计数。
  *
  *   <Custom stat Debuff Turn>
  *    turn = 10;
@@ -275,6 +278,8 @@ Yanfly.BSC.version = 1.12;
  *   Replace 'stat' with 'maxhp', 'maxmp', 'atk', 'def', 'mat', 'mdf', 'agi',
  *   or 'luk' without the quotes. Whatever the 'turn' variable returns is what
  *   the turn count will be set to for the stat debuff.
+ *   将“stat”替换为“maxhp”、“maxmp”、“atk”、“def”、“mat”、“mdf”、“agi”或“luk”，
+ *   不带引号。无论“turn”变量返回什么，都会为属性减益设置回合计数。
  *
  *   <Custom State X Turn>
  *    turn = 10;
@@ -282,6 +287,7 @@ Yanfly.BSC.version = 1.12;
  *   </Custom State X Turn>
  *   This alters the turn count for state x. Whatever the 'turn' variable
  *   returns is what the turn count will be set for state x.
+ *   这将更改状态 x 的回合计数。无论“turn”变量返回什么，都将为状态 x 设置回合计数。
  *
  *   <Custom State name Turn>
  *    turn = 10;
@@ -291,6 +297,8 @@ Yanfly.BSC.version = 1.12;
  *   returns is what the turn count will be set for state 'name'. If you have
  *   multiple states in your database with the same name, priority will be
  *   given to the state with the highest ID.
+ *   这会更改状态“name”的回合计数。无论“turn”变量返回什么，都将为状态“name”
+ *   设置的回合计数。如果数据库中有多个同名状态，则将优先考虑具有最高 ID 的状态。
  *
  * ============================================================================
  * Lunatic Mode - Custom Timing Effects
@@ -316,7 +324,9 @@ Yanfly.BSC.version = 1.12;
  * *Note1: If the state is set to expire on battle end, the expiration will
  * occur before the custom effects would take place, meaning the effects will
  * not occur at all unless the expiration is set to off.
- *
+ * 如果状态设置为在战斗结束时过期，则过期将在自定义效果发生之前发生，
+ * 这意味着除非过期设置为关闭，否则效果根本不会发生。
+ * 
  * State Notetags:
  *
  * --- Timing Effects ---
@@ -329,6 +339,7 @@ Yanfly.BSC.version = 1.12;
  *   </Custom Apply Effect>
  *   The code in between these notetags will run when the state is added onto
  *   a battler. The code will process after the state is actually applied.
+ *   这些注释标签之间的代码将在状态添加到战斗者时运行。代码将在实际应用状态后执行。
  *
  *   <Custom Remove Effect>
  *    code
@@ -337,6 +348,8 @@ Yanfly.BSC.version = 1.12;
  *   The code in between these notetags will run when the state is removed from
  *   a battler either manually or due to turn decay. The code will process
  *   after the state is actually removed but before <Custom Leave Effect>.
+ *   这些注释标签之间的代码将在手动或由于回合衰减而从战斗器中删除状态时运行。
+ *   代码将在状态实际删除后但在<Custom Leave Effect>之前进行处理。
  *
  *   <Custom Leave Effect>
  *    code
@@ -345,7 +358,9 @@ Yanfly.BSC.version = 1.12;
  *   The code in between these notetags will run when the state is removed from
  *   a battler due to turn decay. The code will process after the state is
  *   actually removed and after <Custom Remove Effect>.
- *
+ *   这些注释标签之间的代码将在由于回合衰减而从战斗者中删除状态时运行。
+ *   代码将在状态实际删除后和<Custom Remove Effect>之后进行处理。
+ * 
  *   <Custom Turn Start Effect>
  *    code
  *    code
@@ -353,6 +368,8 @@ Yanfly.BSC.version = 1.12;
  *   This requires YEP_BattleEngineCore. This effect will run at the start of
  *   each of the battler's turns. The code will process after all the other
  *   turn start effects have taken course.
+ *   这需要YEP_BattleEngineCore。此效果将在战斗者每个回合开始时运行。
+ *   代码将在所有其他回合开始效果发生后进行处理。
  *
  *   <Custom Action Start Effect>
  *    code
@@ -360,13 +377,15 @@ Yanfly.BSC.version = 1.12;
  *   </Custom Action Start Effect>
  *   This effect will run at the start of each of the battler's actions. The
  *   code will process before the skill/item cost takes place.
- *
+ *   此效果将在战斗者的每个行动开始时运行。代码将在技能/项物品消耗发生之前进行处理。
+ * 
  *   <Custom Action End Effect>
  *    code
  *    code
  *   </Custom Action End Effect>
  *   This effect will run at the end of each of the battler's actions. The
  *   code will process before the action end steps takes place.
+ *   此效果将在战斗者的每个动作结束时运行。代码将在执行操作结束步骤之前进行处理。
  *
  *   <Custom Regenerate Effect>
  *    code
@@ -374,6 +393,8 @@ Yanfly.BSC.version = 1.12;
  *   </Custom Regenerate Effect>
  *   This effect will run whenever the battler would regenerate HP, MP, or TP.
  *   The code will process after all the other regenerate effects have ran.
+ *   只要战斗者再生HP、MP或TP，这个效果就会运行。代码将在所有其他再生效果运行后
+ *   进行处理。
  *
  *   <Custom Turn End Effect>
  *    code
@@ -381,6 +402,8 @@ Yanfly.BSC.version = 1.12;
  *   </Custom Turn End Effect>
  *   This effect will run at the end of each of the battler's turns. The code
  *   will process after all the other turn end effects have taken course.
+ *   此效果将在战斗者的每个回合结束时运行。代码将在所有其他回合结束效果发生后
+ *   进行处理。
  *
  *   <Custom Battle Effect>
  *    code
@@ -388,6 +411,7 @@ Yanfly.BSC.version = 1.12;
  *   </Custom Battle Effect>
  *   This effect will occur at the start of battle if the battler has the state
  *   already applied (usually through a passive state).
+ *   如果战斗者已经应用了状态（通常通过被动状态），则此效果将在战斗开始时发生。
  *
  *   <Custom Victory Effect>
  *    code
@@ -397,7 +421,10 @@ Yanfly.BSC.version = 1.12;
  *   This will only apply to the player's party. If this state can expire at
  *   the end of battle, this effect will not occur as state expiration will
  *   occur before this effect will happen.
- *
+ *   如果一方获胜，这种效果将在战斗结束时发生。这仅适用于玩家的队伍。
+ *   如果此状态可以在战斗结束时过期，则不会发生此效果，因为状态过期将在此效果发生
+ *   之前发生。
+ * 
  *   <Custom Escape Effect>
  *    code
  *    code
@@ -406,6 +433,9 @@ Yanfly.BSC.version = 1.12;
  *   This will only apply to the player's party. If this state can expire at
  *   the end of battle, this effect will not occur as state expiration will
  *   occur before this effect will happen.
+ *   如果队伍逃脱，这种效果将在战斗结束时发生。这仅适用于玩家的队伍。
+ *   如果此状态可以在战斗结束时过期，则不会发生此效果，因为状态过期将在此效果发生
+ *   之前发生。
  *
  *   <Custom Defeat Effect>
  *    code
@@ -415,6 +445,8 @@ Yanfly.BSC.version = 1.12;
  *   This will only apply to the player's party. If this state can expire at
  *   the end of battle, this effect will not occur as state expiration will
  *   occur before this effect will happen.
+ *   如果一方被击败，这种效果将在战斗结束时发生。这仅适用于玩家的队伍。
+ *   如果此状态可以在战斗结束时过期，则不会发生此效果，因为状态过期将在此效果发生之前发生。
  *
  * ============================================================================
  * Lunatic Mode - Custom Action Effects
@@ -436,6 +468,18 @@ Yanfly.BSC.version = 1.12;
  *   These occur regardless if the action is successfully hit.
  *   - Defender: Deselect
  *   - Attacker: Conclude
+ *   操作开始时触发的效果
+ *   - 攻击方：发起 Initiate
+ *   - 被攻击方：选择 Select
+ *   动作连接为成功命中，如果错过或躲避，则跳过，成功命中时触发以下效果
+ *   - 攻击方：确认 Confirm
+ *   - 被攻击方：反应 React
+ *   伤害施加到防御者身上时触发以下效果
+ *   - 被攻击方：回应 Respond
+ *   - 攻击方：建立 Establish
+ *   无论操作是否成功命中，都会触发以下效果
+ *   - 被攻击方：取消选择 Deselect
+ *   - 攻击方：结束 Conclude
  *
  * State Notetags:
  *
@@ -450,6 +494,8 @@ Yanfly.BSC.version = 1.12;
  *   This effect will run when the battler selects a target. This will occur
  *   before hit/miss/evade confirmation and damage execution. This effect will
  *   run before everything else has taken course.
+ *   此效果将在战斗者选择目标时运行。这将在命中/未命中/躲避确认和损坏执行之前发生。
+ *   这种效果将在其他一切发生之前运行。
  *
  *   <Custom Select Effect>
  *    code
@@ -458,6 +504,8 @@ Yanfly.BSC.version = 1.12;
  *   This effect will run when the battler is selected as a target. This will
  *   occur before hit/miss/evade confirmation and damage execution. This effect
  *   will run after <Custom Initiate Effect> before everything else has ran.
+ *   当战斗者被选为目标时，此效果将运行。这将在命中/未命中/躲避确认和损坏执行之前发生。
+ *   此效果将在<Custom Initiate Effect>之后运行，然后其他所有内容都运行。
  *
  *   <Custom Confirm Effect>
  *    code
@@ -466,6 +514,10 @@ Yanfly.BSC.version = 1.12;
  *   This effect will run when the battler connects a hit and before damage
  *   execution occurs. This effect will run after <Custom Initiate Effect> and
  *   <Custom Select Effect> and before everything else.
+ *   此效果将在战斗者连接命中时和伤害执行发生之前运行。
+ *   此效果将在<Custom Initiate Effect>和<Custom Select Effect>之后运行，
+ *   并在其他所有内容之前运行。
+ *   此时value变量为伤害数值。
  *
  *   <Custom React Effect>
  *    value -= 100;
@@ -476,6 +528,9 @@ Yanfly.BSC.version = 1.12;
  *   This effect will run before damage calculation occurs and will return the
  *   'value' variable as a damage modifier. After <Custom Confirm Effect>, this
  *   effect will run.
+ *   当战斗者被选为目标时，此效果将运行。仅当操作连接时，才会发生这种情况，
+ *   并且将在损害执行之前发生。此效果将在伤害计算发生之前运行，
+ *   并将返回“value”变量作为伤害修饰符。<自定义确认效果>后，将运行此效果。
  *
  *   <Custom Respond Effect>
  *    code
@@ -486,7 +541,10 @@ Yanfly.BSC.version = 1.12;
  *   This effect will run after damage calculation occurs. The 'value' variable
  *   is equal to the damage dealt to the battler. This is the first effect to
  *   run after damage execution has taken place.
- *
+ *   当战斗者被选为目标时，此效果将运行。仅当操作连接时才会发生这种情况，
+ *   并且将在损害执行后发生。此效果将在损失计算发生后运行。此时
+ *   “value”变量等于对战斗者造成的伤害。这是在执行损害后运行的第一个效果。
+ * 
  *   <Custom Establish Effect>
  *    code
  *    code
@@ -494,6 +552,8 @@ Yanfly.BSC.version = 1.12;
  *   This effect will run when the battler connects a hit and after damage
  *   execution occurs. This effect will run after <Custom Respond Effect> has
  *   occurred and before everything else.
+ *   此效果将在战斗者连接命中和伤害执行后运行。
+ *   此效果将在<Custom Respond Effect>发生后和其他所有内容之前运行。
  *
  *   <Custom Deselect Effect>
  *    code
@@ -502,46 +562,58 @@ Yanfly.BSC.version = 1.12;
  *   This effect will run when the battler is selected as a target. This will
  *   occur after hit/miss/evade confirmation and damage execution. This effect
  *   will run after everything else has taken course.
- *
+ *   当战斗者被选为目标时，此效果将运行。这将在命中/未命中/躲避确认和损坏执行后直接发生。
+ *   这种效果将在其他一切都顺其自然之后运行。
+ * 
  *   <Custom Conclude Effect>
  *    code
  *    code
  *   </Custom Conclude Effect>
  *   This is the final effect to be run after the battler selects a target and
  *   will occur after hit/miss/evade confirmation and damage execution.
+ *   这是战斗人员选择目标后运行的最终效果，将在命中/未命中/躲避确认和伤害执行后发生。
  *
  * ============================================================================
  * Lunatic Mode - State Counters
  * ============================================================================
  *
- * State Counters are newly added features to suplement states. They are used
- * purely in custom manners, which means they do not serve any function by
- * themselves. State Counters can be used to note a number of stacks, a stored
- * percentage, display a message, etc. All of it is purely updated based on
- * JavaScript functions.
+ *  State Counters are newly added features to suplement states. They are used
+ *  purely in custom manners, which means they do not serve any function by
+ *  themselves. State Counters can be used to note a number of stacks, a stored
+ *  percentage, display a message, etc. All of it is purely updated based on
+ *  JavaScript functions.
+ *  状态计数器是新增到补充状态的功能。它们纯粹以自定义方式使用，这意味着
+ *  它们本身没有任何功能。状态计数器可用于记录多个堆栈、
+ *  存储的百分比、显示消息等。所有这些都纯粹是基于JavaScript函数更新的。
  *
  * ---
  *
  * There are a couple of notetags you can use for states:
+ * 有几个注释标签可用于状态：
  *
  *   <Counter Font Size>
  *   This adjusts the font size of the counter.
+ *   这将调整计数器的字体大小。
  *
  *   <Counter Alignment: left>
  *   <Counter Alignment: center>
  *   <Counter Alignment: right>
  *   This changes the alignment of the counter text.
+ *   这将更改计数器文本的对齐方式。
  *
  *   <Counter Buffer X: +x>
  *   <Counter Buffer X: -x>
  *   This adjusts the X buffer range for the counter text.
+ *   这将调整计数器文本的 X 缓冲区范围。
  *
  *   <Counter Buffer Y: +x>
  *   <Counter Buffer Y: -x>
  *   This adjusts the Y buffer range for the counter text.
+ *   这将调整计数器文本的 Y 缓冲区范围。
  *
  *   <Counter Text Color: x>
  *   This changes the font color of the text to the text color x.
+ *   这会将文本的字体颜色更改为文本颜色 x。
  *
  * ---
  *
@@ -549,23 +621,29 @@ Yanfly.BSC.version = 1.12;
  *
  *   battler.clearStateCounters();
  *   - This will clear all the counter values for all states.
- *
+ *   - 这将清除所有状态的所有计数器值。
+ * 
  *   battler.setStateCounter(stateId, value);
  *   - This will set the counter value for the particular state to 'value'.
+ *   - 这会将特定状态的计数器值设置为“value”。
  *
  *   battler.addStateCounter(stateId, value);
  *   - This will add to the counter value for the state. The counter must be
  *   a number in order for this to work.
- *
+ *   - 这将添加到状态的计数器值，必须是数字才能正常工作。
+ * 
  *   battler.clampStateCounter(stateId, min, max);
  *   - This will set a minimum and maximum value for the counter value of the
  *   particular state. The counter must be a number in order for this to work.
+ *   - 这将为特定状态的计数器值设置最小值和最大值。必须是数字才能正常工作。
  *
  *   battler.removeStateCounter(stateId)
  *   - This will clear the counter value for the state.
+ *   - 这将清除状态的计数器值。
  *
  *   battler.getStateCounter(stateId)
  *   - This will return the current state counter value.
+ *   - 这将返回当前状态计数器值。
  *
  * ============================================================================
  * Changelog
