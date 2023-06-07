@@ -498,6 +498,8 @@ Yanfly.DMG.version = 1.06;
  * For those who think the damage formula box is too small and would like to
  * use the notebox instead to declare the damage formula, you can use the
  * notetags below:
+ * 对于那些认为伤害公式框太小并希望使用注释框来注释伤害公式的人，
+ * 您可以使用下面的注释标签：
  *
  * Skill and Item Notetags:
  *   <damage formula>
@@ -508,26 +510,37 @@ Yanfly.DMG.version = 1.06;
  *   strings in the middle as the formula instead. Keep in mind that using
  *   comments here will cancel out anything following after. New variables can
  *   be used, too, to make damage calculations a bit easier.
+ *   这将覆盖顶部的伤害公式，并使用中间的字符串作为公式。
+ *   请记住，在此处使用注释将取消后面的任何内容。也可以使用新变量来简化伤害计算。
  *
  *   value   - Refers to the amount that will become the base damage value.
+ *   指向将成为基本伤害值的变量。
  *   user    - Refers to the actor/enemy using the skill/item.
+ *   指向使用技能/物品的角色/敌人，即行动的发起者。
  *   subject - Refers to the actor/enemy using the skill/item.
+ *   指向使用技能/物品的角色/敌人。
  *   target  - Refers to the target actor/enemy on the receiving end of
  *             the skill/item.
- *
+ *   指向身为技能/物品接收端的目标角色/敌人。
+ * 
  * ============================================================================
  * Lunatic Mode - Damage Steps
  * ============================================================================
  *
- * The damage formula isn't all there is to calculating the damage that appears
- * at the very end. In this plugin's parameters towards the bottom, you'll see
- * a large list of Damage Steps. Each one of these steps is a line of code that
- * the damage count will run through in order to calculate and finalize the
- * damage output.
+ *  The damage formula isn't all there is to calculating the damage that appears
+ *  at the very end. In this plugin's parameters towards the bottom, you'll see
+ *  a large list of Damage Steps. Each one of these steps is a line of code that
+ *  the damage count will run through in order to calculate and finalize the
+ *  damage output.
+ *  伤害公式并不是计算最后出现的伤害的全部。在这个插件底部的参数中，
+ *  你会看到一大堆伤害步骤。这些步骤中的每一个都是一行代码，伤害计数将贯穿这些代码，
+ *  以便计算和最终确定损害输出。
  *
- * The purpose of those parameters is to allow you ease of access on where you
- * want to insert code that is your own or custom code provided by another
- * plugin. Here's a quick reference on how the original damage flow looked like:
+ *  purpose of those parameters is to allow you ease of access on where you
+ *  want to insert code that is your own or custom code provided by another
+ *  plugin. Here's a quick reference on how the original damage flow looked like:
+ *  这些参数的目的是让您轻松访问要插入您自己的代码或另一个插件提供的自定义代码的位置。
+ *  以下是有关原始伤害流程的快速参考：
  *
  * Game_Action.prototype.makeDamageValue = function(target, critical) {
  *     var item = this.item();
@@ -553,8 +566,9 @@ Yanfly.DMG.version = 1.06;
  *
  * In the vein of keeping everything organized, the following lines have been
  * incorporated into new functions:
+ * 为了使一切井井有条，以下行已合并到新功能中：
  *
- * Formula                               New Function
+ * Formula（原始指令）                      New Function（插件代码）
  *   value *= target.pdr                   value = this.applyPhysicalRate
  *   value *= target.mdr                   value = this.applyMagicalRate
  *   value *= target.rec                   value = this.applyHealRate
@@ -567,11 +581,14 @@ Yanfly.DMG.version = 1.06;
  * If you have YEP_BattleEngineCore.js installed with this plugin located
  * underneath it in the Plugin Manager, you can make use of these extra
  * damage related action sequences.
- *
+ * 如果您在插件管理器中安装了位于其下方的YEP_BattleEngineCore.js插件，
+ * 则可以使用这些与伤害相关的额外操作序列。
+ * 
  *=============================================================================
  * BYPASS DAMAGE CAP
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * This will override all damage caps. This is applied to healing, too.
+ * 这将覆盖所有伤害上限。这也适用于治疗。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: bypass damage cap
  *=============================================================================
@@ -582,6 +599,7 @@ Yanfly.DMG.version = 1.06;
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * This sets the action's damage cap to x, overriding all over damage caps in
  * play except its own. This will also apply to healing, too.
+ * 这会将动作的伤害上限设置为 x，覆盖游戏中除自身之外的所有伤害上限。这也适用于治疗。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: damage cap: 999
  *                healing cap: 999999
@@ -595,6 +613,8 @@ Yanfly.DMG.version = 1.06;
  * This changes the damage rate across all types of damage (physical, magical,
  * and certain hit). The damage rate is reset at the end of each action
  * sequence. If you use a variable, it is treated as a percentage.
+ * 这会改变所有类型的伤害（物理、魔法和必定命中）的伤害率。
+ * 伤害率在每个动作序列结束时重置。如果使用变量，则将其视为百分比。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: damage rate: 50%
  *                damage rate: 8.667
@@ -609,6 +629,8 @@ Yanfly.DMG.version = 1.06;
  * This adds a flat damage across all types of damage (physical, magical, and
  * certain hit). The flat damage is reset at the end of each action sequence.
  * If you use a variable, it is added onto the damage.
+ * 这会在所有类型的伤害（物理、魔法和特定命中）上增加额外伤害。
+ * 额外伤害在每个动作序列结束时重置。如果使用变量，则会将其添加到伤害中。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: flat damage: +100
  *                flat damage: -250
@@ -624,6 +646,8 @@ Yanfly.DMG.version = 1.06;
  * (physical, magical, and certain hit). The flat damage and heal is reset at
  * the end of each action sequence. If you use a variable, it is added onto the
  * damage and heal.
+ * 这会增加平坦的全局伤害，并在所有类型的伤害（物理、魔法和特定命中）中恢复。
+ * 平坦的伤害和治疗在每个动作序列结束时重置。如果您使用变量，它会添加到伤害和治疗中。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: flat global: +100
  *                flat global: -250
@@ -638,6 +662,8 @@ Yanfly.DMG.version = 1.06;
  * This adds a flat heal across all types of damage (physical, magical, and
  * certain hit). The flat heal is reset at the end of each action sequence.
  * If you use a variable, it is added onto the heal.
+ * 这在所有类型的伤害（物理、魔法和特定命中）上都增加了平坦的治疗。
+ * 平坦愈合在每个动作序列结束时重置。如果使用变量，则会将其添加到修复中。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: flat heal: +100
  *                flat heal: -250
@@ -653,6 +679,8 @@ Yanfly.DMG.version = 1.06;
  * (physical, magical, and certain hit). The damage and healing rates are reset
  * at the end of each action sequence. If you use a variable, it is treated as
  * a percentage.
+ * 这会改变所有类型的伤害（物理、魔法和特定命中）的伤害率和治疗率。
+ * 伤害和治疗率在每个动作序列结束时重置。如果使用变量，则将其视为百分比。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: global rate: 50%
  *                global rate: 8.667
@@ -667,6 +695,8 @@ Yanfly.DMG.version = 1.06;
  * This changes the healing rate across all types of damage (physical, magical,
  * and certain hit). The healing rate is reset at the end of each action
  * sequence. If you use a variable, it is treated as a percentage.
+ * 这会改变所有类型的伤害（物理、魔法和特定命中）的治疗率。
+ * 在每个动作序列结束时重置治疗速率。如果使用变量，则将其视为百分比。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: heal rate: 50%
  *                heal rate: 8.667
@@ -679,6 +709,7 @@ Yanfly.DMG.version = 1.06;
  * This will reset the damage cap implemented by the Damage Cap action
  * sequence. This will also reset the effects of the Bypass Damage Cap
  * action sequence.
+ * 这将重置由伤害上限操作序列实现的伤害上限。这也将重置绕过伤害上限动作序列的效果。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: reset damage cap
  *=============================================================================
@@ -689,6 +720,8 @@ Yanfly.DMG.version = 1.06;
  * This will cause all damage and healing modifiers caused by action sequences
  * to reset. While they normally reset at the end of each action sequence, this
  * will allow you to do it manually.
+ * 这将导致动作序列导致的所有伤害和治疗修改器重置。
+ * 虽然它们通常在每个操作序列结束时重置，但这将允许您手动执行此操作。
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Usage Example: reset damage modifiers
  *=============================================================================
