@@ -313,12 +313,12 @@ Yanfly.Skill.version = 1.11;
  *   <Post-Damage Eval>
  *    code
  *    code
- *   <Post-Damage Eval>
+ *   </Post-Damage Eval>
  *
  *   <After Eval>
  *    code
  *    code
- *   <After Eval>
+ *   </After Eval>
  *   如果你想对技能使用自定义特效，你可以在技能（或物品）的注释栏分别
  *   插入对应的注释，它运行注释之间出现的代码。然而，在注释中使用
  *   任一形式的comment会打断后面的代码。

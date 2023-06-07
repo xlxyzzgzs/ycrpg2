@@ -554,6 +554,7 @@ Yanfly.BSC.version = 1.12;
  *   occurred and before everything else.
  *   此效果将在战斗者连接命中和伤害执行后运行。
  *   此效果将在<Custom Respond Effect>发生后和其他所有内容之前运行。
+ *   此时value变量的值为伤害数值；
  *
  *   <Custom Deselect Effect>
  *    code
