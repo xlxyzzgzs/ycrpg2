@@ -33,6 +33,13 @@ var SF_Plugins = SF_Plugins || {};
         return this.subject().hit;
     };
 
+    Game_Action.prototype.attackCritical = function (target) {
+        if (!this.item().damage.critical) {
+            return 0;
+        }
+        return this.subject().cri - target.cev;
+    };
+
     SF_Objects.Game_Action_apply = Game_Action.prototype.apply;
     Game_Action.prototype.apply = function (target) {
         if (this.isAttack() || this.isSkill()) {
@@ -49,7 +56,7 @@ var SF_Plugins = SF_Plugins || {};
             result.drain = this.isDrain();
             if (result.isHit()) {
                 if (this.item().damage.type > 0) {
-                    result.critical = Math.random() < this.subject().cri - target.cev;
+                    result.critical = Math.random() < this.attackCritical(target);
                     var value = this.makeDamageValue(target, result.critical);
                     this.executeDamage(target, value);
                 }
