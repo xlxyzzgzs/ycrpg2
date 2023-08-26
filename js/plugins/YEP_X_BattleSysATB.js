@@ -279,10 +279,10 @@ Yanfly.ATB.version = 1.25;
  *   <ATB Speed: +x>   or   <ATB Speed: -x>
  *   <ATB Charge: +x>  or   <ATB Charge: -x>
  *   <ATB Gauge: +x>   or   <ATB Gauge: -x>
- *   Usable only during ATB. This increases or decreases the target's current
- *   speed or charge by x. If 'speed' or 'charge' is used, it will only affect
- *   those gauges while in the respective phase. If 'gauge' is used, it will
- *   affect either.
+ *   仅在 ATB 期间可用。这会增加或减少目标的行动槽或咏唱槽 。
+ *   如果使用“Speed”或“Charge”，则只会影响
+ *   在各自的阶段影响目标。如果使用“Gauge”，它将
+ *   在相应阶段影响其中之一。
  *
  *   <ATB Speed: +x%>   or   <ATB Speed: -x%>
  *   <ATB Charge: +x%>  or   <ATB Charge: -x%>
