@@ -261,17 +261,17 @@ Yanfly.SCD.version = 1.11;
  *   cooldown = x;
  *   cooldown += x;
  *   </Cooldown Eval>
- *   Insert these two tags into the skill's notebox to give it a unique way to
- *   determine the cooldown's value. The 'cooldown' variable determines the
- *   amount of turns for the cooldown.
+ *   
+ *   将这两个标签插入技能的记事框中，为其提供一种确定冷却时间值的独特方法。
+ *   “cooldown”变量确定冷却时间的回合数。
  *
  *   <Warmup Eval>
  *   warmup = x;
  *   warmup += x;
  *   </Warmup Eval>
- *   Insert these two tags into the skill's notebox to give it a unique way to
- *   determine the warmup's value. The 'warmup' variable determines the amount
- *   of turns for the warmup.
+ *   
+ *   将这两个标签插入技能的记事框中，为其提供确定预热值的独特方法。
+ *   “warmup”变量确定预热的回合数。
  *
  * ============================================================================
  * Yanfly Engine Plugins - Battle Engine Extension - Action Sequence Commands
