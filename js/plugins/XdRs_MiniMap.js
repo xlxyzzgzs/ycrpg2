@@ -3,10 +3,10 @@
 //==================================================================================================================
 /*:
  * @plugindesc 实景小地图 。
- * 
+ *
  * @author 芯☆淡茹水
- * 
- * @help 
+ *
+ * @help
  *---------------------------------------------------------------------------------------------------------------------------------
  * 〓 说明 〓
  * 1，小地图显示对象（角色+事件）所备注的图标，来表示对象在小地图上的位置。
@@ -15,7 +15,7 @@
  *
  * 2，事件通过备注以及当前页事件项，来区分事件类型。
  *    具体备注为：
- *    Npc    =>  <Npc>     
+ *    Npc    =>  <Npc>
  *    敌人   =>  <Enemy>        //事件当前页需要有 战斗项 。
  *    传送点 =>  <Transfer>     //事件当前页需要有 传送项 。
  *    门     =>  <Door>         //事件当前页需要有 传送项 。
@@ -35,10 +35,10 @@
  *
  *---------------------------------------------------------------------------------------------------------------------------------
  * 〓 插件命令 〓
- * 
+ *
  * 收起小地图  =>  RetractMiniMap
  * ※例如：用于剧情演出时，小地图遮挡住剧情人物的情况※
- * 
+ *
  *---------------------------------------------------------------------------------------------------------------------------------
  *
  * @param key
@@ -56,7 +56,7 @@
  * @param miniSize
  * @desc 迷你按钮的尺寸（宽 && 高）
  * @default 24
- * 
+ *
  * @param dpFollower
  * @desc 是否将跟随的队员加入到小地图。（是：Y；否：N）
  * @default Y
@@ -72,7 +72,7 @@
  * @param dpDc2
  * @desc 门图标动态。（是：Y；否：N）
  * @default Y
- * 
+ *
  * @param dpMapName
  * @desc 是否显示地图名。（是：Y；否：N）
  * @default Y
@@ -84,7 +84,7 @@
  * @param dpScale
  * @desc 是否显示小地图比例。（是：Y；否：N）
  * @default Y
- * 
+ *
  * @param color1
  * @desc 坐标名（X/Y）文字颜色。（格式：红,绿,蓝）
  * @default 200,0,200
@@ -124,14 +124,14 @@
  * @param icon7
  * @desc 小地图隐藏时，快捷按钮显示的图标序号。
  * @default 48
- * 
-*/
+ *
+ */
 //==================================================================================================================
-; var XdRsData = XdRsData || {};
+var XdRsData = XdRsData || {};
 XdRsData.miniMap = {};
-XdRsData.miniMap.parameters = PluginManager.parameters('XdRs_MiniMap');
+XdRsData.miniMap.parameters = PluginManager.parameters("XdRs_MiniMap");
 //==================================================================================================================
-Input.keyMapper[+XdRsData.miniMap.parameters['key']] = 'miniMap';
+Input.keyMapper[+XdRsData.miniMap.parameters["key"]] = "miniMap";
 //==================================================================================================================
 Tilemap.prototype.affixMiniMapSign = function () {
     this._miniMapSign = true;
@@ -146,17 +146,24 @@ Tilemap.prototype._updateLayerPositions = function (startX, startY) {
     else XdRsData.miniMap.TMP_updateLayerPositions.call(this, startX, startY);
 };
 Tilemap.prototype.updateMiniMapPositions = function () {
-    var ox = Math.floor(this.origin.x), oy = Math.floor(this.origin.y);
-    var x2 = ox.mod(this._layerWidth), y2 = oy.mod(this._layerHeight);
+    var ox = Math.floor(this.origin.x),
+        oy = Math.floor(this.origin.y);
+    var x2 = ox.mod(this._layerWidth),
+        y2 = oy.mod(this._layerHeight);
     var w1 = ox < this._tileWidth ? this._width - x2 : this._layerWidth - x2;
     var h1 = oy < this._tileHeight ? this._height - y2 : this._layerHeight - y2;
-    var w2 = this._width - w1, h2 = this._height - h1;
+    var w2 = this._width - w1,
+        h2 = this._height - h1;
     for (var i = 0; i < 2; i++) {
         var children = !i ? this._lowerLayer.children : this._upperLayer.children;
-        children[0].move(0, 0, w1, h1); children[0].setFrame(x2, y2, w1, h1);
-        children[1].move(w1, 0, w2, h1); children[1].setFrame(0, y2, w2, h1);
-        children[2].move(0, h1, w1, h2); children[2].setFrame(x2, 0, w1, h2);
-        children[3].move(w1, h1, w2, h2); children[3].setFrame(0, 0, w2, h2);
+        children[0].move(0, 0, w1, h1);
+        children[0].setFrame(x2, y2, w1, h1);
+        children[1].move(w1, 0, w2, h1);
+        children[1].setFrame(0, y2, w2, h1);
+        children[2].move(0, h1, w1, h2);
+        children[2].setFrame(x2, 0, w1, h2);
+        children[3].move(w1, h1, w2, h2);
+        children[3].setFrame(0, 0, w2, h2);
     }
 };
 //==================================================================================================================
@@ -165,10 +172,10 @@ XdRsData.miniMap.side = function () {
 };
 XdRsData.miniMap.setupDisplaySize = function () {
     try {
-        this._displayWidth = eval(this.parameters['width']);
-        this._displayHeight = eval(this.parameters['height']);
+        this._displayWidth = eval(this.parameters["width"]);
+        this._displayHeight = eval(this.parameters["height"]);
     } catch (e) {
-        alert('小地图宽/高参数设置错误，恢复到默认尺寸。');
+        alert("小地图宽/高参数设置错误，恢复到默认尺寸。");
         this._displayWidth = Graphics.width / 3;
         this._displayHeight = Graphics.height / 3;
     }
@@ -220,18 +227,18 @@ XdRsData.miniMap.loadTileset = function (tilemap) {
     }
 };
 XdRsData.miniMap.getDpState = function (sym) {
-    return this.parameters['dp' + sym] === 'Y';
+    return this.parameters["dp" + sym] === "Y";
 };
 XdRsData.miniMap.getColor = function (n) {
-    var data = this.parameters['color' + n] || '255,255,255';
-    return 'rgb(' + data + ')';
+    var data = this.parameters["color" + n] || "255,255,255";
+    return "rgb(" + data + ")";
 };
 XdRsData.miniMap.getMiniIcon = function (kind) {
-    return this.parameters['icon' + kind] || 0;
+    return this.parameters["icon" + kind] || 0;
 };
 XdRsData.miniMap.isDynamic = function (kind) {
     if (![1, 2].contains(kind)) return false;
-    return this.getDpState('Dc' + kind);
+    return this.getDpState("Dc" + kind);
 };
 //==================================================================================================================
 XdRsData.miniMap.GSinitialize = Game_System.prototype.initialize;
@@ -241,7 +248,7 @@ Game_System.prototype.initialize = function () {
 };
 Game_System.prototype.initMiniMapData = function () {
     this._miniMapData = {};
-    this._miniMapData.scale = 0.2;  //缩放比例 （ 0.1 ~ 0.5之间较为合适，大了就失去小地图的意义）。
+    this._miniMapData.scale = 0.2; //缩放比例 （ 0.1 ~ 0.5之间较为合适，大了就失去小地图的意义）。
     this._miniMapData.visible = true;
     this._miniMapData.opacity = 195;
 };
@@ -264,7 +271,7 @@ Game_Character.prototype.miniIcon = function () {
     return this._miniIcon || 0;
 };
 Game_Character.prototype.isMiniVisible = function () {
-    return this._characterName !== '';
+    return this._characterName !== "";
 };
 //==================================================================================================================
 XdRsData.miniMap.GPrefresh = Game_Player.prototype.refresh;
@@ -277,7 +284,7 @@ Game_Player.prototype.refreshMiniIcon = function () {
     this._miniIcon = actor ? actor.miniIcon() : 0;
 };
 Game_Player.prototype.miniMapMembers = function () {
-    if (!XdRsData.miniMap.getDpState('Follower')) return [this];
+    if (!XdRsData.miniMap.getDpState("Follower")) return [this];
     return this.followers()._data.concat([this]);
 };
 //==================================================================================================================
@@ -330,15 +337,18 @@ Game_Event.prototype.isMiniVisible = function () {
     return Game_Character.prototype.isMiniVisible.call(this);
 };
 Game_Event.prototype.hasCode = function (code) {
-    return this.page() && this.page().list.some(function (l) {
-        return l.code === code;
-    });
+    return (
+        this.page() &&
+        this.page().list.some(function (l) {
+            return l.code === code;
+        })
+    );
 };
 //==================================================================================================================
 XdRsData.miniMap.GIpluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function (command, args) {
     XdRsData.miniMap.GIpluginCommand.call(this, command, args);
-    command === 'RetractMiniMap' && $gameSystem.setMiniMapData('visible', false);
+    command === "RetractMiniMap" && $gameSystem.setMiniMapData("visible", false);
 };
 //==================================================================================================================
 function Window_MiniMap() {
@@ -375,20 +385,20 @@ Window_MiniMap.prototype.standardFontSize = function () {
 };
 Window_MiniMap.prototype.scaleText = function () {
     var scale = $gameSystem.miniMapData().scale;
-    return '' + (1 / scale).toFixed(1) + ' : ' + 1;
+    return "" + (1 / scale).toFixed(1) + " : " + 1;
 };
 Window_MiniMap.prototype.mapNameColor = function () {
     var data = $dataMap.note.match(/<NameColor:(\S+)>/);
-    data = data ? RegExp.$1 : '255,255,255';
-    return 'rgb(' + data + ')';
+    data = data ? RegExp.$1 : "255,255,255";
+    return "rgb(" + data + ")";
 };
 Window_MiniMap.prototype.createSprite = function () {
     this._sprite = new Sprite_MiniMap();
     this.addChildToBack(this._sprite);
 };
 Window_MiniMap.prototype.drawInfo = function () {
-    ['MapName', 'Place', 'Scale'].forEach(function (sym) {
-        XdRsData.miniMap.getDpState(sym) && this['draw' + sym]();
+    ["MapName", "Place", "Scale"].forEach(function (sym) {
+        XdRsData.miniMap.getDpState(sym) && this["draw" + sym]();
     }, this);
 };
 Window_MiniMap.prototype.drawMapName = function () {
@@ -401,15 +411,16 @@ Window_MiniMap.prototype.drawPlace = function () {
     this._dataX = $gamePlayer.x;
     this._dataY = $gamePlayer.y;
     var w = Math.min(this.contents.width / 3, 90);
-    var x1 = this.contents.width - w, x2 = x1 + w / 2;
+    var x1 = this.contents.width - w,
+        x2 = x1 + w / 2;
     this.contents.clearRect(x1 - 4, 0, w, this.lineHeight() + 8);
     this.changeTextColor(XdRsData.miniMap.getColor(1));
-    var cw = this.contents.measureTextWidth('X:') + 4;
-    this.drawText('X:', x1, 4, cw);
-    this.drawText('Y:', x2, 4, cw);
+    var cw = this.contents.measureTextWidth("X:") + 4;
+    this.drawText("X:", x1, 4, cw);
+    this.drawText("Y:", x2, 4, cw);
     this.changeTextColor(XdRsData.miniMap.getColor(2));
-    this.drawText('' + this._dataX, x1 + cw, 4, 30);
-    this.drawText('' + this._dataY, x2 + cw, 4, 30);
+    this.drawText("" + this._dataX, x1 + cw, 4, 30);
+    this.drawText("" + this._dataY, x2 + cw, 4, 30);
 };
 Window_MiniMap.prototype.drawScale = function () {
     var w = this.contents.width / 4;
@@ -417,7 +428,7 @@ Window_MiniMap.prototype.drawScale = function () {
     var x = this.contents.width - w;
     this.contents.clearRect(x, y, w, this.lineHeight());
     this.changeTextColor(XdRsData.miniMap.getColor(3));
-    this.drawText(this.scaleText(), x, y, w, 'center');
+    this.drawText(this.scaleText(), x, y, w, "center");
 };
 Window_MiniMap.prototype.isPlayerTouched = function () {
     var lx = $gamePlayer.screenX() - 40;
@@ -425,13 +436,12 @@ Window_MiniMap.prototype.isPlayerTouched = function () {
     var ty = $gamePlayer.screenY() - 80;
     var by = $gamePlayer.screenY() + 20;
     if (rx < this.x || by < this.y) return false;
-    if (lx > (this.x + this.width)) return false;
-    if (ty > (this.y + this.height)) return false;
+    if (lx > this.x + this.width) return false;
+    if (ty > this.y + this.height) return false;
     return true;
 };
 Window_MiniMap.prototype.isPlayerMoved = function () {
-    return this._dataX !== $gamePlayer.x ||
-        this._dataY !== $gamePlayer.y;
+    return this._dataX !== $gamePlayer.x || this._dataY !== $gamePlayer.y;
 };
 Window_MiniMap.prototype.isVisibleChanged = function () {
     return this._isVisible !== $gameSystem.miniMapData().visible;
@@ -463,11 +473,11 @@ Window_MiniMap.prototype.updateVisible = function () {
     this._moving = true;
 };
 Window_MiniMap.prototype.updatePlayerMove = function () {
-    if (!XdRsData.miniMap.getDpState('Place')) return;
+    if (!XdRsData.miniMap.getDpState("Place")) return;
     this.isPlayerMoved() && this.drawPlace();
 };
 Window_MiniMap.prototype.updatePlayerTouch = function () {
-    if (!this._isVisible || !XdRsData.miniMap.getDpState('Hide')) return;
+    if (!this._isVisible || !XdRsData.miniMap.getDpState("Hide")) return;
     //this.visible = !this.isPlayerTouched();
     this._sprite.opacity = this.opacity = this.isPlayerTouched() ? 50 : $gameSystem.miniMapData().opacity;
 };
@@ -492,7 +502,7 @@ Mini_Button.prototype.sh = function () {
     return this.height / 2;
 };
 Mini_Button.prototype.size = function () {
-    return +XdRsData.miniMap.parameters['miniSize'] || 24;
+    return +XdRsData.miniMap.parameters["miniSize"] || 24;
 };
 Mini_Button.prototype.createBitmap = function () {
     this.bitmap = new Bitmap(this.size(), this.size());
@@ -502,24 +512,27 @@ Mini_Button.prototype.drawArrow = function () {
     this._lastState = $gameSystem.miniMapData().visible;
     var n = this._lastState ? 6 : 7;
     var index = XdRsData.miniMap.getMiniIcon(n);
-    var bitmap = ImageManager.loadSystem('IconSet');
-    var pw = Window_Base._iconWidth, ph = Window_Base._iconHeight;
-    var sx = index % 16 * pw, sy = Math.floor(index / 16) * ph;
+    var bitmap = ImageManager.loadSystem("IconSet");
+    var pw = Window_Base._iconWidth,
+        ph = Window_Base._iconHeight;
+    var sx = (index % 16) * pw,
+        sy = Math.floor(index / 16) * ph;
     this.bitmap.blt(bitmap, sx, sy, pw, ph, 0, 0, this.size(), this.size());
 };
 Mini_Button.prototype.changeVisible = function () {
     SoundManager.playOk();
     var state = $gameSystem.miniMapData().visible;
-    $gameSystem.setMiniMapData('visible', !state);
+    $gameSystem.setMiniMapData("visible", !state);
 };
 Mini_Button.prototype.isStateChanged = function () {
     return this._lastState !== $gameSystem.miniMapData().visible;
 };
 Mini_Button.prototype.isTouch = function () {
-    var x = TouchInput.x, y = TouchInput.y;
-    var bx = this.x - this.sw(), by = this.y - this.sh();
-    return x > bx && x < (bx + this.width) &&
-        y > by && y < (by + this.height);
+    var x = TouchInput.x,
+        y = TouchInput.y;
+    var bx = this.x - this.sw(),
+        by = this.y - this.sh();
+    return x > bx && x < bx + this.width && y > by && y < by + this.height;
 };
 Mini_Button.prototype.press = function () {
     this.scale = new Point(0.9, 0.9);
@@ -536,7 +549,7 @@ Mini_Button.prototype.updateState = function () {
     this.isStateChanged() && this.drawArrow();
 };
 Mini_Button.prototype.updateInput = function () {
-    Input.isTriggered('miniMap') && this.changeVisible();
+    Input.isTriggered("miniMap") && this.changeVisible();
     if (!TouchInput.isTriggered()) return;
     this.isTouch() && this.press();
 };
@@ -575,7 +588,12 @@ Sprite_MiniMap.prototype.createTileMap = function () {
 };
 Sprite_MiniMap.prototype.createParts = function () {
     this._parts = [];
-    var data = $gameMap.events().concat($gamePlayer.miniMapMembers());
+    var data = $gameMap
+        .events()
+        .filter((event) => {
+            return !event._erased;
+        })
+        .concat($gamePlayer.miniMapMembers());
     data.forEach(function (e) {
         var part = new Sprite_MiniPart(e);
         this._parts.push(part);
@@ -597,11 +615,10 @@ Sprite_MiniMap.prototype.realY = function (y, add) {
     return y - this._miniY * this._scale + add;
 };
 Sprite_MiniMap.prototype.isScrolled = function () {
-    return this._dataX !== this._miniX ||
-        this._dataY !== this._miniY;
+    return this._dataX !== this._miniX || this._dataY !== this._miniY;
 };
 Sprite_MiniMap.prototype.setPosition = function () {
-    var x = y = XdRsData.miniMap.side();
+    var x = (y = XdRsData.miniMap.side());
     var dw = XdRsData.miniMap.displayWidth();
     var dh = XdRsData.miniMap.displayHeight();
     x = Math.max(x, (dw - this.width) / 2 + x);
@@ -611,7 +628,8 @@ Sprite_MiniMap.prototype.setPosition = function () {
 Sprite_MiniMap.prototype.refreshScroll = function () {
     var mw = XdRsData.miniMap.realMapWidth();
     var mh = XdRsData.miniMap.realMapHeight();
-    var tw = this._tileMap.width, th = this._tileMap.height;
+    var tw = this._tileMap.width,
+        th = this._tileMap.height;
     this._miniX = this.playerX() - tw / 2;
     this._miniY = this.playerY() - th / 2;
     this._miniX = Math.max(0, Math.min(mw - tw, this._miniX));
@@ -627,7 +645,8 @@ Sprite_MiniMap.prototype.updateScroll = function () {
 };
 Sprite_MiniMap.prototype.updateScrolled = function () {
     if (!this.visible || !this.isScrolled()) return;
-    this._dataX = this._miniX; this._dataY = this._miniY;
+    this._dataX = this._miniX;
+    this._dataY = this._miniY;
     this._tileMap.origin.x = this._miniX;
     this._tileMap.origin.y = this._miniY;
 };
@@ -664,7 +683,7 @@ Sprite_MiniPart.prototype.bitmapHeight = function () {
 };
 Sprite_MiniPart.prototype.anchorY = function () {
     var scale = $gameSystem.miniMapData().scale;
-    return $gameMap.tileHeight() * scale / this.bitmap.height;
+    return ($gameMap.tileHeight() * scale) / this.bitmap.height;
 };
 Sprite_MiniPart.prototype.createBitmap = function () {
     this.bitmap = new Bitmap(this.bitmapWidth(), this.bitmapHeight());
@@ -678,10 +697,13 @@ Sprite_MiniPart.prototype.refresh = function () {
     this.visible && this.drawPart();
 };
 Sprite_MiniPart.prototype.drawPart = function () {
-    var bitmap = ImageManager.loadSystem('IconSet');
-    var pw = Window_Base._iconWidth, ph = Window_Base._iconHeight;
-    var sx = this._icon % 16 * pw, sy = Math.floor(this._icon / 16) * ph;
-    var bw = this.bitmap.width, bh = this.bitmap.height;
+    var bitmap = ImageManager.loadSystem("IconSet");
+    var pw = Window_Base._iconWidth,
+        ph = Window_Base._iconHeight;
+    var sx = (this._icon % 16) * pw,
+        sy = Math.floor(this._icon / 16) * ph;
+    var bw = this.bitmap.width,
+        bh = this.bitmap.height;
     this.bitmap.blt(bitmap, sx, sy, pw, ph, 0, 0, bw, bh);
 };
 Sprite_MiniPart.prototype.isEvent = function () {
@@ -695,18 +717,17 @@ Sprite_MiniPart.prototype.isDynamic = function () {
     return XdRsData.miniMap.isDynamic(this._obj.miniKind());
 };
 Sprite_MiniPart.prototype.isStateChanged = function () {
-    return this._icon !== this._obj.miniIcon() ||
-        this.visible !== this.isVisible();
+    return this._icon !== this._obj.miniIcon() || this.visible !== this.isVisible();
 };
 Sprite_MiniPart.prototype.isInScreen = function () {
     var w = XdRsData.miniMap.displayWidth();
     var h = XdRsData.miniMap.displayHeight();
     var side = XdRsData.miniMap.side();
-    return this.x >= 0 && this.y >= 0 && this.x < w && (this.y - side) < h;
+    return this.x >= 0 && this.y >= 0 && this.x < w && this.y - side < h;
 };
 Sprite_MiniPart.prototype.dyAdd = function () {
     var scale = $gameSystem.miniMapData().scale;
-    return 30 * scale / 10;
+    return (30 * scale) / 10;
 };
 Sprite_MiniPart.prototype.update = function () {
     Sprite.prototype.update.call(this);
@@ -733,10 +754,10 @@ Sprite_MiniPart.prototype.updatePosition = function () {
 XdRsData.miniMap.WOaddGeneralOptions = Window_Options.prototype.addGeneralOptions;
 Window_Options.prototype.addGeneralOptions = function () {
     XdRsData.miniMap.WOaddGeneralOptions.call(this);
-    this.addCommand('小地图透明度', 'miniMapOpacity');
+    this.addCommand("小地图透明度", "miniMapOpacity");
 };
 Window_Options.prototype.isMiniSymbol = function (symbol) {
-    return symbol === 'miniMapOpacity';
+    return symbol === "miniMapOpacity";
 };
 XdRsData.miniMap.WOstatusText = Window_Options.prototype.statusText;
 Window_Options.prototype.statusText = function (index) {
@@ -744,7 +765,7 @@ Window_Options.prototype.statusText = function (index) {
     return XdRsData.miniMap.WOstatusText.call(this, index);
 };
 Window_Options.prototype.miniValText = function () {
-    return '' + $gameSystem.miniMapData().opacity;
+    return "" + $gameSystem.miniMapData().opacity;
 };
 Window_Options.prototype.setMiniVal = function (type) {
     var val = $gameSystem.miniMapData().opacity;
@@ -754,7 +775,7 @@ Window_Options.prototype.setMiniVal = function (type) {
 Window_Options.prototype.changeMiniData = function (symbol, type) {
     SoundManager.playCursor();
     var value = this.setMiniVal(type);
-    $gameSystem.setMiniMapData('opacity', value);
+    $gameSystem.setMiniMapData("opacity", value);
     this.redrawItem(this.findSymbol(symbol));
 };
 XdRsData.miniMap.WOprocessOk = Window_Options.prototype.processOk;
@@ -785,7 +806,7 @@ Scene_Map.prototype.createAllWindows = function () {
 };
 Scene_Map.prototype.createMiniMap = function () {
     this._miniMap = new Window_MiniMap();
-    this._miniButton = new Mini_Button(this._miniMap.x + this._miniMap.width);//图标X轴位置
+    this._miniButton = new Mini_Button(this._miniMap.x + this._miniMap.width); //图标X轴位置
     this.addChild(this._miniMap);
     this.addChild(this._miniButton);
 };
