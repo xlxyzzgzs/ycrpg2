@@ -14,110 +14,110 @@ var SF_Plugins = SF_Plugins || {};
  * @desc random show when loading
  * @type text[]
  * @default []
- *  
+ *
  * @param initialize
  * @text  initialize function
  * @desc run this only once time when game started
  * @type note
  * @default ""
- * 
+ *
  * @param create
  * @text create function
  * @desc run this once when start loading
  * @type note
  * @default ""
- * 
+ *
  * @param update
  * @text update function
  * @desc run this each frame when in loading.
  * so you can use this to make animation
  * @type note
  * @default ""
- * 
+ *
  * @param terminate
  * @text terminate function
  * @desc run this when removed
  * @type note
  * @default ""
- * 
+ *
  * @param canExit
  * @text can Exit function
  * @desc call this each update after new scene loaded
  * @type note
  * @default "return true;"
- * 
+ *
  */
 
 /*~struct~picture:
- * 
+ *
  * @param pictures
  * @desc loop as gif files
  * @type file[]
  * @default []
- * 
+ *
  * @param initialize
  * @text initilize function
  * @desc run this only once time when game started
  * @type note
  * @default ""
- * 
- * 
+ *
+ *
  * @param create
  * @text create function
  * @desc run this once when start loading
  * @type note
  * @default ""
- * 
+ *
  * @param update
  * @text update function
  * @desc run this each frame when in loading.
  * so you can use this to make animation
  * @type note
  * @default ""
- * 
+ *
  * @param terminate
  * @text terminate function
  * @desc run this when removed
  * @type note
  * @default ""
- * 
+ *
  * @param canExit
  * @text can Exit function
  * @desc call this in each update after new scene loaded
  * @type note
  * @default "return true;"
- * 
+ *
  */
 
 /*:
  * @plugindesc Show Loading when loading
  * @author SaltedFish
  *
- * @help 
- * 
+ * @help
+ *
  * ============================================================================
  * Introduction
  * ============================================================================
- * 
+ *
  * require SF_InputBindControl.js and SF_SkipLoadError.js
  * loop these pictures as gif on loading game resource
- * 
+ *
  * ============================================================================
  * Changelog
  * ============================================================================
- * 
+ *
  * v1.0 - initial release
- * 
+ *
  * ============================================================================
  * End of Helpfile
  * ============================================================================
- * 
- * 
+ *
+ *
  * @param loading picture
  * @desc SHow when loading
  * @type struct<picture>[]
  * @default []
- * 
+ *
  * @param fade speed
  * @desc the nunmber of speed that alpha(0~1) change per frame
  * @type number
@@ -125,21 +125,21 @@ var SF_Plugins = SF_Plugins || {};
  * @max 1
  * @decimals 4
  * @default 0.1000
- * 
+ *
  * @param fading in
  * @desc loading scene fading in or not
  * @on enable
  * @off disable
  * @default true
  * @type boolean
- * 
+ *
  * @param fading out
  * @desc loading scene fading out or not
  * @on enable
  * @off disable
  * @default true
  * @type boolean
- * 
+ *
  * @param alpha min
  * @desc Scene fade alpha minimum
  * @type number
@@ -147,16 +147,16 @@ var SF_Plugins = SF_Plugins || {};
  * @min 0
  * @max 1
  * @default 0.5000
- * 
+ *
  * @param all tips
  * @desc show tips when animation loops
  * @type struct<tip>[]
- * 
+ *
  * @param disabled fade scene
  * @desc these scene may be not faded
  * @type text[]
  * @default ["Scene_Boot"]
- * 
+ *
  */
 //=============================================================================
 
@@ -166,7 +166,6 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
 }
 
 (function () {
-
     var SF_LoadingScene = {};
     SF_Plugins.SF_LoadingScene = SF_LoadingScene;
     SF_LoadingScene.version = 1.0;
@@ -175,21 +174,23 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
     // Parameter
     //=============================================================================
 
-    SF_LoadingScene.parameters = PluginManager.parameters('SF_LoadingScene');
-    SF_LoadingScene.fadeSpeed = Number(SF_LoadingScene.parameters['fade speed']) || 0.1;
-    SF_LoadingScene.needLoopSceneFadeIn = String(SF_LoadingScene.parameters['fade in']).toLowerCase() === "true";
-    SF_LoadingScene.needLoopSceneFadeOut = String(SF_LoadingScene.parameters['fade out']).toLowerCase() === "true";
-    SF_LoadingScene.alphaMin = Number(SF_LoadingScene.parameters['alpha min']);
-    SF_LoadingScene.loadingTips = JsonEx.parse(SF_LoadingScene.parameters['all tips'])
-        .map(function (tip) { return JsonEx.parse(tip); });
-    SF_LoadingScene.loadingPictures = JsonEx.parse(SF_LoadingScene.parameters['loading picture'])
-        .map(function (picture) { return JsonEx.parse(picture); });
+    SF_LoadingScene.parameters = PluginManager.parameters("SF_LoadingScene");
+    SF_LoadingScene.fadeSpeed = Number(SF_LoadingScene.parameters["fade speed"]) || 0.1;
+    SF_LoadingScene.needLoopSceneFadeIn = String(SF_LoadingScene.parameters["fade in"]).toLowerCase() === "true";
+    SF_LoadingScene.needLoopSceneFadeOut = String(SF_LoadingScene.parameters["fade out"]).toLowerCase() === "true";
+    SF_LoadingScene.alphaMin = Number(SF_LoadingScene.parameters["alpha min"]);
+    SF_LoadingScene.loadingTips = JsonEx.parse(SF_LoadingScene.parameters["all tips"]).map(function (tip) {
+        return JsonEx.parse(tip);
+    });
+    SF_LoadingScene.loadingPictures = JsonEx.parse(SF_LoadingScene.parameters["loading picture"]).map(function (
+        picture
+    ) {
+        return JsonEx.parse(picture);
+    });
 
+    SF_LoadingScene.disabledFadeScene = JsonEx.parse(SF_LoadingScene.parameters["disabled fade scene"]);
 
-    SF_LoadingScene.disabledFadeScene = JsonEx.parse(SF_LoadingScene.parameters['disabled fade scene']);
-
-
-    // fading_out_old_scene 
+    // fading_out_old_scene
     // fading_in_loading_scene
     // loop_loading_scene
     // fading_out_loading_scene
@@ -212,11 +213,11 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
         PIXI.Text.call(this);
         this.allTips = JsonEx.parse(tip.tips);
         this.customFunc = {};
-        this.customFunc.initialize = (new Function("tip", JsonEx.parse(tip.initialize))).bind(this, this);
-        this.customFunc.create = (new Function("tip", JsonEx.parse(tip.create))).bind(this, this);
-        this.customFunc.update = (new Function("tip", JsonEx.parse(tip.update))).bind(this, this);
-        this.customFunc.terminate = (new Function("tip", JsonEx.parse(tip.terminate))).bind(this, this);
-        this.customFunc.canExit = (new Function("tip", JsonEx.parse(tip.canExit))).bind(this, this);
+        this.customFunc.initialize = new Function("tip", JsonEx.parse(tip.initialize)).bind(this, this);
+        this.customFunc.create = new Function("tip", JsonEx.parse(tip.create)).bind(this, this);
+        this.customFunc.update = new Function("tip", JsonEx.parse(tip.update)).bind(this, this);
+        this.customFunc.terminate = new Function("tip", JsonEx.parse(tip.terminate)).bind(this, this);
+        this.customFunc.canExit = new Function("tip", JsonEx.parse(tip.canExit)).bind(this, this);
         this.customFunc.initialize();
     };
 
@@ -252,14 +253,14 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
         Sprite.prototype.initialize.apply(this, null);
         this.loopBitmaps = [];
         JsonEx.parse(picture.pictures).forEach(function (fileName) {
-            this.loopBitmaps.push(Bitmap.load(fileName + '.png'));
+            this.loopBitmaps.push(Bitmap.load(fileName + ".png"));
         }, this);
         this.customFunc = {};
-        this.customFunc.initialize = (new Function("picture", JsonEx.parse(picture.initialize))).bind(this, this);
-        this.customFunc.create = (new Function("picture", JsonEx.parse(picture.create))).bind(this, this);
-        this.customFunc.update = (new Function("picture", JsonEx.parse(picture.update))).bind(this, this);
-        this.customFunc.terminate = (new Function("picture", JsonEx.parse(picture.terminate))).bind(this, this);
-        this.customFunc.canExit = (new Function("picture", JsonEx.parse(picture.canExit))).bind(this, this);
+        this.customFunc.initialize = new Function("picture", JsonEx.parse(picture.initialize)).bind(this, this);
+        this.customFunc.create = new Function("picture", JsonEx.parse(picture.create)).bind(this, this);
+        this.customFunc.update = new Function("picture", JsonEx.parse(picture.update)).bind(this, this);
+        this.customFunc.terminate = new Function("picture", JsonEx.parse(picture.terminate)).bind(this, this);
+        this.customFunc.canExit = new Function("picture", JsonEx.parse(picture.canExit)).bind(this, this);
         this.customFunc.initialize();
     };
 
@@ -271,9 +272,7 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
         this.customFunc.update();
     };
 
-    LoadingScene_Picture.prototype.fadingInEnded = function () {
-
-    };
+    LoadingScene_Picture.prototype.fadingInEnded = function () {};
 
     LoadingScene_Picture.prototype.canExit = function () {
         return this.customFunc.canExit();
@@ -289,7 +288,6 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
 
     SF_LoadingScene.Graphics_setLoadingImage = Graphics.setLoadingImage;
     Graphics.setLoadingImage = function (src) {
-
         SF_LoadingScene.previousSceneSprite = new Sprite();
         SF_LoadingScene.nextSceneSprite = new Sprite();
         SF_LoadingScene.loadingScene = new PIXI.Container();
@@ -312,7 +310,7 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
             view: Graphics._upperCanvas,
             transparent: true,
             preserveDrawingBuffer: true,
-            clearBeforeRender: true
+            clearBeforeRender: true,
         });
 
         SF_LoadingScene.upperCanvasStatues = "";
@@ -360,7 +358,6 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
         SF_LoadingScene.newSceneLoaded = false;
         SF_LoadingScene.animationFrameId = window.requestAnimationFrame(SF_LoadingScene.animationOnUpperCanvas);
         return;
-
     };
 
     SF_LoadingScene.animationOnUpperCanvas = function () {
@@ -372,11 +369,11 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
             SF_LoadingScene.pixiRender.render(SF_LoadingScene.previousSceneSprite);
             if (SF_LoadingScene.globalAlpha <= SF_LoadingScene.alphaMin) {
                 if (SF_LoadingScene.needLoopSceneFadeIn) {
-                    SF_LoadingScene.upperCanvasStatues = 'fading_in_loading_scene';
+                    SF_LoadingScene.upperCanvasStatues = "fading_in_loading_scene";
                     SF_LoadingScene.fadingIn = true;
                     SF_LoadingScene.fadingOut = false;
                 } else {
-                    SF_LoadingScene.upperCanvasStatues = 'loop_loading_scene';
+                    SF_LoadingScene.upperCanvasStatues = "loop_loading_scene";
                     SF_LoadingScene.fadingIn = false;
                     SF_LoadingScene.fadingOut = false;
                     SF_LoadingScene.globalAlpha = 1;
@@ -430,7 +427,7 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
                 SF_LoadingScene.needContinue = false;
             }
         } else {
-            throw new SyntaxError('some error happen in SF_LoadingScene plugins');
+            throw new SyntaxError("some error happen in SF_LoadingScene plugins");
         }
 
         SF_LoadingScene.updateUpperCanvasAlpha();
@@ -459,11 +456,14 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
     };
 
     SF_LoadingScene.canExitLoadingScene = function () {
-        return SF_LoadingScene.newSceneLoaded && SF_LoadingScene.loadingScene.children.every(function (child) {
-            return child.children.every(function (child) {
-                return child.canExit();
-            });
-        });
+        return (
+            SF_LoadingScene.newSceneLoaded &&
+            SF_LoadingScene.loadingScene.children.every(function (child) {
+                return child.children.every(function (child) {
+                    return child.canExit();
+                });
+            })
+        );
     };
 
     SF_LoadingScene.terminateLoadingScene = function () {
@@ -482,7 +482,6 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
         }
     };
 
-
     SF_LoadingScene.Graphics_endLoading = Graphics.endLoading;
     Graphics.endLoading = function () {
         if (SceneManager._nextScene || isNaN(SF_LoadingScene.animationFrameId)) return;
@@ -493,7 +492,7 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
     };
 
     SF_LoadingScene.Graphics_updateLoading = Graphics.updateLoading;
-    Graphics.updateLoading = function () { };
+    Graphics.updateLoading = function () {};
 
     SF_LoadingScene.Graphics_clearUpperCanvas = Graphics._clearUpperCanvas;
     Graphics._clearUpperCanvas = function () {
@@ -503,5 +502,4 @@ if (!Imported.SF_InputBindControl || !Imported.SF_SkipLoadError) {
             SF_LoadingScene.Graphics_clearUpperCanvas.apply(this, arguments);
         }
     };
-
 })();

@@ -8,16 +8,16 @@ Imported.YEP_X_MoreQuests1 = true;
 
 var Yanfly = Yanfly || {};
 Yanfly.MoreQuests1 = Yanfly.MoreQuests1 || {};
-Yanfly.MoreQuests1.version = 1.00;
+Yanfly.MoreQuests1.version = 1.0;
 
 //=============================================================================
- /*:
+/*:
  * @plugindesc YEP任务扩展-任务数扩充1000
  * @author Yanfly Engine Plugins 汉化：硕明云书
  *
  * @help
  * ============================================================================
- * 介绍  
+ * 介绍
  * ============================================================================
  *
  * 此插件需要YEP_QuestJournal。确保找到此插件
@@ -210,7 +210,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc Modify the data used by this quest entry.
  * Refer to Help for more information about each setting.
  * @default
- * 
+ *
  * @param Quest 120
  * @parent ---Quests 101 to 200---
  * @type struct<Quest>
@@ -946,7 +946,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc Modify the data used by this quest entry.
  * Refer to Help for more information about each setting.
  * @default
- * 
+ *
  * @param Quest 220
  * @parent ---Quests 201 to 300---
  * @type struct<Quest>
@@ -1682,7 +1682,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc Modify the data used by this quest entry.
  * Refer to Help for more information about each setting.
  * @default
- * 
+ *
  * @param Quest 320
  * @parent ---Quests 301 to 400---
  * @type struct<Quest>
@@ -2418,7 +2418,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc Modify the data used by this quest entry.
  * Refer to Help for more information about each setting.
  * @default
- * 
+ *
  * @param Quest 420
  * @parent ---Quests 401 to 500---
  * @type struct<Quest>
@@ -3154,7 +3154,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc Modify the data used by this quest entry.
  * Refer to Help for more information about each setting.
  * @default
- * 
+ *
  * @param Quest 520
  * @parent ---Quests 501 to 600---
  * @type struct<Quest>
@@ -3890,7 +3890,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc Modify the data used by this quest entry.
  * Refer to Help for more information about each setting.
  * @default
- * 
+ *
  * @param Quest 620
  * @parent ---Quests 601 to 700---
  * @type struct<Quest>
@@ -4626,7 +4626,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc Modify the data used by this quest entry.
  * Refer to Help for more information about each setting.
  * @default
- * 
+ *
  * @param Quest 720
  * @parent ---Quests 701 to 800---
  * @type struct<Quest>
@@ -5362,7 +5362,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc Modify the data used by this quest entry.
  * Refer to Help for more information about each setting.
  * @default
- * 
+ *
  * @param Quest 820
  * @parent ---Quests 801 to 900---
  * @type struct<Quest>
@@ -6098,7 +6098,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc Modify the data used by this quest entry.
  * Refer to Help for more information about each setting.
  * @default
- * 
+ *
  * @param Quest 920
  * @parent ---Quests 901 to 1000---
  * @type struct<Quest>
@@ -6733,7 +6733,7 @@ Yanfly.MoreQuests1.version = 1.00;
  * @desc The reward list for this quest.
  * Text codes allowed.
  * @default ["\"\\\\i[176]Potion x5\"","\"\\\\i[178]Ether x3\"","\"To make other rewards appear,\\nenable them through the \\\\c[4]'Visible\\nRewards'\\\\c[0] plugin parameter or by\\nusing a plugin command to make\\nthem appear\""]
- * 
+ *
  * @param Visible Rewards
  * @parent Rewards List
  * @type number[]
@@ -6749,57 +6749,54 @@ Yanfly.MoreQuests1.version = 1.00;
 //=============================================================================
 
 if (Imported.YEP_QuestJournal) {
+    //=============================================================================
+    // Parameter Variables
+    //=============================================================================
 
-//=============================================================================
-// Parameter Variables
-//=============================================================================
+    Yanfly.Parameters = PluginManager.parameters("YEP_X_MoreQuests1");
+    Yanfly.Param = Yanfly.Param || {};
 
-Yanfly.Parameters = PluginManager.parameters('YEP_X_MoreQuests1');
-Yanfly.Param = Yanfly.Param || {};
+    DataManager.questDatabaseCreate = function () {
+        $dataQuests = $dataQuests || [null];
+        var index1 = [101, 201, 301, 401, 501, 601, 701, 801, 901];
+        var index2 = [200, 300, 400, 500, 600, 700, 800, 900, 1000];
+        var length = index1.length;
+        for (var n = 0; n < length; ++n) {
+            var a = index1[n];
+            var b = index2[n];
+            var str = a + " to " + b;
 
-DataManager.questDatabaseCreate = function() {
-  $dataQuests = $dataQuests || [null];
-  var index1 = [101, 201, 301, 401, 501, 601, 701, 801, 901];
-  var index2 = [200, 300, 400, 500, 600, 700, 800, 900, 1000];
-  var length = index1.length;
-  for (var n = 0; n < length; ++n) {
-    var a = index1[n];
-    var b = index2[n];
-    var str = a + ' to ' + b;
+            for (var i = a; i <= b; ++i) {
+                var questData = JSON.parse(Yanfly.Parameters["Quest " + i] || "null");
+                if (!questData) continue;
+                if (questData["Type"] === "|-=AUTO=-|") {
+                    questData["Type"] = Yanfly.Parameters["Category: " + str];
+                }
+                if (questData["Difficulty"] === "|-=AUTO=-|") {
+                    questData["Difficulty"] = Yanfly.Parameters["Difficulty: " + str];
+                }
+                if (questData["From"] === "|-=AUTO=-|") {
+                    questData["From"] = Yanfly.Parameters["From: " + str];
+                }
+                if (questData["Location"] === "|-=AUTO=-|") {
+                    questData["Location"] = Yanfly.Parameters["Location: " + str];
+                }
+                this.questDatabaseAdd(i, questData);
+            }
+        }
+    };
 
-    for (var i = a; i <= b; ++i) {
-      var questData = JSON.parse(Yanfly.Parameters['Quest ' + i] || 'null');
-      if (!questData) continue;
-      if (questData['Type'] === '|-=AUTO=-|') {
-        questData['Type'] = Yanfly.Parameters['Category: ' + str];
-      }
-      if (questData['Difficulty'] === '|-=AUTO=-|') {
-        questData['Difficulty'] = Yanfly.Parameters['Difficulty: ' + str];
-      }
-      if (questData['From'] === '|-=AUTO=-|') {
-        questData['From'] = Yanfly.Parameters['From: ' + str];
-      }
-      if (questData['Location'] === '|-=AUTO=-|') {
-        questData['Location'] = Yanfly.Parameters['Location: ' + str];
-      }
-      this.questDatabaseAdd(i, questData);
-    }
-  }
-};
+    DataManager.questDatabaseCreate();
 
-DataManager.questDatabaseCreate();
-
-//=============================================================================
-// End of File
-//=============================================================================
+    //=============================================================================
+    // End of File
+    //=============================================================================
 } else {
-
-var text = '';
-text += 'You are getting this error because you are trying to run ';
-text += 'YEP_X_MoreQuests1 without YEP_QuestJournal. Please visit Yanfly.moe ';
-text += 'and install YEP_QuestJournal in your game project before you can use ';
-text += 'this plugin.';
-console.log(text);
-require('nw.gui').Window.get().showDevTools();
-
-}; // Imported.YEP_QuestJournal
+    var text = "";
+    text += "You are getting this error because you are trying to run ";
+    text += "YEP_X_MoreQuests1 without YEP_QuestJournal. Please visit Yanfly.moe ";
+    text += "and install YEP_QuestJournal in your game project before you can use ";
+    text += "this plugin.";
+    console.log(text);
+    require("nw.gui").Window.get().showDevTools();
+} // Imported.YEP_QuestJournal

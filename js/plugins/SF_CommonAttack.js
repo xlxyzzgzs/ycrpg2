@@ -42,8 +42,7 @@ SF_Plugins.SF_CommonAttack.version = 1.0;
 // DataManager
 //=============================================================================
 
-SF_Plugins.SF_CommonAttack.DataManager_isDatabaseLoaded =
-    DataManager.isDatabaseLoaded;
+SF_Plugins.SF_CommonAttack.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
 DataManager.isDatabaseLoaded = function () {
     if (!SF_Plugins.SF_CommonAttack.DataManager_isDatabaseLoaded.call(this)) {
         return false;
@@ -79,11 +78,9 @@ DataManager.SF_CommonAttack_isDatabaseLoaded = function (group) {
 //=============================================================================
 // Game_Actor
 //=============================================================================
-SF_Plugins.SF_CommonAttack.Game_Actor_attackSkillId =
-    Game_Actor.prototype.attackSkillId;
+SF_Plugins.SF_CommonAttack.Game_Actor_attackSkillId = Game_Actor.prototype.attackSkillId;
 Game_Actor.prototype.attackSkillId = function () {
-    var normalId =
-        SF_Plugins.SF_CommonAttack.Game_Actor_attackSkillId.call(this);
+    var normalId = SF_Plugins.SF_CommonAttack.Game_Actor_attackSkillId.call(this);
     var maxPriority = 0;
 
     // 职业
@@ -115,8 +112,7 @@ Game_Actor.prototype.attackSkillId = function () {
 //=============================================================================
 // SceneBattle
 //=============================================================================
-SF_Plugins.SF_CommonAttack.Scene_Battle_commandAttack =
-    Scene_Battle.prototype.commandAttack;
+SF_Plugins.SF_CommonAttack.Scene_Battle_commandAttack = Scene_Battle.prototype.commandAttack;
 Scene_Battle.prototype.commandAttack = function () {
     BattleManager.inputtingAction().setAttack();
     this.onSelectAction();

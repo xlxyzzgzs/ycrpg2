@@ -10,9 +10,9 @@ var SF_Plugins = SF_Plugins || {};
 
 //=============================================================================
 /*:
-    * @plugindesc scenes lib for salted fish plugins
-    * @author Salted Fish
-    */
+ * @plugindesc scenes lib for salted fish plugins
+ * @author Salted Fish
+ */
 //=============================================================================
 
 (function () {
@@ -29,5 +29,5 @@ var SF_Plugins = SF_Plugins || {};
     Scene_Base.prototype.terminate = function () {
         SF_Scenes.Scene_Base_terminate.call(this);
         TouchInput.removeUsers();
-    }
+    };
 })();

@@ -10,18 +10,18 @@ var SF_Plugins = SF_Plugins || {};
 
 //=============================================================================
 /*:
-    * @plugindesc Allows you to add a click event to object.
-    * @author Salted Fish
-    * 
-    * @help
-    * ============================================================================
-    * Introduction
-    * ============================================================================
-    * 
-    * This plugin allows you to add a click event to object.
-    *
-    * Use as a dependency.
-    */
+ * @plugindesc Allows you to add a click event to object.
+ * @author Salted Fish
+ *
+ * @help
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin allows you to add a click event to object.
+ *
+ * Use as a dependency.
+ */
 
 //=============================================================================
 (function () {
@@ -29,8 +29,6 @@ var SF_Plugins = SF_Plugins || {};
     SF_Plugins.SF_ClickEvent = SF_ClickEvent;
 
     SF_ClickEvent.version = 1.0;
-
-
 
     //=============================================================================
     // Scene_Base
@@ -42,13 +40,13 @@ var SF_Plugins = SF_Plugins || {};
         this._clickEvent = {};
         this._clicking = false;
         this._clickingName = null;
-    }
+    };
 
     SF_ClickEvent.Scene_Base_update = Scene_Base.prototype.update;
     Scene_Base.prototype.update = function () {
         SF_ClickEvent.Scene_Base_update.call(this);
         this.updateClickEvent();
-    }
+    };
 
     // register click event
     // @param {String} name
@@ -63,37 +61,34 @@ var SF_Plugins = SF_Plugins || {};
             mousedown: mousedown,
             mouseup: mouseup,
             mouseclick: mouseclick,
-            enabled: true
+            enabled: true,
         };
-    }
+    };
 
     // unregister click event
     // @param {String} name
     Scene_Base.prototype.unregisterClickEvent = function (name) {
         delete this._clickEvent[name];
-    }
+    };
 
     // enable click event
     // @param {String} name
     Scene_Base.prototype.enableClickEvent = function (name) {
         this._clickEvent[name].enabled = true;
-    }
+    };
 
     // disable click event
     // @param {String} name
     Scene_Base.prototype.disableClickEvent = function (name) {
         this._clickEvent[name].enabled = false;
-    }
+    };
 
     // update click event
     Scene_Base.prototype.updateClickEvent = function () {
         var touch_x = TouchInput.x;
         var touch_y = TouchInput.y;
         if (this._clicking) {
-            if (
-                this._clickingName &&
-                this._clickEvent[this._clickingName]
-            ) {
+            if (this._clickingName && this._clickEvent[this._clickingName]) {
                 var clickEvent = this._clickEvent[this._clickingName];
                 var isContain = clickEvent.hitArea.contains(touch_x, touch_y);
                 if (!isContain || !clickEvent.enabled) {
@@ -137,9 +132,5 @@ var SF_Plugins = SF_Plugins || {};
                 }
             }
         }
-    }
-
-
-
+    };
 })();
-

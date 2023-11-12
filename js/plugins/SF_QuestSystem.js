@@ -13,164 +13,164 @@ var $dataQuests = null;
 
 //=============================================================================
 /*~struct~Quest:
-    * @param name
-    * @text Quest Name
-    * @desc The name of the quest.
-    * @type text
-    * @default
-    * 
-    * @param desc
-    * @text Quest Description
-    * @desc The description of the quest.
-    * @type note
-    * @default
-    * 
-    */
+ * @param name
+ * @text Quest Name
+ * @desc The name of the quest.
+ * @type text
+ * @default
+ *
+ * @param desc
+ * @text Quest Description
+ * @desc The description of the quest.
+ * @type note
+ * @default
+ *
+ */
 /*:
-    * @plugindesc v1.0 Allows you to show quests.
-    * @author SaltedFish
-    * 
-    * @param Quest List Window
-    * 
-    * @param Quest List Window X
-    * @desc The X position of the quest list window.
-    * @default 0
-    * @type number
-    * @parent Quest List Window
-    * 
-    * @param Quest List Window Y
-    * @desc The Y position of the quest list window.
-    * @default 0
-    * @type number
-    * @parent Quest List Window
-    * 
-    * @param Quest List Window Width
-    * @desc The width of the quest list window.
-    * @default 240
-    * @type number
-    * @parent Quest List Window
-    * 
-    * @param Quest List Window Height
-    * @desc The height of the quest list window.
-    * @default 480
-    * @type number
-    * @parent Quest List Window
-    * 
-    * @param Quest List Window Font Size
-    * @desc The font size of the quest list window.
-    * @default 28
-    * @type number
-    * @parent Quest List Window
-    * @min 1
-    * 
-    * @param Quest Detail Window
-    * 
-    * @param Quest Detail Window X
-    * @desc The X position of the quest detail window.
-    * @default 0
-    * @type number
-    * @parent Quest Detail Window
-    * 
-    * @param Quest Detail Window Y
-    * @desc The Y position of the quest detail window.
-    * @default 0
-    * @type number
-    * @parent Quest Detail Window
-    * 
-    * @param Quest Detail Window Width
-    * @desc The width of the quest detail window.
-    * @default 240
-    * @type number
-    * @parent Quest Detail Window
-    * 
-    * @param Quest Detail Window Height
-    * @desc The height of the quest detail window.
-    * @default 480
-    * @type number
-    * @parent Quest Detail Window
-    * 
-    * @param Quest Detail Window Font Size
-    * @desc The font size of the quest detail window.
-    * @default 28
-    * @type number
-    * @parent Quest Detail Window
-    * @min 1
-    * 
-    * @param Quest Editor
-    * 
-    * @param Quest Editor Enable
-    * @desc Enable the quest editor.
-    * @default false
-    * @type boolean
-    * @parent Quest Editor
-    * 
-    * @param Quest List Info X
-    * @desc The X position of the quest list info.
-    * @default 0
-    * @type number
-    * @parent Quest Editor
-    * 
-    * @param Quest List Info Y
-    * @desc The Y position of the quest list info.
-    * @default 0
-    * @type number
-    * @parent Quest Editor
-    * 
-    * @param Quest List Info Width
-    * @desc The width of the quest list info.
-    * @default 240
-    * @type number
-    * @parent Quest Editor
-    * 
-    * @param Quest List Info Height
-    * @desc The height of the quest list info.
-    * @default 480
-    * @type number
-    * @parent Quest Editor
-    * 
-    * @param Quest List Info Font Size
-    * @desc The font size of the quest list info.
-    * @default 28
-    * @type number
-    * @parent Quest Editor
-    * @min 1 
-    * 
-    * 
-    * 
-    * @help
-    * ============================================================================
-    * Introduction
-    * ============================================================================
-    *
-    * plugin requirement:
-    * - SF_WindowScrollCommand
-    * 
-    * Modified from Gameus's Quest System plugin.
-    * This plugin allows you to show quests.
-    *
-    * ============================================================================
-    * Plugin Commands
-    * ============================================================================
-    *
-    * SF_Quest Add QuestID
-    *   Adds a quest to the player's quest list.
-    *
-    * SF_Quest Complete QuestID
-    *   Marks a quest as completed.
-    *
-    * SF_Quest Open
-    *   Opens the quest scene.
-    *
-    * ============================================================================
-    * Script Calls
-    * ============================================================================
-    *   
-    * $gameParty.addQuest(questId)
-    *   Adds a quest to the player's quest list.
-    * 
-    * $gameParty.removeQuest(questId)
-    *   Removes a quest from the player's quest list.
-    */
+ * @plugindesc v1.0 Allows you to show quests.
+ * @author SaltedFish
+ *
+ * @param Quest List Window
+ *
+ * @param Quest List Window X
+ * @desc The X position of the quest list window.
+ * @default 0
+ * @type number
+ * @parent Quest List Window
+ *
+ * @param Quest List Window Y
+ * @desc The Y position of the quest list window.
+ * @default 0
+ * @type number
+ * @parent Quest List Window
+ *
+ * @param Quest List Window Width
+ * @desc The width of the quest list window.
+ * @default 240
+ * @type number
+ * @parent Quest List Window
+ *
+ * @param Quest List Window Height
+ * @desc The height of the quest list window.
+ * @default 480
+ * @type number
+ * @parent Quest List Window
+ *
+ * @param Quest List Window Font Size
+ * @desc The font size of the quest list window.
+ * @default 28
+ * @type number
+ * @parent Quest List Window
+ * @min 1
+ *
+ * @param Quest Detail Window
+ *
+ * @param Quest Detail Window X
+ * @desc The X position of the quest detail window.
+ * @default 0
+ * @type number
+ * @parent Quest Detail Window
+ *
+ * @param Quest Detail Window Y
+ * @desc The Y position of the quest detail window.
+ * @default 0
+ * @type number
+ * @parent Quest Detail Window
+ *
+ * @param Quest Detail Window Width
+ * @desc The width of the quest detail window.
+ * @default 240
+ * @type number
+ * @parent Quest Detail Window
+ *
+ * @param Quest Detail Window Height
+ * @desc The height of the quest detail window.
+ * @default 480
+ * @type number
+ * @parent Quest Detail Window
+ *
+ * @param Quest Detail Window Font Size
+ * @desc The font size of the quest detail window.
+ * @default 28
+ * @type number
+ * @parent Quest Detail Window
+ * @min 1
+ *
+ * @param Quest Editor
+ *
+ * @param Quest Editor Enable
+ * @desc Enable the quest editor.
+ * @default false
+ * @type boolean
+ * @parent Quest Editor
+ *
+ * @param Quest List Info X
+ * @desc The X position of the quest list info.
+ * @default 0
+ * @type number
+ * @parent Quest Editor
+ *
+ * @param Quest List Info Y
+ * @desc The Y position of the quest list info.
+ * @default 0
+ * @type number
+ * @parent Quest Editor
+ *
+ * @param Quest List Info Width
+ * @desc The width of the quest list info.
+ * @default 240
+ * @type number
+ * @parent Quest Editor
+ *
+ * @param Quest List Info Height
+ * @desc The height of the quest list info.
+ * @default 480
+ * @type number
+ * @parent Quest Editor
+ *
+ * @param Quest List Info Font Size
+ * @desc The font size of the quest list info.
+ * @default 28
+ * @type number
+ * @parent Quest Editor
+ * @min 1
+ *
+ *
+ *
+ * @help
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * plugin requirement:
+ * - SF_WindowScrollCommand
+ *
+ * Modified from Gameus's Quest System plugin.
+ * This plugin allows you to show quests.
+ *
+ * ============================================================================
+ * Plugin Commands
+ * ============================================================================
+ *
+ * SF_Quest Add QuestID
+ *   Adds a quest to the player's quest list.
+ *
+ * SF_Quest Complete QuestID
+ *   Marks a quest as completed.
+ *
+ * SF_Quest Open
+ *   Opens the quest scene.
+ *
+ * ============================================================================
+ * Script Calls
+ * ============================================================================
+ *
+ * $gameParty.addQuest(questId)
+ *   Adds a quest to the player's quest list.
+ *
+ * $gameParty.removeQuest(questId)
+ *   Removes a quest from the player's quest list.
+ */
 //=============================================================================
 
 //=============================================================================
@@ -182,7 +182,6 @@ if (!Imported.SF_WindowScrollCommand) {
     alert("SF_QuestSystem requires SF_WindowScrollCommand.");
 }
 (function () {
-
     var SF_QuestSystem = {};
     SF_Plugins.SF_QuestSystem = SF_QuestSystem;
     SF_QuestSystem.version = 1.0;
@@ -191,7 +190,7 @@ if (!Imported.SF_WindowScrollCommand) {
     // Parameters
     //=============================================================================
 
-    SF_QuestSystem.Parameters = PluginManager.parameters('SF_QuestSystem');
+    SF_QuestSystem.Parameters = PluginManager.parameters("SF_QuestSystem");
 
     SF_QuestSystem.QuestListWindow_X = Number(SF_QuestSystem.Parameters["Quest List Window X"]);
     SF_QuestSystem.QuestListWindow_Y = Number(SF_QuestSystem.Parameters["Quest List Window Y"]);
@@ -217,7 +216,7 @@ if (!Imported.SF_WindowScrollCommand) {
         quest.name = "";
         quest.desc = "";
         return quest;
-    }
+    };
 
     //=============================================================================
     // DataManager
@@ -228,19 +227,19 @@ if (!Imported.SF_WindowScrollCommand) {
         var contents = SF_QuestSystem.DataManager_makeSaveContents.call(this);
         contents.quests = $gameQuests;
         return contents;
-    }
+    };
 
     SF_QuestSystem.DataManager_extractSaveContents = DataManager.extractSaveContents;
     DataManager.extractSaveContents = function (contents) {
         SF_QuestSystem.DataManager_extractSaveContents.call(this, contents);
         $gameQuests = contents.quests;
-    }
+    };
 
     SF_QuestSystem.DataManager_createGameObjects = DataManager.createGameObjects;
     DataManager.createGameObjects = function () {
         SF_QuestSystem.DataManager_createGameObjects.call(this);
         $gameQuests = new Game_Quests();
-    }
+    };
 
     //=============================================================================
     // Game_Quest
@@ -257,15 +256,15 @@ if (!Imported.SF_WindowScrollCommand) {
         this.name = questData.name;
         this.desc = questData.desc;
         this.status = "progress";
-    }
+    };
 
     Game_Quest.prototype.completed = function () {
         return this.status == "completed";
-    }
+    };
 
     Game_Quest.prototype.inProgress = function () {
         return this.status == "progress";
-    }
+    };
 
     Game_Quest.prototype.complete = function () {
         this.status = "completed";
@@ -275,13 +274,12 @@ if (!Imported.SF_WindowScrollCommand) {
         this.status = "progress";
     };
 
-
     //---------------------------------------------------------------------------------------------
     // Game_Quests
     //---------------------------------------------------------------------------------------------
     function Game_Quests() {
         this.initialize.apply(this, arguments);
-    };
+    }
 
     Game_Quests.prototype.initialize = function () {
         this.data = [];
@@ -301,7 +299,7 @@ if (!Imported.SF_WindowScrollCommand) {
         if (this.get(quest_id)) {
             this.get(quest_id).complete();
         }
-    }
+    };
 
     //=============================================================================
     // Game_Party
@@ -347,8 +345,6 @@ if (!Imported.SF_WindowScrollCommand) {
         return $gameQuests.get(quest_id);
     };
 
-
-
     //=============================================================================
     // Window_QuestList
     //=============================================================================
@@ -365,30 +361,30 @@ if (!Imported.SF_WindowScrollCommand) {
         Window_ScrollCommand.prototype.initialize.call(this, arguments);
         this.x = SF_QuestSystem.QuestListWindow_X;
         this.y = SF_QuestSystem.QuestListWindow_Y;
-    }
+    };
 
     Window_QuestList.prototype.standardFontSize = function () {
         return SF_QuestSystem.QuestListWindow_FontSize;
-    }
+    };
 
     Window_QuestList.prototype.lineHeight = function () {
         return this.standardFontSize() + 8;
-    }
+    };
 
     // Sets the filter for the quest list
     // "completed" - Completed quests
     // "progress" - In progress quests
     Window_QuestList.prototype.setFilter = function (filter) {
         this._filter = filter;
-    }
+    };
 
     Window_QuestList.prototype.windowWidth = function () {
         return SF_QuestSystem.QuestListWindowWidth;
-    }
+    };
 
     Window_QuestList.prototype.windowHeight = function () {
         return SF_QuestSystem.QuestListWindowHeight;
-    }
+    };
 
     Window_QuestList.prototype.makeCommandList = function () {
         for (var i = 0; i < $gameParty.quests.length; i += 1) {
@@ -397,14 +393,14 @@ if (!Imported.SF_WindowScrollCommand) {
                 this.addCommand(quest.name, "quest", true, $gameParty.quests[i]);
             }
         }
-    }
+    };
 
     Window_QuestList.prototype.updateHelp = function () {
         Window_ScrollCommand.prototype.updateHelp.call(this);
         if (this._helpWindow) {
             this._helpWindow.setQuest(this.currentExt());
         }
-    }
+    };
 
     //=============================================================================
     // Window_QuestDetail
@@ -418,29 +414,31 @@ if (!Imported.SF_WindowScrollCommand) {
     Window_QuestDetail.prototype.constructor = Window_QuestDetail;
 
     Window_QuestDetail.prototype.initialize = function () {
-        Window_ScrollHelp.prototype.initialize.call(this,
+        Window_ScrollHelp.prototype.initialize.call(
+            this,
             SF_QuestSystem.QuestDetailWindowX,
             SF_QuestSystem.QuestDetailWindowY,
             SF_QuestSystem.QuestDetailWindowWidth,
-            SF_QuestSystem.QuestDetailWindowHeight);
+            SF_QuestSystem.QuestDetailWindowHeight
+        );
         this._questId = null;
-    }
+    };
 
     Window_QuestDetail.prototype.windowWidth = function () {
         return SF_QuestSystem.QuestDetailWindowWidth;
-    }
+    };
 
     Window_QuestDetail.prototype.lineHeight = function () {
         return this.standardFontSize() + 8;
-    }
+    };
 
     Window_QuestDetail.prototype.standardFontSize = function () {
         return SF_QuestSystem.QuestDetailWindowFontSize;
-    }
+    };
 
     Window_QuestDetail.prototype.windowHeight = function () {
         return SF_QuestSystem.QuestDetailWindowHeight;
-    }
+    };
 
     Window_QuestDetail.prototype.setQuest = function (questId) {
         this._questId = questId;
@@ -448,7 +446,7 @@ if (!Imported.SF_WindowScrollCommand) {
             var quest = $gameQuests.get(this._questId);
             this.setText(quest.desc);
         }
-    }
+    };
 
     //=============================================================================
     // Scene_Quest
@@ -465,33 +463,33 @@ if (!Imported.SF_WindowScrollCommand) {
 
     Scene_Quest.prototype.initialize = function () {
         Scene_MenuBase.prototype.initialize.call(this);
-    }
+    };
 
     Scene_Quest.prototype.create = function () {
         Scene_MenuBase.prototype.create.call(this);
         this.createQuestDetailWindow();
         this.createQuestListWindow();
         this._questListWindow.setHelpWindow(this._questDetailWindow);
-    }
+    };
 
     Scene_Quest.prototype.createQuestListWindow = function () {
         this._questListWindow = new Window_QuestList();
         this._questListWindow.setHandler("quest", this.onQuestListOk.bind(this));
         this._questListWindow.setHandler("cancel", this.popScene.bind(this));
         this.addWindow(this._questListWindow);
-    }
+    };
 
     Scene_Quest.prototype.createQuestDetailWindow = function () {
         this._questDetailWindow = new Window_QuestDetail();
         //this._questDetailWindow.setHandler("cancel", this.popScene.bind(this));
         this.addWindow(this._questDetailWindow);
-    }
+    };
 
     Scene_Quest.prototype.onQuestListOk = function () {
         //var questId = this._questListWindow.currentExt();
         //this._questDetailWindow.setQuest(questId);
         this._questListWindow.activate();
-    }
+    };
 
     //=============================================================================
     // Game_Interpreter
@@ -514,17 +512,16 @@ if (!Imported.SF_WindowScrollCommand) {
                     break;
             }
         }
-    }
+    };
 
     if (Utils.isNwjs() && SF_QuestSystem.QuestEditorEnable) {
-
-        var fs = require('fs');
-        var path = require('path');
-        var process = require('process');
-        var quest_path = path.join(process.cwd(), 'data/Quests.json');
+        var fs = require("fs");
+        var path = require("path");
+        var process = require("process");
+        var quest_path = path.join(process.cwd(), "data/Quests.json");
         var quest_data = null;
         if (fs.existsSync(quest_path)) {
-            quest_data = JsonEx.parse(fs.readFileSync(quest_path, 'utf8'));
+            quest_data = JsonEx.parse(fs.readFileSync(quest_path, "utf8"));
         } else {
             quest_data = [SF_QuestSystem.default_quest()];
         }
@@ -544,45 +541,50 @@ if (!Imported.SF_WindowScrollCommand) {
             Window_ScrollCommand.prototype.initialize.call(this);
             this.x = SF_QuestSystem.QuestListInfoX;
             this.y = SF_QuestSystem.QuestListInfoY;
-        }
+        };
 
         Window_QuestListInfo.prototype.windowWidth = function () {
             return SF_QuestSystem.QuestListInfoWidth;
-        }
+        };
 
         Window_QuestListInfo.prototype.windowHeight = function () {
             return SF_QuestSystem.QuestListInfoHeight;
-        }
+        };
 
         Window_QuestListInfo.prototype.standardFontSize = function () {
             return SF_QuestSystem.QuestListInfoFontSize;
-        }
+        };
 
         Window_QuestListInfo.prototype.lineHeight = function () {
             return this.standardFontSize() + 8;
-        }
+        };
 
         Window_QuestListInfo.prototype.makeCommandList = function () {
             var i;
             for (i = 0; i * quest_one_page + 1 < quest_data.length; i++) {
-                this.addCommand(`${i * quest_one_page + 1}-${i * quest_one_page + quest_one_page}`, 'quest_page', true, i);
+                this.addCommand(
+                    `${i * quest_one_page + 1}-${i * quest_one_page + quest_one_page}`,
+                    "quest_page",
+                    true,
+                    i
+                );
             }
             if (i * quest_one_page + 1 == quest_data.length) {
-                this.addCommand('newpage', 'newpage');
+                this.addCommand("newpage", "newpage");
             }
-        }
+        };
 
         Window_QuestListInfo.prototype.select = function (index) {
             Window_ScrollCommand.prototype.select.call(this, index);
-            if (index >= 0 && this.currentSymbol() == 'quest_page' && this._questListWindow) {
+            if (index >= 0 && this.currentSymbol() == "quest_page" && this._questListWindow) {
                 this._questListWindow.setPage(this.currentExt());
             }
-        }
+        };
 
         Window_QuestListInfo.prototype.newPage = function () {
             quest_data.push(SF_QuestSystem.default_quest());
             this.refresh();
-        }
+        };
         //=============================================================================
         // Window_QuestList
         //=============================================================================
@@ -592,43 +594,42 @@ if (!Imported.SF_WindowScrollCommand) {
             this.x = SF_QuestSystem.QuestListWindow_X;
             this.y = SF_QuestSystem.QuestListWindow_Y;
             this._page = null;
-        }
+        };
 
         Window_QuestList.prototype.setPage = function (page) {
             this._page = page;
             this.refresh();
-        }
+        };
 
         Window_QuestList.prototype.makeCommandList = function () {
             if (this._page >= 0) {
                 for (var i = this._page * quest_one_page + 1; i <= (this._page + 1) * quest_one_page; i++) {
                     if (i >= quest_data.length) {
-                        this.addCommand('newquest', 'newquest');
+                        this.addCommand("newquest", "newquest");
                         break;
                     }
-                    this.addCommand(quest_data[i].name, 'quest', true, i);
+                    this.addCommand(quest_data[i].name, "quest", true, i);
                 }
             }
-        }
+        };
 
         Window_QuestList.prototype.newQuest = function () {
             quest_data.splice(quest_data.length, 0, SF_QuestSystem.default_quest());
             this.refresh();
             var i;
-            for (i = 0; i * quest_one_page + 1 < quest_data.length; i++) {
-            }
+            for (i = 0; i * quest_one_page + 1 < quest_data.length; i++) {}
             if (i * quest_one_page + 1 == quest_data.length) {
-                this._questListInfoWindow.addCommand('newpage', 'newpage');
+                this._questListInfoWindow.addCommand("newpage", "newpage");
                 this._questListInfoWindow.refresh();
             }
-        }
+        };
 
         Window_QuestList.prototype.updateHelp = function () {
             Window_ScrollCommand.prototype.updateHelp.call(this);
             if (this._helpWindow) {
                 this._helpWindow.setQuest(this.currentExt());
             }
-        }
+        };
 
         //=============================================================================
         // Window_QuestDetail
@@ -636,7 +637,7 @@ if (!Imported.SF_WindowScrollCommand) {
 
         Window_QuestDetail.prototype.clear = function () {
             this.contents.clear();
-        }
+        };
 
         Window_QuestDetail.prototype.setQuest = function (questId) {
             this._questId = questId;
@@ -664,7 +665,7 @@ if (!Imported.SF_WindowScrollCommand) {
             }
 
             this.refresh();
-        }
+        };
 
         //=============================================================================
         // Scene_Quest_Editor
@@ -681,7 +682,7 @@ if (!Imported.SF_WindowScrollCommand) {
         Scene_QuestEditor.prototype.initialize = function () {
             Scene_MenuBase.prototype.initialize.call(this);
             this.createEditorDiv();
-        }
+        };
 
         Scene_QuestEditor.prototype.create = function () {
             Scene_MenuBase.prototype.create.call(this);
@@ -694,7 +695,7 @@ if (!Imported.SF_WindowScrollCommand) {
             this._questListWindow._questListInfoWindow = this._questListInfoWindow;
             this._questListInfoWindow.select(0);
             this._questListWindow.select(0);
-        }
+        };
 
         Scene_QuestEditor.prototype.createQuestListWindow = function () {
             this._questListWindow = new Window_QuestList();
@@ -702,20 +703,20 @@ if (!Imported.SF_WindowScrollCommand) {
             this._questListWindow.setHandler("newquest", this.onQuestListNewQuest.bind(this));
             //this._questListWindow.setHandler("cancel", this.onQuestListCancel.bind(this));
             this.addWindow(this._questListWindow);
-        }
+        };
 
         Scene_QuestEditor.prototype.createQuestListInfoWindow = function () {
             this._questListInfoWindow = new Window_QuestListInfo();
             // this._questListInfoWindow.setHandler("cancel", this.popScene.bind(this));
-            this._questListInfoWindow.setHandler('quest_page', this.onQuestListInfoPage.bind(this));
-            this._questListInfoWindow.setHandler('newpage', this.onQuestListInfoNewPage.bind(this));
+            this._questListInfoWindow.setHandler("quest_page", this.onQuestListInfoPage.bind(this));
+            this._questListInfoWindow.setHandler("newpage", this.onQuestListInfoNewPage.bind(this));
             this.addWindow(this._questListInfoWindow);
-        }
+        };
 
         Scene_QuestEditor.prototype.createQuestDetailWindow = function () {
             this._questDetailWindow = new Window_QuestDetail();
             this.addWindow(this._questDetailWindow);
-        }
+        };
 
         Scene_QuestEditor.prototype.onQuestListOk = function () {
             this._questListWindow.deactivate();
@@ -729,32 +730,37 @@ if (!Imported.SF_WindowScrollCommand) {
             this._editor_desc = document.getElementById("quest_editor_desc");
             this._editor_save = document.getElementById("quest_editor_save");
             this._editor_cancel = document.getElementById("quest_editor_cancel");
-            this._editor_save.addEventListener('click', this._editor_save_bind);
-            this._editor_cancel.addEventListener('click', this._editor_cancel_bind);
+            this._editor_save.addEventListener("click", this._editor_save_bind);
+            this._editor_cancel.addEventListener("click", this._editor_cancel_bind);
             this._editor_name.value = quest_data[this._questListWindow._questId].name;
             this._editor_desc.value = quest_data[this._questListWindow._questId].desc;
-
-        }
+        };
 
         Scene_QuestEditor.prototype.onQuestListNewQuest = function () {
             this._questListWindow.newQuest();
             this._questListWindow.activate();
-        }
+        };
 
         Scene_QuestEditor.prototype.onQuestListInfoPage = function () {
             this._questListInfoWindow.activate();
-        }
+        };
 
         Scene_QuestEditor.prototype.onQuestListInfoNewPage = function () {
             this._questListInfoWindow.newPage();
             this._questListInfoWindow.activate();
-        }
+        };
 
         Scene_QuestEditor.prototype.createEditorDiv = function () {
             var canvas = document.getElementById("UpperCanvas");
             this._editor_div = this._editor_div || document.createElement("div");
-            this._editor_div.setAttribute("style", "position: absolute;margin: auto; top: 0px; left: 0px; right: 0px; bottom: 0px;z-index: 1000; height:" +
-                canvas.offsetHeight + "px; width:" + canvas.offsetWidth + "px; background-color: rgba(0, 0, 0, 0.3); color: #FFFFFF; user-select:text;");
+            this._editor_div.setAttribute(
+                "style",
+                "position: absolute;margin: auto; top: 0px; left: 0px; right: 0px; bottom: 0px;z-index: 1000; height:" +
+                    canvas.offsetHeight +
+                    "px; width:" +
+                    canvas.offsetWidth +
+                    "px; background-color: rgba(0, 0, 0, 0.3); color: #FFFFFF; user-select:text;"
+            );
             this._editor_div.setAttribute("id", "quest_editor");
 
             this._editor_div.innerHTML = `
@@ -768,7 +774,7 @@ if (!Imported.SF_WindowScrollCommand) {
             `;
             this._editor_save_bind = this.onEditorSave.bind(this);
             this._editor_cancel_bind = this.onEditorCancel.bind(this);
-        }
+        };
 
         Scene_QuestEditor.prototype.onEditorSave = function () {
             var quest = quest_data[this._questListWindow._questId];
@@ -776,7 +782,7 @@ if (!Imported.SF_WindowScrollCommand) {
             quest.desc = this._editor_desc.value;
             fs.writeFileSync(quest_path, JsonEx.stringify(quest_data));
             this.onEditorCancel();
-        }
+        };
 
         Scene_QuestEditor.prototype.onEditorCancel = function () {
             this._editor_div.remove();
@@ -790,7 +796,7 @@ if (!Imported.SF_WindowScrollCommand) {
             this._questListInfoWindow.activate();
             this._questListWindow.refresh();
             this._questListWindow.selectExt(this._questListWindow._questId);
-        }
+        };
 
         //=============================================================================
         // Scene_Title
@@ -798,13 +804,12 @@ if (!Imported.SF_WindowScrollCommand) {
 
         Scene_Title.prototype.start = function () {
             SceneManager.goto(Scene_QuestEditor);
-        }
+        };
     } else {
         //=============================================================================
         // DataManager
         //=============================================================================
 
-        DataManager._databaseFiles.push({ name: '$dataQuests', src: 'Quests.json' });
+        DataManager._databaseFiles.push({ name: "$dataQuests", src: "Quests.json" });
     }
-
 })();

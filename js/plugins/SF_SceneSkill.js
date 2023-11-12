@@ -11,20 +11,20 @@ var SF_Plugins = SF_Plugins || {};
 
 //=============================================================================
 /*:
-    * @plugindesc v1.0.0 - Scene Skill
-    * @author Salted Fish
-    * 
-    * 
-    * @help
-    * 
-    * ===========================================================================
-    * Introduction
-    * ===========================================================================
-    * 
-    * This plugin is used to show the skill list.
-    * Any config just change the file.
-    *
-    */
+ * @plugindesc v1.0.0 - Scene Skill
+ * @author Salted Fish
+ *
+ *
+ * @help
+ *
+ * ===========================================================================
+ * Introduction
+ * ===========================================================================
+ *
+ * This plugin is used to show the skill list.
+ * Any config just change the file.
+ *
+ */
 //=============================================================================
 
 (function () {
@@ -50,11 +50,9 @@ var SF_Plugins = SF_Plugins || {};
     Window_UserSelect.prototype.initialize = function () {
         Window_PagingBase.prototype.initialize.apply(this, arguments);
         this.refresh();
-    }
+    };
 
     //=============================================================================
     // Scene_Skill
     //=============================================================================
-
-
 })();

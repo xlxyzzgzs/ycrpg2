@@ -38,11 +38,11 @@ Window_Base.prototype.lineHeight = function () {
 
 Window_Base.prototype.standardFontFace = function () {
     if ($gameSystem.isChinese()) {
-        return 'SimHei, Heiti TC, sans-serif';
+        return "SimHei, Heiti TC, sans-serif";
     } else if ($gameSystem.isKorean()) {
-        return 'Dotum, AppleGothic, sans-serif';
+        return "Dotum, AppleGothic, sans-serif";
     } else {
-        return 'GameFont';
+        return "GameFont";
     }
 };
 
@@ -63,7 +63,7 @@ Window_Base.prototype.standardBackOpacity = function () {
 };
 
 Window_Base.prototype.loadWindowskin = function () {
-    this.windowskin = ImageManager.loadSystem('Window');
+    this.windowskin = ImageManager.loadSystem("Window");
 };
 
 Window_Base.prototype.updatePadding = function () {
@@ -276,43 +276,55 @@ Window_Base.prototype.drawTextEx = function (text, x, y) {
 };
 
 Window_Base.prototype.convertEscapeCharacters = function (text) {
-    text = text.replace(/\\/g, '\x1b');
-    text = text.replace(/\x1b\x1b/g, '\\');
-    text = text.replace(/\x1bV\[(\d+)\]/gi, function () {
-        return $gameVariables.value(parseInt(arguments[1]));
-    }.bind(this));
-    text = text.replace(/\x1bV\[(\d+)\]/gi, function () {
-        return $gameVariables.value(parseInt(arguments[1]));
-    }.bind(this));
-    text = text.replace(/\x1bN\[(\d+)\]/gi, function () {
-        return this.actorName(parseInt(arguments[1]));
-    }.bind(this));
-    text = text.replace(/\x1bP\[(\d+)\]/gi, function () {
-        return this.partyMemberName(parseInt(arguments[1]));
-    }.bind(this));
+    text = text.replace(/\\/g, "\x1b");
+    text = text.replace(/\x1b\x1b/g, "\\");
+    text = text.replace(
+        /\x1bV\[(\d+)\]/gi,
+        function () {
+            return $gameVariables.value(parseInt(arguments[1]));
+        }.bind(this)
+    );
+    text = text.replace(
+        /\x1bV\[(\d+)\]/gi,
+        function () {
+            return $gameVariables.value(parseInt(arguments[1]));
+        }.bind(this)
+    );
+    text = text.replace(
+        /\x1bN\[(\d+)\]/gi,
+        function () {
+            return this.actorName(parseInt(arguments[1]));
+        }.bind(this)
+    );
+    text = text.replace(
+        /\x1bP\[(\d+)\]/gi,
+        function () {
+            return this.partyMemberName(parseInt(arguments[1]));
+        }.bind(this)
+    );
     text = text.replace(/\x1bG/gi, TextManager.currencyUnit);
     return text;
 };
 
 Window_Base.prototype.actorName = function (n) {
     var actor = n >= 1 ? $gameActors.actor(n) : null;
-    return actor ? actor.name() : '';
+    return actor ? actor.name() : "";
 };
 
 Window_Base.prototype.partyMemberName = function (n) {
     var actor = n >= 1 ? $gameParty.members()[n - 1] : null;
-    return actor ? actor.name() : '';
+    return actor ? actor.name() : "";
 };
 
 Window_Base.prototype.processCharacter = function (textState) {
     switch (textState.text[textState.index]) {
-        case '\n':
+        case "\n":
             this.processNewLine(textState);
             break;
-        case '\f':
+        case "\f":
             this.processNewPage(textState);
             break;
-        case '\x1b':
+        case "\x1b":
             this.processEscapeCharacter(this.obtainEscapeCode(textState), textState);
             break;
         default:
@@ -347,7 +359,7 @@ Window_Base.prototype.obtainEscapeCode = function (textState) {
         textState.index += arr[0].length;
         return arr[0].toUpperCase();
     } else {
-        return '';
+        return "";
     }
 };
 
@@ -357,22 +369,22 @@ Window_Base.prototype.obtainEscapeParam = function (textState) {
         textState.index += arr[0].length;
         return parseInt(arr[0].slice(1));
     } else {
-        return '';
+        return "";
     }
 };
 
 Window_Base.prototype.processEscapeCharacter = function (code, textState) {
     switch (code) {
-        case 'C':
+        case "C":
             this.changeTextColor(this.textColor(this.obtainEscapeParam(textState)));
             break;
-        case 'I':
+        case "I":
             this.processDrawIcon(this.obtainEscapeParam(textState), textState);
             break;
-        case '{':
+        case "{":
             this.makeFontBigger();
             break;
-        case '}':
+        case "}":
             this.makeFontSmaller();
             break;
     }
@@ -398,19 +410,19 @@ Window_Base.prototype.makeFontSmaller = function () {
 Window_Base.prototype.calcTextHeight = function (textState, all) {
     var lastFontSize = this.contents.fontSize;
     var textHeight = 0;
-    var lines = textState.text.slice(textState.index).split('\n');
+    var lines = textState.text.slice(textState.index).split("\n");
     var maxLines = all ? lines.length : 1;
 
     for (var i = 0; i < maxLines; i++) {
         var maxFontSize = this.contents.fontSize;
         var regExp = /\x1b[\{\}]/g;
-        for (; ;) {
+        for (;;) {
             var array = regExp.exec(lines[i]);
             if (array) {
-                if (array[0] === '\x1b{') {
+                if (array[0] === "\x1b{") {
                     this.makeFontBigger();
                 }
-                if (array[0] === '\x1b}') {
+                if (array[0] === "\x1b}") {
                     this.makeFontSmaller();
                 }
                 if (maxFontSize < this.contents.fontSize) {
@@ -428,10 +440,10 @@ Window_Base.prototype.calcTextHeight = function (textState, all) {
 };
 
 Window_Base.prototype.drawIcon = function (iconIndex, x, y) {
-    var bitmap = ImageManager.loadSystem('IconSet');
+    var bitmap = ImageManager.loadSystem("IconSet");
     var pw = Window_Base._iconWidth;
     var ph = Window_Base._iconHeight;
-    var sx = iconIndex % 16 * pw;
+    var sx = (iconIndex % 16) * pw;
     var sy = Math.floor(iconIndex / 16) * ph;
     this.contents.blt(bitmap, sx, sy, pw, ph, x, y);
 };
@@ -446,7 +458,7 @@ Window_Base.prototype.drawFace = function (faceName, faceIndex, x, y, width, hei
     var sh = Math.min(height, ph);
     var dx = Math.floor(x + Math.max(width - pw, 0) / 2);
     var dy = Math.floor(y + Math.max(height - ph, 0) / 2);
-    var sx = faceIndex % 4 * pw + (pw - sw) / 2;
+    var sx = (faceIndex % 4) * pw + (pw - sw) / 2;
     var sy = Math.floor(faceIndex / 4) * ph + (ph - sh) / 2;
     this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy);
 };
@@ -457,8 +469,8 @@ Window_Base.prototype.drawCharacter = function (characterName, characterIndex, x
     var pw = bitmap.width / (big ? 3 : 12);
     var ph = bitmap.height / (big ? 4 : 8);
     var n = characterIndex;
-    var sx = (n % 4 * 3 + 1) * pw;
-    var sy = (Math.floor(n / 4) * 4) * ph;
+    var sx = ((n % 4) * 3 + 1) * pw;
+    var sy = Math.floor(n / 4) * 4 * ph;
     this.contents.blt(bitmap, sx, sy, pw, ph, x - pw / 2, y - ph);
 };
 
@@ -517,7 +529,7 @@ Window_Base.prototype.drawActorLevel = function (actor, x, y) {
     this.changeTextColor(this.systemColor());
     this.drawText(TextManager.levelA, x, y, 48);
     this.resetTextColor();
-    this.drawText(actor.level, x + 84, y, 36, 'right');
+    this.drawText(actor.level, x + 84, y, 36, "right");
 };
 
 Window_Base.prototype.drawActorIcons = function (actor, x, y, width) {
@@ -528,23 +540,22 @@ Window_Base.prototype.drawActorIcons = function (actor, x, y, width) {
     }
 };
 
-Window_Base.prototype.drawCurrentAndMax = function (current, max, x, y,
-    width, color1, color2) {
-    var labelWidth = this.textWidth('HP');
-    var valueWidth = this.textWidth('0000');
-    var slashWidth = this.textWidth('/');
+Window_Base.prototype.drawCurrentAndMax = function (current, max, x, y, width, color1, color2) {
+    var labelWidth = this.textWidth("HP");
+    var valueWidth = this.textWidth("0000");
+    var slashWidth = this.textWidth("/");
     var x1 = x + width - valueWidth;
     var x2 = x1 - slashWidth;
     var x3 = x2 - valueWidth;
     if (x3 >= x + labelWidth) {
         this.changeTextColor(color1);
-        this.drawText(current, x3, y, valueWidth, 'right');
+        this.drawText(current, x3, y, valueWidth, "right");
         this.changeTextColor(color2);
-        this.drawText('/', x2, y, slashWidth, 'right');
-        this.drawText(max, x1, y, valueWidth, 'right');
+        this.drawText("/", x2, y, slashWidth, "right");
+        this.drawText(max, x1, y, valueWidth, "right");
     } else {
         this.changeTextColor(color1);
-        this.drawText(current, x1, y, valueWidth, 'right');
+        this.drawText(current, x1, y, valueWidth, "right");
     }
 };
 
@@ -555,8 +566,7 @@ Window_Base.prototype.drawActorHp = function (actor, x, y, width) {
     this.drawGauge(x, y, width, actor.hpRate(), color1, color2);
     this.changeTextColor(this.systemColor());
     this.drawText(TextManager.hpA, x, y, 44);
-    this.drawCurrentAndMax(actor.hp, actor.mhp, x, y, width,
-        this.hpColor(actor), this.normalColor());
+    this.drawCurrentAndMax(actor.hp, actor.mhp, x, y, width, this.hpColor(actor), this.normalColor());
 };
 
 Window_Base.prototype.drawActorMp = function (actor, x, y, width) {
@@ -566,8 +576,7 @@ Window_Base.prototype.drawActorMp = function (actor, x, y, width) {
     this.drawGauge(x, y, width, actor.mpRate(), color1, color2);
     this.changeTextColor(this.systemColor());
     this.drawText(TextManager.mpA, x, y, 44);
-    this.drawCurrentAndMax(actor.mp, actor.mmp, x, y, width,
-        this.mpColor(actor), this.normalColor());
+    this.drawCurrentAndMax(actor.mp, actor.mmp, x, y, width, this.mpColor(actor), this.normalColor());
 };
 
 Window_Base.prototype.drawActorTp = function (actor, x, y, width) {
@@ -578,7 +587,7 @@ Window_Base.prototype.drawActorTp = function (actor, x, y, width) {
     this.changeTextColor(this.systemColor());
     this.drawText(TextManager.tpA, x, y, 44);
     this.changeTextColor(this.tpColor(actor));
-    this.drawText(actor.tp, x + width - 64, y, 64, 'right');
+    this.drawText(actor.tp, x + width - 64, y, 64, "right");
 };
 
 Window_Base.prototype.drawActorSimpleStatus = function (actor, x, y, width) {
@@ -606,9 +615,9 @@ Window_Base.prototype.drawItemName = function (item, x, y, width) {
 Window_Base.prototype.drawCurrencyValue = function (value, unit, x, y, width) {
     var unitWidth = Math.min(80, this.textWidth(unit));
     this.resetTextColor();
-    this.drawText(value, x, y, width - unitWidth - 6, 'right');
+    this.drawText(value, x, y, width - unitWidth - 6, "right");
     this.changeTextColor(this.systemColor());
-    this.drawText(unit, x + width - unitWidth, y, unitWidth, 'right');
+    this.drawText(unit, x + width - unitWidth, y, unitWidth, "right");
 };
 
 Window_Base.prototype.paramchangeTextColor = function (change) {
@@ -677,11 +686,11 @@ Window_Base.prototype.refreshDimmerBitmap = function () {
 };
 
 Window_Base.prototype.dimColor1 = function () {
-    return 'rgba(0, 0, 0, 0.6)';
+    return "rgba(0, 0, 0, 0.6)";
 };
 
 Window_Base.prototype.dimColor2 = function () {
-    return 'rgba(0, 0, 0, 0)';
+    return "rgba(0, 0, 0, 0)";
 };
 
 Window_Base.prototype.canvasToLocalX = function (x) {
@@ -767,8 +776,7 @@ Window_Selectable.prototype.spacing = function () {
 };
 
 Window_Selectable.prototype.itemWidth = function () {
-    return Math.floor((this.width - this.padding * 2 +
-        this.spacing()) / this.maxCols() - this.spacing());
+    return Math.floor((this.width - this.padding * 2 + this.spacing()) / this.maxCols() - this.spacing());
 };
 
 Window_Selectable.prototype.itemHeight = function () {
@@ -860,7 +868,7 @@ Window_Selectable.prototype.itemRect = function (index) {
     var maxCols = this.maxCols();
     rect.width = this.itemWidth();
     rect.height = this.itemHeight();
-    rect.x = index % maxCols * (rect.width + this.spacing()) - this._scrollX;
+    rect.x = (index % maxCols) * (rect.width + this.spacing()) - this._scrollX;
     rect.y = Math.floor(index / maxCols) * rect.height - this._scrollY;
     return rect;
 };
@@ -908,8 +916,7 @@ Window_Selectable.prototype.isOpenAndActive = function () {
 };
 
 Window_Selectable.prototype.isCursorMovable = function () {
-    return (this.isOpenAndActive() && !this._cursorFixed &&
-        !this._cursorAll && this.maxItems() > 0);
+    return this.isOpenAndActive() && !this._cursorFixed && !this._cursorAll && this.maxItems() > 0;
 };
 
 Window_Selectable.prototype.cursorDown = function (wrap) {
@@ -997,22 +1004,22 @@ Window_Selectable.prototype.updateArrows = function () {
 Window_Selectable.prototype.processCursorMove = function () {
     if (this.isCursorMovable()) {
         var lastIndex = this.index();
-        if (Input.isRepeated('down')) {
-            this.cursorDown(Input.isTriggered('down'));
+        if (Input.isRepeated("down")) {
+            this.cursorDown(Input.isTriggered("down"));
         }
-        if (Input.isRepeated('up')) {
-            this.cursorUp(Input.isTriggered('up'));
+        if (Input.isRepeated("up")) {
+            this.cursorUp(Input.isTriggered("up"));
         }
-        if (Input.isRepeated('right')) {
-            this.cursorRight(Input.isTriggered('right'));
+        if (Input.isRepeated("right")) {
+            this.cursorRight(Input.isTriggered("right"));
         }
-        if (Input.isRepeated('left')) {
-            this.cursorLeft(Input.isTriggered('left'));
+        if (Input.isRepeated("left")) {
+            this.cursorLeft(Input.isTriggered("left"));
         }
-        if (!this.isHandled('pagedown') && Input.isTriggered('pagedown')) {
+        if (!this.isHandled("pagedown") && Input.isTriggered("pagedown")) {
             this.cursorPagedown();
         }
-        if (!this.isHandled('pageup') && Input.isTriggered('pageup')) {
+        if (!this.isHandled("pageup") && Input.isTriggered("pageup")) {
             this.cursorPageup();
         }
         if (this.index() !== lastIndex) {
@@ -1027,9 +1034,9 @@ Window_Selectable.prototype.processHandling = function () {
             this.processOk();
         } else if (this.isCancelEnabled() && this.isCancelTriggered()) {
             this.processCancel();
-        } else if (this.isHandled('pagedown') && Input.isTriggered('pagedown')) {
+        } else if (this.isHandled("pagedown") && Input.isTriggered("pagedown")) {
             this.processPagedown();
-        } else if (this.isHandled('pageup') && Input.isTriggered('pageup')) {
+        } else if (this.isHandled("pageup") && Input.isTriggered("pageup")) {
             this.processPageup();
         }
     }
@@ -1125,7 +1132,7 @@ Window_Selectable.prototype.isContentsArea = function (x, y) {
     var top = this.padding;
     var right = this.width - this.padding;
     var bottom = this.height - this.padding;
-    return (x >= left && y >= top && x < right && y < bottom);
+    return x >= left && y >= top && x < right && y < bottom;
 };
 
 Window_Selectable.prototype.isTouchOkEnabled = function () {
@@ -1133,19 +1140,19 @@ Window_Selectable.prototype.isTouchOkEnabled = function () {
 };
 
 Window_Selectable.prototype.isOkEnabled = function () {
-    return this.isHandled('ok');
+    return this.isHandled("ok");
 };
 
 Window_Selectable.prototype.isCancelEnabled = function () {
-    return this.isHandled('cancel');
+    return this.isHandled("cancel");
 };
 
 Window_Selectable.prototype.isOkTriggered = function () {
-    return Input.isRepeated('ok');
+    return Input.isRepeated("ok");
 };
 
 Window_Selectable.prototype.isCancelTriggered = function () {
-    return Input.isRepeated('cancel');
+    return Input.isRepeated("cancel");
 };
 
 Window_Selectable.prototype.processOk = function () {
@@ -1168,7 +1175,7 @@ Window_Selectable.prototype.playBuzzerSound = function () {
 };
 
 Window_Selectable.prototype.callOkHandler = function () {
-    this.callHandler('ok');
+    this.callHandler("ok");
 };
 
 Window_Selectable.prototype.processCancel = function () {
@@ -1179,21 +1186,21 @@ Window_Selectable.prototype.processCancel = function () {
 };
 
 Window_Selectable.prototype.callCancelHandler = function () {
-    this.callHandler('cancel');
+    this.callHandler("cancel");
 };
 
 Window_Selectable.prototype.processPageup = function () {
     SoundManager.playCursor();
     this.updateInputData();
     this.deactivate();
-    this.callHandler('pageup');
+    this.callHandler("pageup");
 };
 
 Window_Selectable.prototype.processPagedown = function () {
     SoundManager.playCursor();
     this.updateInputData();
     this.deactivate();
-    this.callHandler('pagedown');
+    this.callHandler("pagedown");
 };
 
 Window_Selectable.prototype.updateInputData = function () {
@@ -1258,8 +1265,7 @@ Window_Selectable.prototype.drawAllItems = function () {
     }
 };
 
-Window_Selectable.prototype.drawItem = function (index) {
-};
+Window_Selectable.prototype.drawItem = function (index) {};
 
 Window_Selectable.prototype.clearItem = function (index) {
     var rect = this.itemRect(index);
@@ -1327,8 +1333,7 @@ Window_Command.prototype.clearCommandList = function () {
     this._list = [];
 };
 
-Window_Command.prototype.makeCommandList = function () {
-};
+Window_Command.prototype.makeCommandList = function () {};
 
 Window_Command.prototype.addCommand = function (name, symbol, enabled, ext) {
     if (enabled === undefined) {
@@ -1413,7 +1418,7 @@ Window_Command.prototype.drawItem = function (index) {
 };
 
 Window_Command.prototype.itemTextAlign = function () {
-    return 'left';
+    return "left";
 };
 
 Window_Command.prototype.isOkEnabled = function () {
@@ -1424,7 +1429,7 @@ Window_Command.prototype.callOkHandler = function () {
     var symbol = this.currentSymbol();
     if (this.isHandled(symbol)) {
         this.callHandler(symbol);
-    } else if (this.isHandled('ok')) {
+    } else if (this.isHandled("ok")) {
         Window_Selectable.prototype.callOkHandler.call(this);
     } else {
         this.activate();
@@ -1463,7 +1468,7 @@ Window_HorzCommand.prototype.maxCols = function () {
 };
 
 Window_HorzCommand.prototype.itemTextAlign = function () {
-    return 'center';
+    return "center";
 };
 
 //-----------------------------------------------------------------------------
@@ -1482,7 +1487,7 @@ Window_Help.prototype.initialize = function (numLines) {
     var width = Graphics.boxWidth;
     var height = this.fittingHeight(numLines || 2);
     Window_Base.prototype.initialize.call(this, 0, 0, width, height);
-    this._text = '';
+    this._text = "";
 };
 
 Window_Help.prototype.setText = function (text) {
@@ -1493,11 +1498,11 @@ Window_Help.prototype.setText = function (text) {
 };
 
 Window_Help.prototype.clear = function () {
-    this.setText('');
+    this.setText("");
 };
 
 Window_Help.prototype.setItem = function (item) {
-    this.setText(item ? item.description : '');
+    this.setText(item ? item.description : "");
 };
 
 Window_Help.prototype.refresh = function () {
@@ -1594,64 +1599,63 @@ Window_MenuCommand.prototype.makeCommandList = function () {
 
 Window_MenuCommand.prototype.addMainCommands = function () {
     var enabled = this.areMainCommandsEnabled();
-    if (this.needsCommand('item')) {
-        this.addCommand(TextManager.item, 'item', enabled);
+    if (this.needsCommand("item")) {
+        this.addCommand(TextManager.item, "item", enabled);
     }
-    if (this.needsCommand('skill')) {
-        this.addCommand(TextManager.skill, 'skill', enabled);
+    if (this.needsCommand("skill")) {
+        this.addCommand(TextManager.skill, "skill", enabled);
     }
-    if (this.needsCommand('equip')) {
-        this.addCommand(TextManager.equip, 'equip', enabled);
+    if (this.needsCommand("equip")) {
+        this.addCommand(TextManager.equip, "equip", enabled);
     }
-    if (this.needsCommand('status')) {
-        this.addCommand(TextManager.status, 'status', enabled);
+    if (this.needsCommand("status")) {
+        this.addCommand(TextManager.status, "status", enabled);
     }
 };
 
 Window_MenuCommand.prototype.addFormationCommand = function () {
-    if (this.needsCommand('formation')) {
+    if (this.needsCommand("formation")) {
         var enabled = this.isFormationEnabled();
-        this.addCommand(TextManager.formation, 'formation', enabled);
+        this.addCommand(TextManager.formation, "formation", enabled);
     }
 };
 
-Window_MenuCommand.prototype.addOriginalCommands = function () {
-};
+Window_MenuCommand.prototype.addOriginalCommands = function () {};
 
 Window_MenuCommand.prototype.addOptionsCommand = function () {
-    if (this.needsCommand('options')) {
+    if (this.needsCommand("options")) {
         var enabled = this.isOptionsEnabled();
-        this.addCommand(TextManager.options, 'options', enabled);
+        this.addCommand(TextManager.options, "options", enabled);
     }
 };
 
 Window_MenuCommand.prototype.addSaveCommand = function () {
-    if (this.needsCommand('save')) {
+    if (this.needsCommand("save")) {
         var enabled = this.isSaveEnabled();
-        this.addCommand(TextManager.save, 'save', enabled);
+        this.addCommand(TextManager.save, "save", enabled);
     }
 };
 
 Window_MenuCommand.prototype.addGameEndCommand = function () {
     var enabled = this.isGameEndEnabled();
-    this.addCommand(TextManager.gameEnd, 'gameEnd', enabled);
+    this.addCommand(TextManager.gameEnd, "gameEnd", enabled);
 };
 
 Window_MenuCommand.prototype.needsCommand = function (name) {
     var flags = $dataSystem.menuCommands;
     if (flags) {
         switch (name) {
-            case 'item':
+            case "item":
                 return flags[0];
-            case 'skill':
+            case "skill":
                 return flags[1];
-            case 'equip':
+            case "equip":
                 return flags[2];
-            case 'status':
+            case "status":
                 return flags[3];
-            case 'formation':
+            case "formation":
                 return flags[4];
-            case 'save':
+            case "save":
                 return flags[5];
         }
     }
@@ -1886,10 +1890,10 @@ Window_ItemCategory.prototype.update = function () {
 };
 
 Window_ItemCategory.prototype.makeCommandList = function () {
-    this.addCommand(TextManager.item, 'item');
-    this.addCommand(TextManager.weapon, 'weapon');
-    this.addCommand(TextManager.armor, 'armor');
-    this.addCommand(TextManager.keyItem, 'keyItem');
+    this.addCommand(TextManager.item, "item");
+    this.addCommand(TextManager.weapon, "weapon");
+    this.addCommand(TextManager.armor, "armor");
+    this.addCommand(TextManager.keyItem, "keyItem");
 };
 
 Window_ItemCategory.prototype.setItemWindow = function (itemWindow) {
@@ -1910,7 +1914,7 @@ Window_ItemList.prototype.constructor = Window_ItemList;
 
 Window_ItemList.prototype.initialize = function (x, y, width, height) {
     Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-    this._category = 'none';
+    this._category = "none";
     this._data = [];
 };
 
@@ -1945,13 +1949,13 @@ Window_ItemList.prototype.isCurrentItemEnabled = function () {
 
 Window_ItemList.prototype.includes = function (item) {
     switch (this._category) {
-        case 'item':
+        case "item":
             return DataManager.isItem(item) && item.itypeId === 1;
-        case 'weapon':
+        case "weapon":
             return DataManager.isWeapon(item);
-        case 'armor':
+        case "armor":
             return DataManager.isArmor(item);
-        case 'keyItem':
+        case "keyItem":
             return DataManager.isItem(item) && item.itypeId === 2;
         default:
             return false;
@@ -1994,13 +1998,13 @@ Window_ItemList.prototype.drawItem = function (index) {
 };
 
 Window_ItemList.prototype.numberWidth = function () {
-    return this.textWidth('000');
+    return this.textWidth("000");
 };
 
 Window_ItemList.prototype.drawItemNumber = function (item, x, y, width) {
     if (this.needsNumber()) {
-        this.drawText(':', x, y, width - this.textWidth('00'), 'right');
-        this.drawText($gameParty.numItems(item), x, y, width, 'right');
+        this.drawText(":", x, y, width - this.textWidth("00"), "right");
+        this.drawText($gameParty.numItems(item), x, y, width, "right");
     }
 };
 
@@ -2055,7 +2059,7 @@ Window_SkillType.prototype.makeCommandList = function () {
         });
         skillTypes.forEach(function (stypeId) {
             var name = $dataSystem.skillTypes[stypeId];
-            this.addCommand(name, 'skill', true, stypeId);
+            this.addCommand(name, "skill", true, stypeId);
         }, this);
     }
 };
@@ -2214,16 +2218,16 @@ Window_SkillList.prototype.drawItem = function (index) {
 };
 
 Window_SkillList.prototype.costWidth = function () {
-    return this.textWidth('000');
+    return this.textWidth("000");
 };
 
 Window_SkillList.prototype.drawSkillCost = function (skill, x, y, width) {
     if (this._actor.skillTpCost(skill) > 0) {
         this.changeTextColor(this.tpCostColor());
-        this.drawText(this._actor.skillTpCost(skill), x, y, width, 'right');
+        this.drawText(this._actor.skillTpCost(skill), x, y, width, "right");
     } else if (this._actor.skillMpCost(skill) > 0) {
         this.changeTextColor(this.mpCostColor());
-        this.drawText(this._actor.skillMpCost(skill), x, y, width, 'right');
+        this.drawText(this._actor.skillMpCost(skill), x, y, width, "right");
     }
 };
 
@@ -2312,19 +2316,19 @@ Window_EquipStatus.prototype.drawParamName = function (x, y, paramId) {
 
 Window_EquipStatus.prototype.drawCurrentParam = function (x, y, paramId) {
     this.resetTextColor();
-    this.drawText(this._actor.param(paramId), x, y, 48, 'right');
+    this.drawText(this._actor.param(paramId), x, y, 48, "right");
 };
 
 Window_EquipStatus.prototype.drawRightArrow = function (x, y) {
     this.changeTextColor(this.systemColor());
-    this.drawText('\u2192', x, y, 32, 'center');
+    this.drawText("\u2192", x, y, 32, "center");
 };
 
 Window_EquipStatus.prototype.drawNewParam = function (x, y, paramId) {
     var newValue = this._tempActor.param(paramId);
     var diffvalue = newValue - this._actor.param(paramId);
     this.changeTextColor(this.paramchangeTextColor(diffvalue));
-    this.drawText(newValue, x, y, 48, 'right');
+    this.drawText(newValue, x, y, 48, "right");
 };
 
 //-----------------------------------------------------------------------------
@@ -2353,9 +2357,9 @@ Window_EquipCommand.prototype.maxCols = function () {
 };
 
 Window_EquipCommand.prototype.makeCommandList = function () {
-    this.addCommand(TextManager.equip2, 'equip');
-    this.addCommand(TextManager.optimize, 'optimize');
-    this.addCommand(TextManager.clear, 'clear');
+    this.addCommand(TextManager.equip2, "equip");
+    this.addCommand(TextManager.optimize, "optimize");
+    this.addCommand(TextManager.clear, "clear");
 };
 
 //-----------------------------------------------------------------------------
@@ -2411,7 +2415,7 @@ Window_EquipSlot.prototype.drawItem = function (index) {
 
 Window_EquipSlot.prototype.slotName = function (index) {
     var slots = this._actor.equipSlots();
-    return this._actor ? $dataSystem.equipTypes[slots[index]] : '';
+    return this._actor ? $dataSystem.equipTypes[slots[index]] : "";
 };
 
 Window_EquipSlot.prototype.isEnabled = function (index) {
@@ -2487,8 +2491,7 @@ Window_EquipItem.prototype.isEnabled = function (item) {
     return true;
 };
 
-Window_EquipItem.prototype.selectLast = function () {
-};
+Window_EquipItem.prototype.selectLast = function () {};
 
 Window_EquipItem.prototype.setStatusWindow = function (statusWindow) {
     this._statusWindow = statusWindow;
@@ -2504,8 +2507,7 @@ Window_EquipItem.prototype.updateHelp = function () {
     }
 };
 
-Window_EquipItem.prototype.playOkSound = function () {
-};
+Window_EquipItem.prototype.playOkSound = function () {};
 
 //-----------------------------------------------------------------------------
 // Window_Status
@@ -2597,7 +2599,7 @@ Window_Status.prototype.drawParameters = function (x, y) {
         this.changeTextColor(this.systemColor());
         this.drawText(TextManager.param(paramId), x, y2, 160);
         this.resetTextColor();
-        this.drawText(this._actor.param(paramId), x + 160, y2, 60, 'right');
+        this.drawText(this._actor.param(paramId), x + 160, y2, 60, "right");
     }
 };
 
@@ -2608,15 +2610,15 @@ Window_Status.prototype.drawExpInfo = function (x, y) {
     var value1 = this._actor.currentExp();
     var value2 = this._actor.nextRequiredExp();
     if (this._actor.isMaxLevel()) {
-        value1 = '-------';
-        value2 = '-------';
+        value1 = "-------";
+        value2 = "-------";
     }
     this.changeTextColor(this.systemColor());
     this.drawText(expTotal, x, y + lineHeight * 0, 270);
     this.drawText(expNext, x, y + lineHeight * 2, 270);
     this.resetTextColor();
-    this.drawText(value1, x, y + lineHeight * 1, 270, 'right');
-    this.drawText(value2, x, y + lineHeight * 3, 270, 'right');
+    this.drawText(value1, x, y + lineHeight * 1, 270, "right");
+    this.drawText(value2, x, y + lineHeight * 3, 270, "right");
 };
 
 Window_Status.prototype.drawEquipments = function (x, y) {
@@ -2671,15 +2673,15 @@ Window_Options.prototype.makeCommandList = function () {
 };
 
 Window_Options.prototype.addGeneralOptions = function () {
-    this.addCommand(TextManager.alwaysDash, 'alwaysDash');
-    this.addCommand(TextManager.commandRemember, 'commandRemember');
+    this.addCommand(TextManager.alwaysDash, "alwaysDash");
+    this.addCommand(TextManager.commandRemember, "commandRemember");
 };
 
 Window_Options.prototype.addVolumeOptions = function () {
-    this.addCommand(TextManager.bgmVolume, 'bgmVolume');
-    this.addCommand(TextManager.bgsVolume, 'bgsVolume');
-    this.addCommand(TextManager.meVolume, 'meVolume');
-    this.addCommand(TextManager.seVolume, 'seVolume');
+    this.addCommand(TextManager.bgmVolume, "bgmVolume");
+    this.addCommand(TextManager.bgsVolume, "bgsVolume");
+    this.addCommand(TextManager.meVolume, "meVolume");
+    this.addCommand(TextManager.seVolume, "seVolume");
 };
 
 Window_Options.prototype.drawItem = function (index) {
@@ -2688,8 +2690,8 @@ Window_Options.prototype.drawItem = function (index) {
     var titleWidth = rect.width - statusWidth;
     this.resetTextColor();
     this.changePaintOpacity(this.isCommandEnabled(index));
-    this.drawText(this.commandName(index), rect.x, rect.y, titleWidth, 'left');
-    this.drawText(this.statusText(index), titleWidth, rect.y, statusWidth, 'right');
+    this.drawText(this.commandName(index), rect.x, rect.y, titleWidth, "left");
+    this.drawText(this.statusText(index), titleWidth, rect.y, statusWidth, "right");
 };
 
 Window_Options.prototype.statusWidth = function () {
@@ -2707,15 +2709,15 @@ Window_Options.prototype.statusText = function (index) {
 };
 
 Window_Options.prototype.isVolumeSymbol = function (symbol) {
-    return symbol.contains('Volume');
+    return symbol.contains("Volume");
 };
 
 Window_Options.prototype.booleanStatusText = function (value) {
-    return value ? 'ON' : 'OFF';
+    return value ? "ON" : "OFF";
 };
 
 Window_Options.prototype.volumeStatusText = function (value) {
-    return value + '%';
+    return value + "%";
 };
 
 Window_Options.prototype.processOk = function () {
@@ -2822,7 +2824,7 @@ Window_SavefileList.prototype.drawItem = function (index) {
     var info = DataManager.loadSavefileInfo(id);
     var rect = this.itemRectForText(index);
     this.resetTextColor();
-    if (this._mode === 'load') {
+    if (this._mode === "load") {
         this.changePaintOpacity(valid);
     }
     this.drawFileId(id, rect.x, rect.y);
@@ -2834,7 +2836,7 @@ Window_SavefileList.prototype.drawItem = function (index) {
 };
 
 Window_SavefileList.prototype.drawFileId = function (id, x, y) {
-    this.drawText(TextManager.file + ' ' + id, x, y, 180);
+    this.drawText(TextManager.file + " " + id, x, y, 180);
 };
 
 Window_SavefileList.prototype.drawContents = function (info, rect, valid) {
@@ -2869,12 +2871,11 @@ Window_SavefileList.prototype.drawPartyCharacters = function (info, x, y) {
 
 Window_SavefileList.prototype.drawPlaytime = function (info, x, y, width) {
     if (info.playtime) {
-        this.drawText(info.playtime, x, y, width, 'right');
+        this.drawText(info.playtime, x, y, width, "right");
     }
 };
 
-Window_SavefileList.prototype.playOkSound = function () {
-};
+Window_SavefileList.prototype.playOkSound = function () {};
 
 //-----------------------------------------------------------------------------
 // Window_ShopCommand
@@ -2903,9 +2904,9 @@ Window_ShopCommand.prototype.maxCols = function () {
 };
 
 Window_ShopCommand.prototype.makeCommandList = function () {
-    this.addCommand(TextManager.buy, 'buy');
-    this.addCommand(TextManager.sell, 'sell', !this._purchaseOnly);
-    this.addCommand(TextManager.cancel, 'cancel');
+    this.addCommand(TextManager.buy, "buy");
+    this.addCommand(TextManager.sell, "sell", !this._purchaseOnly);
+    this.addCommand(TextManager.cancel, "cancel");
 };
 
 //-----------------------------------------------------------------------------
@@ -2955,8 +2956,7 @@ Window_ShopBuy.prototype.price = function (item) {
 };
 
 Window_ShopBuy.prototype.isEnabled = function (item) {
-    return (item && this.price(item) <= this._money &&
-        !$gameParty.hasMaxItems(item));
+    return item && this.price(item) <= this._money && !$gameParty.hasMaxItems(item);
 };
 
 Window_ShopBuy.prototype.refresh = function () {
@@ -2995,8 +2995,7 @@ Window_ShopBuy.prototype.drawItem = function (index) {
     rect.width -= this.textPadding();
     this.changePaintOpacity(this.isEnabled(item));
     this.drawItemName(item, rect.x, rect.y, rect.width - priceWidth);
-    this.drawText(this.price(item), rect.x + rect.width - priceWidth,
-        rect.y, priceWidth, 'right');
+    this.drawText(this.price(item), rect.x + rect.width - priceWidth, rect.y, priceWidth, "right");
     this.changePaintOpacity(true);
 };
 
@@ -3080,7 +3079,7 @@ Window_ShopNumber.prototype.setCurrencyUnit = function (currencyUnit) {
 };
 
 Window_ShopNumber.prototype.createButtons = function () {
-    var bitmap = ImageManager.loadSystem('ButtonSet');
+    var bitmap = ImageManager.loadSystem("ButtonSet");
     var buttonWidth = 48;
     var buttonHeight = 48;
     this._buttons = [];
@@ -3147,7 +3146,7 @@ Window_ShopNumber.prototype.refresh = function () {
 };
 
 Window_ShopNumber.prototype.drawMultiplicationSign = function () {
-    var sign = '\u00d7';
+    var sign = "\u00d7";
     var width = this.textWidth(sign);
     var x = this.cursorX() - width * 2;
     var y = this.itemY();
@@ -3160,7 +3159,7 @@ Window_ShopNumber.prototype.drawNumber = function () {
     var y = this.itemY();
     var width = this.cursorWidth() - this.textPadding();
     this.resetTextColor();
-    this.drawText(this._number, x, y, width, 'right');
+    this.drawText(this._number, x, y, width, "right");
 };
 
 Window_ShopNumber.prototype.drawTotalPrice = function () {
@@ -3182,7 +3181,7 @@ Window_ShopNumber.prototype.buttonY = function () {
 };
 
 Window_ShopNumber.prototype.cursorWidth = function () {
-    var digitWidth = this.textWidth('0');
+    var digitWidth = this.textWidth("0");
     return this.maxDigits() * digitWidth + this.textPadding() * 2;
 };
 
@@ -3200,24 +3199,23 @@ Window_ShopNumber.prototype.update = function () {
 };
 
 Window_ShopNumber.prototype.isOkTriggered = function () {
-    return Input.isTriggered('ok');
+    return Input.isTriggered("ok");
 };
 
-Window_ShopNumber.prototype.playOkSound = function () {
-};
+Window_ShopNumber.prototype.playOkSound = function () {};
 
 Window_ShopNumber.prototype.processNumberChange = function () {
     if (this.isOpenAndActive()) {
-        if (Input.isRepeated('right')) {
+        if (Input.isRepeated("right")) {
             this.changeNumber(1);
         }
-        if (Input.isRepeated('left')) {
+        if (Input.isRepeated("left")) {
             this.changeNumber(-1);
         }
-        if (Input.isRepeated('up')) {
+        if (Input.isRepeated("up")) {
             this.changeNumber(10);
         }
-        if (Input.isRepeated('down')) {
+        if (Input.isRepeated("down")) {
             this.changeNumber(-10);
         }
     }
@@ -3233,8 +3231,7 @@ Window_ShopNumber.prototype.changeNumber = function (amount) {
 };
 
 Window_ShopNumber.prototype.updateCursor = function () {
-    this.setCursorRect(this.cursorX(), this.itemY(),
-        this.cursorWidth(), this.lineHeight());
+    this.setCursorRect(this.cursorX(), this.itemY(), this.cursorWidth(), this.lineHeight());
 };
 
 Window_ShopNumber.prototype.onButtonUp = function () {
@@ -3299,11 +3296,11 @@ Window_ShopStatus.prototype.isEquipItem = function () {
 
 Window_ShopStatus.prototype.drawPossession = function (x, y) {
     var width = this.contents.width - this.textPadding() - x;
-    var possessionWidth = this.textWidth('0000');
+    var possessionWidth = this.textWidth("0000");
     this.changeTextColor(this.systemColor());
     this.drawText(TextManager.possession, x, y, width - possessionWidth);
     this.resetTextColor();
-    this.drawText($gameParty.numItems(this._item), x, y, width, 'right');
+    this.drawText($gameParty.numItems(this._item), x, y, width, "right");
 };
 
 Window_ShopStatus.prototype.drawEquipInfo = function (x, y) {
@@ -3345,7 +3342,7 @@ Window_ShopStatus.prototype.drawActorParamChange = function (x, y, actor, item1)
     var paramId = this.paramId();
     var change = this._item.params[paramId] - (item1 ? item1.params[paramId] : 0);
     this.changeTextColor(this.paramchangeTextColor(change));
-    this.drawText((change > 0 ? '+' : '') + change, x, y, width, 'right');
+    this.drawText((change > 0 ? "+" : "") + change, x, y, width, "right");
 };
 
 Window_ShopStatus.prototype.paramId = function () {
@@ -3389,7 +3386,7 @@ Window_ShopStatus.prototype.isPageChangeEnabled = function () {
 };
 
 Window_ShopStatus.prototype.isPageChangeRequested = function () {
-    if (Input.isTriggered('shift')) {
+    if (Input.isTriggered("shift")) {
         return true;
     }
     if (TouchInput.isTriggered() && this.isTouchedInsideFrame()) {
@@ -3484,7 +3481,7 @@ Window_NameEdit.prototype.faceWidth = function () {
 };
 
 Window_NameEdit.prototype.charWidth = function () {
-    var text = $gameSystem.isJapanese() ? '\uff21' : 'A';
+    var text = $gameSystem.isJapanese() ? "\uff21" : "A";
     return this.textWidth(text);
 };
 
@@ -3499,7 +3496,7 @@ Window_NameEdit.prototype.itemRect = function (index) {
         x: this.left() + index * this.charWidth(),
         y: 54,
         width: this.charWidth(),
-        height: this.lineHeight()
+        height: this.lineHeight(),
     };
 };
 
@@ -3527,7 +3524,7 @@ Window_NameEdit.prototype.drawUnderline = function (index) {
 Window_NameEdit.prototype.drawChar = function (index) {
     var rect = this.itemRect(index);
     this.resetTextColor();
-    this.drawText(this._name[index] || '', rect.x, rect.y);
+    this.drawText(this._name[index] || "", rect.x, rect.y);
 };
 
 Window_NameEdit.prototype.refresh = function () {
@@ -3554,66 +3551,558 @@ function Window_NameInput() {
 
 Window_NameInput.prototype = Object.create(Window_Selectable.prototype);
 Window_NameInput.prototype.constructor = Window_NameInput;
-Window_NameInput.LATIN1 =
-    ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e',
-        'F', 'G', 'H', 'I', 'J', 'f', 'g', 'h', 'i', 'j',
-        'K', 'L', 'M', 'N', 'O', 'k', 'l', 'm', 'n', 'o',
-        'P', 'Q', 'R', 'S', 'T', 'p', 'q', 'r', 's', 't',
-        'U', 'V', 'W', 'X', 'Y', 'u', 'v', 'w', 'x', 'y',
-        'Z', '[', ']', '^', '_', 'z', '{', '}', '|', '~',
-        '0', '1', '2', '3', '4', '!', '#', '$', '%', '&',
-        '5', '6', '7', '8', '9', '(', ')', '*', '+', '-',
-        '/', '=', '@', '<', '>', ':', ';', ' ', 'Page', 'OK'];
-Window_NameInput.LATIN2 =
-    ['Á', 'É', 'Í', 'Ó', 'Ú', 'á', 'é', 'í', 'ó', 'ú',
-        'À', 'È', 'Ì', 'Ò', 'Ù', 'à', 'è', 'ì', 'ò', 'ù',
-        'Â', 'Ê', 'Î', 'Ô', 'Û', 'â', 'ê', 'î', 'ô', 'û',
-        'Ä', 'Ë', 'Ï', 'Ö', 'Ü', 'ä', 'ë', 'ï', 'ö', 'ü',
-        'Ā', 'Ē', 'Ī', 'Ō', 'Ū', 'ā', 'ē', 'ī', 'ō', 'ū',
-        'Ã', 'Å', 'Æ', 'Ç', 'Ð', 'ã', 'å', 'æ', 'ç', 'ð',
-        'Ñ', 'Õ', 'Ø', 'Š', 'Ŵ', 'ñ', 'õ', 'ø', 'š', 'ŵ',
-        'Ý', 'Ŷ', 'Ÿ', 'Ž', 'Þ', 'ý', 'ÿ', 'ŷ', 'ž', 'þ',
-        'Ĳ', 'Œ', 'ĳ', 'œ', 'ß', '«', '»', ' ', 'Page', 'OK'];
-Window_NameInput.RUSSIA =
-    ['А', 'Б', 'В', 'Г', 'Д', 'а', 'б', 'в', 'г', 'д',
-        'Е', 'Ё', 'Ж', 'З', 'И', 'е', 'ё', 'ж', 'з', 'и',
-        'Й', 'К', 'Л', 'М', 'Н', 'й', 'к', 'л', 'м', 'н',
-        'О', 'П', 'Р', 'С', 'Т', 'о', 'п', 'р', 'с', 'т',
-        'У', 'Ф', 'Х', 'Ц', 'Ч', 'у', 'ф', 'х', 'ц', 'ч',
-        'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'ш', 'щ', 'ъ', 'ы', 'ь',
-        'Э', 'Ю', 'Я', '^', '_', 'э', 'ю', 'я', '%', '&',
-        '0', '1', '2', '3', '4', '(', ')', '*', '+', '-',
-        '5', '6', '7', '8', '9', ':', ';', ' ', '', 'OK'];
-Window_NameInput.JAPAN1 =
-    ['あ', 'い', 'う', 'え', 'お', 'が', 'ぎ', 'ぐ', 'げ', 'ご',
-        'か', 'き', 'く', 'け', 'こ', 'ざ', 'じ', 'ず', 'ぜ', 'ぞ',
-        'さ', 'し', 'す', 'せ', 'そ', 'だ', 'ぢ', 'づ', 'で', 'ど',
-        'た', 'ち', 'つ', 'て', 'と', 'ば', 'び', 'ぶ', 'べ', 'ぼ',
-        'な', 'に', 'ぬ', 'ね', 'の', 'ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ',
-        'は', 'ひ', 'ふ', 'へ', 'ほ', 'ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ',
-        'ま', 'み', 'む', 'め', 'も', 'っ', 'ゃ', 'ゅ', 'ょ', 'ゎ',
-        'や', 'ゆ', 'よ', 'わ', 'ん', 'ー', '～', '・', '＝', '☆',
-        'ら', 'り', 'る', 'れ', 'ろ', 'ゔ', 'を', '　', 'カナ', '決定'];
-Window_NameInput.JAPAN2 =
-    ['ア', 'イ', 'ウ', 'エ', 'オ', 'ガ', 'ギ', 'グ', 'ゲ', 'ゴ',
-        'カ', 'キ', 'ク', 'ケ', 'コ', 'ザ', 'ジ', 'ズ', 'ゼ', 'ゾ',
-        'サ', 'シ', 'ス', 'セ', 'ソ', 'ダ', 'ヂ', 'ヅ', 'デ', 'ド',
-        'タ', 'チ', 'ツ', 'テ', 'ト', 'バ', 'ビ', 'ブ', 'ベ', 'ボ',
-        'ナ', 'ニ', 'ヌ', 'ネ', 'ノ', 'パ', 'ピ', 'プ', 'ペ', 'ポ',
-        'ハ', 'ヒ', 'フ', 'ヘ', 'ホ', 'ァ', 'ィ', 'ゥ', 'ェ', 'ォ',
-        'マ', 'ミ', 'ム', 'メ', 'モ', 'ッ', 'ャ', 'ュ', 'ョ', 'ヮ',
-        'ヤ', 'ユ', 'ヨ', 'ワ', 'ン', 'ー', '～', '・', '＝', '☆',
-        'ラ', 'リ', 'ル', 'レ', 'ロ', 'ヴ', 'ヲ', '　', '英数', '決定'];
-Window_NameInput.JAPAN3 =
-    ['Ａ', 'Ｂ', 'Ｃ', 'Ｄ', 'Ｅ', 'ａ', 'ｂ', 'ｃ', 'ｄ', 'ｅ',
-        'Ｆ', 'Ｇ', 'Ｈ', 'Ｉ', 'Ｊ', 'ｆ', 'ｇ', 'ｈ', 'ｉ', 'ｊ',
-        'Ｋ', 'Ｌ', 'Ｍ', 'Ｎ', 'Ｏ', 'ｋ', 'ｌ', 'ｍ', 'ｎ', 'ｏ',
-        'Ｐ', 'Ｑ', 'Ｒ', 'Ｓ', 'Ｔ', 'ｐ', 'ｑ', 'ｒ', 'ｓ', 'ｔ',
-        'Ｕ', 'Ｖ', 'Ｗ', 'Ｘ', 'Ｙ', 'ｕ', 'ｖ', 'ｗ', 'ｘ', 'ｙ',
-        'Ｚ', '［', '］', '＾', '＿', 'ｚ', '｛', '｝', '｜', '～',
-        '０', '１', '２', '３', '４', '！', '＃', '＄', '％', '＆',
-        '５', '６', '７', '８', '９', '（', '）', '＊', '＋', '－',
-        '／', '＝', '＠', '＜', '＞', '：', '；', '　', 'かな', '決定'];
+Window_NameInput.LATIN1 = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "p",
+    "q",
+    "r",
+    "s",
+    "t",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "u",
+    "v",
+    "w",
+    "x",
+    "y",
+    "Z",
+    "[",
+    "]",
+    "^",
+    "_",
+    "z",
+    "{",
+    "}",
+    "|",
+    "~",
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "!",
+    "#",
+    "$",
+    "%",
+    "&",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "(",
+    ")",
+    "*",
+    "+",
+    "-",
+    "/",
+    "=",
+    "@",
+    "<",
+    ">",
+    ":",
+    ";",
+    " ",
+    "Page",
+    "OK",
+];
+Window_NameInput.LATIN2 = [
+    "Á",
+    "É",
+    "Í",
+    "Ó",
+    "Ú",
+    "á",
+    "é",
+    "í",
+    "ó",
+    "ú",
+    "À",
+    "È",
+    "Ì",
+    "Ò",
+    "Ù",
+    "à",
+    "è",
+    "ì",
+    "ò",
+    "ù",
+    "Â",
+    "Ê",
+    "Î",
+    "Ô",
+    "Û",
+    "â",
+    "ê",
+    "î",
+    "ô",
+    "û",
+    "Ä",
+    "Ë",
+    "Ï",
+    "Ö",
+    "Ü",
+    "ä",
+    "ë",
+    "ï",
+    "ö",
+    "ü",
+    "Ā",
+    "Ē",
+    "Ī",
+    "Ō",
+    "Ū",
+    "ā",
+    "ē",
+    "ī",
+    "ō",
+    "ū",
+    "Ã",
+    "Å",
+    "Æ",
+    "Ç",
+    "Ð",
+    "ã",
+    "å",
+    "æ",
+    "ç",
+    "ð",
+    "Ñ",
+    "Õ",
+    "Ø",
+    "Š",
+    "Ŵ",
+    "ñ",
+    "õ",
+    "ø",
+    "š",
+    "ŵ",
+    "Ý",
+    "Ŷ",
+    "Ÿ",
+    "Ž",
+    "Þ",
+    "ý",
+    "ÿ",
+    "ŷ",
+    "ž",
+    "þ",
+    "Ĳ",
+    "Œ",
+    "ĳ",
+    "œ",
+    "ß",
+    "«",
+    "»",
+    " ",
+    "Page",
+    "OK",
+];
+Window_NameInput.RUSSIA = [
+    "А",
+    "Б",
+    "В",
+    "Г",
+    "Д",
+    "а",
+    "б",
+    "в",
+    "г",
+    "д",
+    "Е",
+    "Ё",
+    "Ж",
+    "З",
+    "И",
+    "е",
+    "ё",
+    "ж",
+    "з",
+    "и",
+    "Й",
+    "К",
+    "Л",
+    "М",
+    "Н",
+    "й",
+    "к",
+    "л",
+    "м",
+    "н",
+    "О",
+    "П",
+    "Р",
+    "С",
+    "Т",
+    "о",
+    "п",
+    "р",
+    "с",
+    "т",
+    "У",
+    "Ф",
+    "Х",
+    "Ц",
+    "Ч",
+    "у",
+    "ф",
+    "х",
+    "ц",
+    "ч",
+    "Ш",
+    "Щ",
+    "Ъ",
+    "Ы",
+    "Ь",
+    "ш",
+    "щ",
+    "ъ",
+    "ы",
+    "ь",
+    "Э",
+    "Ю",
+    "Я",
+    "^",
+    "_",
+    "э",
+    "ю",
+    "я",
+    "%",
+    "&",
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "(",
+    ")",
+    "*",
+    "+",
+    "-",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    ":",
+    ";",
+    " ",
+    "",
+    "OK",
+];
+Window_NameInput.JAPAN1 = [
+    "あ",
+    "い",
+    "う",
+    "え",
+    "お",
+    "が",
+    "ぎ",
+    "ぐ",
+    "げ",
+    "ご",
+    "か",
+    "き",
+    "く",
+    "け",
+    "こ",
+    "ざ",
+    "じ",
+    "ず",
+    "ぜ",
+    "ぞ",
+    "さ",
+    "し",
+    "す",
+    "せ",
+    "そ",
+    "だ",
+    "ぢ",
+    "づ",
+    "で",
+    "ど",
+    "た",
+    "ち",
+    "つ",
+    "て",
+    "と",
+    "ば",
+    "び",
+    "ぶ",
+    "べ",
+    "ぼ",
+    "な",
+    "に",
+    "ぬ",
+    "ね",
+    "の",
+    "ぱ",
+    "ぴ",
+    "ぷ",
+    "ぺ",
+    "ぽ",
+    "は",
+    "ひ",
+    "ふ",
+    "へ",
+    "ほ",
+    "ぁ",
+    "ぃ",
+    "ぅ",
+    "ぇ",
+    "ぉ",
+    "ま",
+    "み",
+    "む",
+    "め",
+    "も",
+    "っ",
+    "ゃ",
+    "ゅ",
+    "ょ",
+    "ゎ",
+    "や",
+    "ゆ",
+    "よ",
+    "わ",
+    "ん",
+    "ー",
+    "～",
+    "・",
+    "＝",
+    "☆",
+    "ら",
+    "り",
+    "る",
+    "れ",
+    "ろ",
+    "ゔ",
+    "を",
+    "　",
+    "カナ",
+    "決定",
+];
+Window_NameInput.JAPAN2 = [
+    "ア",
+    "イ",
+    "ウ",
+    "エ",
+    "オ",
+    "ガ",
+    "ギ",
+    "グ",
+    "ゲ",
+    "ゴ",
+    "カ",
+    "キ",
+    "ク",
+    "ケ",
+    "コ",
+    "ザ",
+    "ジ",
+    "ズ",
+    "ゼ",
+    "ゾ",
+    "サ",
+    "シ",
+    "ス",
+    "セ",
+    "ソ",
+    "ダ",
+    "ヂ",
+    "ヅ",
+    "デ",
+    "ド",
+    "タ",
+    "チ",
+    "ツ",
+    "テ",
+    "ト",
+    "バ",
+    "ビ",
+    "ブ",
+    "ベ",
+    "ボ",
+    "ナ",
+    "ニ",
+    "ヌ",
+    "ネ",
+    "ノ",
+    "パ",
+    "ピ",
+    "プ",
+    "ペ",
+    "ポ",
+    "ハ",
+    "ヒ",
+    "フ",
+    "ヘ",
+    "ホ",
+    "ァ",
+    "ィ",
+    "ゥ",
+    "ェ",
+    "ォ",
+    "マ",
+    "ミ",
+    "ム",
+    "メ",
+    "モ",
+    "ッ",
+    "ャ",
+    "ュ",
+    "ョ",
+    "ヮ",
+    "ヤ",
+    "ユ",
+    "ヨ",
+    "ワ",
+    "ン",
+    "ー",
+    "～",
+    "・",
+    "＝",
+    "☆",
+    "ラ",
+    "リ",
+    "ル",
+    "レ",
+    "ロ",
+    "ヴ",
+    "ヲ",
+    "　",
+    "英数",
+    "決定",
+];
+Window_NameInput.JAPAN3 = [
+    "Ａ",
+    "Ｂ",
+    "Ｃ",
+    "Ｄ",
+    "Ｅ",
+    "ａ",
+    "ｂ",
+    "ｃ",
+    "ｄ",
+    "ｅ",
+    "Ｆ",
+    "Ｇ",
+    "Ｈ",
+    "Ｉ",
+    "Ｊ",
+    "ｆ",
+    "ｇ",
+    "ｈ",
+    "ｉ",
+    "ｊ",
+    "Ｋ",
+    "Ｌ",
+    "Ｍ",
+    "Ｎ",
+    "Ｏ",
+    "ｋ",
+    "ｌ",
+    "ｍ",
+    "ｎ",
+    "ｏ",
+    "Ｐ",
+    "Ｑ",
+    "Ｒ",
+    "Ｓ",
+    "Ｔ",
+    "ｐ",
+    "ｑ",
+    "ｒ",
+    "ｓ",
+    "ｔ",
+    "Ｕ",
+    "Ｖ",
+    "Ｗ",
+    "Ｘ",
+    "Ｙ",
+    "ｕ",
+    "ｖ",
+    "ｗ",
+    "ｘ",
+    "ｙ",
+    "Ｚ",
+    "［",
+    "］",
+    "＾",
+    "＿",
+    "ｚ",
+    "｛",
+    "｝",
+    "｜",
+    "～",
+    "０",
+    "１",
+    "２",
+    "３",
+    "４",
+    "！",
+    "＃",
+    "＄",
+    "％",
+    "＆",
+    "５",
+    "６",
+    "７",
+    "８",
+    "９",
+    "（",
+    "）",
+    "＊",
+    "＋",
+    "－",
+    "／",
+    "＝",
+    "＠",
+    "＜",
+    "＞",
+    "：",
+    "；",
+    "　",
+    "かな",
+    "決定",
+];
 
 Window_NameInput.prototype.initialize = function (editWindow) {
     var x = editWindow.x;
@@ -3635,14 +4124,11 @@ Window_NameInput.prototype.windowHeight = function () {
 
 Window_NameInput.prototype.table = function () {
     if ($gameSystem.isJapanese()) {
-        return [Window_NameInput.JAPAN1,
-        Window_NameInput.JAPAN2,
-        Window_NameInput.JAPAN3];
+        return [Window_NameInput.JAPAN1, Window_NameInput.JAPAN2, Window_NameInput.JAPAN3];
     } else if ($gameSystem.isRussian()) {
         return [Window_NameInput.RUSSIA];
     } else {
-        return [Window_NameInput.LATIN1,
-        Window_NameInput.LATIN2];
+        return [Window_NameInput.LATIN1, Window_NameInput.LATIN2];
     }
 };
 
@@ -3655,7 +4141,7 @@ Window_NameInput.prototype.maxItems = function () {
 };
 
 Window_NameInput.prototype.character = function () {
-    return this._index < 88 ? this.table()[this._page][this._index] : '';
+    return this._index < 88 ? this.table()[this._page][this._index] : "";
 };
 
 Window_NameInput.prototype.isPageChange = function () {
@@ -3668,10 +4154,10 @@ Window_NameInput.prototype.isOk = function () {
 
 Window_NameInput.prototype.itemRect = function (index) {
     return {
-        x: index % 10 * 42 + Math.floor(index % 10 / 5) * 24,
+        x: (index % 10) * 42 + Math.floor((index % 10) / 5) * 24,
         y: Math.floor(index / 10) * this.lineHeight(),
         width: 42,
-        height: this.lineHeight()
+        height: this.lineHeight(),
     };
 };
 
@@ -3683,7 +4169,7 @@ Window_NameInput.prototype.refresh = function () {
         var rect = this.itemRect(i);
         rect.x += 3;
         rect.width -= 6;
-        this.drawText(table[this._page][i], rect.x, rect.y, rect.width, 'center');
+        this.drawText(table[this._page][i], rect.x, rect.y, rect.width, "center");
     }
 };
 
@@ -3745,13 +4231,13 @@ Window_NameInput.prototype.processCursorMove = function () {
 
 Window_NameInput.prototype.processHandling = function () {
     if (this.isOpen() && this.active) {
-        if (Input.isTriggered('shift')) {
+        if (Input.isTriggered("shift")) {
             this.processJump();
         }
-        if (Input.isRepeated('cancel')) {
+        if (Input.isRepeated("cancel")) {
             this.processBack();
         }
-        if (Input.isRepeated('ok')) {
+        if (Input.isRepeated("ok")) {
             this.processOk();
         }
     }
@@ -3798,7 +4284,7 @@ Window_NameInput.prototype.onNameAdd = function () {
 };
 
 Window_NameInput.prototype.onNameOk = function () {
-    if (this._editWindow.name() === '') {
+    if (this._editWindow.name() === "") {
         if (this._editWindow.restoreDefault()) {
             SoundManager.playOk();
         } else {
@@ -3915,7 +4401,7 @@ Window_ChoiceList.prototype.contentsHeight = function () {
 Window_ChoiceList.prototype.makeCommandList = function () {
     var choices = $gameMessage.choices();
     for (var i = 0; i < choices.length; i++) {
-        this.addCommand(choices[i], 'choice');
+        this.addCommand(choices[i], "choice");
     }
 };
 
@@ -3929,7 +4415,7 @@ Window_ChoiceList.prototype.isCancelEnabled = function () {
 };
 
 Window_ChoiceList.prototype.isOkTriggered = function () {
-    return Input.isTriggered('ok');
+    return Input.isTriggered("ok");
 };
 
 Window_ChoiceList.prototype.callOkHandler = function () {
@@ -4018,7 +4504,7 @@ Window_NumberInput.prototype.itemWidth = function () {
 };
 
 Window_NumberInput.prototype.createButtons = function () {
-    var bitmap = ImageManager.loadSystem('ButtonSet');
+    var bitmap = ImageManager.loadSystem("ButtonSet");
     var buttonWidth = 48;
     var buttonHeight = 48;
     this._buttons = [];
@@ -4090,9 +4576,9 @@ Window_NumberInput.prototype.update = function () {
 
 Window_NumberInput.prototype.processDigitChange = function () {
     if (this.isOpenAndActive()) {
-        if (Input.isRepeated('up')) {
+        if (Input.isRepeated("up")) {
             this.changeDigit(true);
-        } else if (Input.isRepeated('down')) {
+        } else if (Input.isRepeated("down")) {
             this.changeDigit(false);
         }
     }
@@ -4126,7 +4612,7 @@ Window_NumberInput.prototype.isCancelEnabled = function () {
 };
 
 Window_NumberInput.prototype.isOkTriggered = function () {
-    return Input.isTriggered('ok');
+    return Input.isTriggered("ok");
 };
 
 Window_NumberInput.prototype.processOk = function () {
@@ -4140,7 +4626,7 @@ Window_NumberInput.prototype.processOk = function () {
 
 Window_NumberInput.prototype.drawItem = function (index) {
     var rect = this.itemRect(index);
-    var align = 'center';
+    var align = "center";
     var s = this._number.padZero(this._maxDigits);
     var c = s.slice(index, index + 1);
     this.resetTextColor();
@@ -4179,8 +4665,8 @@ Window_EventItem.prototype.initialize = function (messageWindow) {
     Window_ItemList.prototype.initialize.call(this, 0, 0, width, height);
     this.openness = 0;
     this.deactivate();
-    this.setHandler('ok', this.onOk.bind(this));
-    this.setHandler('cancel', this.onCancel.bind(this));
+    this.setHandler("ok", this.onOk.bind(this));
+    this.setHandler("cancel", this.onCancel.bind(this));
 };
 
 Window_EventItem.prototype.windowHeight = function () {
@@ -4264,8 +4750,7 @@ Window_Message.prototype.initMembers = function () {
 };
 
 Window_Message.prototype.subWindows = function () {
-    return [this._goldWindow, this._choiceWindow,
-    this._numberWindow, this._itemWindow];
+    return [this._goldWindow, this._choiceWindow, this._numberWindow, this._itemWindow];
 };
 
 Window_Message.prototype.createSubWindows = function () {
@@ -4340,7 +4825,7 @@ Window_Message.prototype.startMessage = function () {
 
 Window_Message.prototype.updatePlacement = function () {
     this._positionType = $gameMessage.positionType();
-    this.y = this._positionType * (Graphics.boxHeight - this.height) / 2;
+    this.y = (this._positionType * (Graphics.boxHeight - this.height)) / 2;
     this._goldWindow.y = this.y > 0 ? 0 : Graphics.boxHeight - this._goldWindow.height;
 };
 
@@ -4396,9 +4881,7 @@ Window_Message.prototype.updateInput = function () {
 };
 
 Window_Message.prototype.isAnySubWindowActive = function () {
-    return (this._choiceWindow.active ||
-        this._numberWindow.active ||
-        this._itemWindow.active);
+    return this._choiceWindow.active || this._numberWindow.active || this._itemWindow.active;
 };
 
 Window_Message.prototype.updateMessage = function () {
@@ -4452,18 +4935,15 @@ Window_Message.prototype.startInput = function () {
 };
 
 Window_Message.prototype.isTriggered = function () {
-    return (Input.isRepeated('ok') || Input.isRepeated('cancel') ||
-        TouchInput.isRepeated());
+    return Input.isRepeated("ok") || Input.isRepeated("cancel") || TouchInput.isRepeated();
 };
 
 Window_Message.prototype.doesContinue = function () {
-    return ($gameMessage.hasText() && !$gameMessage.scrollMode() &&
-        !this.areSettingsChanged());
+    return $gameMessage.hasText() && !$gameMessage.scrollMode() && !this.areSettingsChanged();
 };
 
 Window_Message.prototype.areSettingsChanged = function () {
-    return (this._background !== $gameMessage.background() ||
-        this._positionType !== $gameMessage.positionType());
+    return this._background !== $gameMessage.background() || this._positionType !== $gameMessage.positionType();
 };
 
 Window_Message.prototype.updateShowFast = function () {
@@ -4493,7 +4973,7 @@ Window_Message.prototype.drawMessageFace = function () {
 };
 
 Window_Message.prototype.newLineX = function () {
-    return $gameMessage.faceName() === '' ? 0 : 168;
+    return $gameMessage.faceName() === "" ? 0 : 168;
 };
 
 Window_Message.prototype.processNewLine = function (textState) {
@@ -4506,7 +4986,7 @@ Window_Message.prototype.processNewLine = function (textState) {
 
 Window_Message.prototype.processNewPage = function (textState) {
     Window_Base.prototype.processNewPage.call(this, textState);
-    if (textState.text[textState.index] === '\n') {
+    if (textState.text[textState.index] === "\n") {
         textState.index++;
     }
     textState.y = this.contents.height;
@@ -4518,31 +4998,30 @@ Window_Message.prototype.isEndOfText = function (textState) {
 };
 
 Window_Message.prototype.needsNewPage = function (textState) {
-    return (!this.isEndOfText(textState) &&
-        textState.y + textState.height > this.contents.height);
+    return !this.isEndOfText(textState) && textState.y + textState.height > this.contents.height;
 };
 
 Window_Message.prototype.processEscapeCharacter = function (code, textState) {
     switch (code) {
-        case '$':
+        case "$":
             this._goldWindow.open();
             break;
-        case '.':
+        case ".":
             this.startWait(15);
             break;
-        case '|':
+        case "|":
             this.startWait(60);
             break;
-        case '!':
+        case "!":
             this.startPause();
             break;
-        case '>':
+        case ">":
             this._lineShowFast = true;
             break;
-        case '<':
+        case "<":
             this._lineShowFast = false;
             break;
-        case '^':
+        case "^":
             this._pauseSkip = true;
             break;
         default:
@@ -4579,7 +5058,7 @@ Window_ScrollText.prototype.initialize = function () {
     Window_Base.prototype.initialize.call(this, 0, 0, width, height);
     this.opacity = 0;
     this.hide();
-    this._text = '';
+    this._text = "";
     this._allTextHeight = 0;
 };
 
@@ -4634,8 +5113,7 @@ Window_ScrollText.prototype.isFastForward = function () {
     if ($gameMessage.scrollNoFast()) {
         return false;
     } else {
-        return (Input.isPressed('ok') || Input.isPressed('shift') ||
-            TouchInput.isPressed());
+        return Input.isPressed("ok") || Input.isPressed("shift") || TouchInput.isPressed();
     }
 };
 
@@ -4711,7 +5189,7 @@ Window_MapName.prototype.refresh = function () {
     if ($gameMap.displayName()) {
         var width = this.contentsWidth();
         this.drawBackground(0, 0, width, this.lineHeight());
-        this.drawText($gameMap.displayName(), 0, 0, width, 'center');
+        this.drawText($gameMap.displayName(), 0, 0, width, "center");
     }
 };
 
@@ -4743,7 +5221,7 @@ Window_BattleLog.prototype.initialize = function () {
     this._lines = [];
     this._methods = [];
     this._waitCount = 0;
-    this._waitMode = '';
+    this._waitMode = "";
     this._baseLineStack = [];
     this._spriteset = null;
     this.createBackBitmap();
@@ -4814,15 +5292,15 @@ Window_BattleLog.prototype.updateWaitCount = function () {
 Window_BattleLog.prototype.updateWaitMode = function () {
     var waiting = false;
     switch (this._waitMode) {
-        case 'effect':
+        case "effect":
             waiting = this._spriteset.isEffecting();
             break;
-        case 'movement':
+        case "movement":
             waiting = this._spriteset.isAnyoneMoving();
             break;
     }
     if (!waiting) {
-        this._waitMode = '';
+        this._waitMode = "";
     }
     return waiting;
 };
@@ -4837,14 +5315,13 @@ Window_BattleLog.prototype.callNextMethod = function () {
         if (method.name && this[method.name]) {
             this[method.name].apply(this, method.params);
         } else {
-            throw new Error('Method not found: ' + method.name);
+            throw new Error("Method not found: " + method.name);
         }
     }
 };
 
 Window_BattleLog.prototype.isFastForward = function () {
-    return (Input.isLongPressed('ok') || Input.isPressed('shift') ||
-        TouchInput.isLongPressed());
+    return Input.isLongPressed("ok") || Input.isPressed("shift") || TouchInput.isLongPressed();
 };
 
 Window_BattleLog.prototype.push = function (methodName) {
@@ -4863,11 +5340,11 @@ Window_BattleLog.prototype.wait = function () {
 };
 
 Window_BattleLog.prototype.waitForEffect = function () {
-    this.setWaitMode('effect');
+    this.setWaitMode("effect");
 };
 
 Window_BattleLog.prototype.waitForMovement = function () {
-    this.setWaitMode('movement');
+    this.setWaitMode("movement");
 };
 
 Window_BattleLog.prototype.addText = function (text) {
@@ -5016,12 +5493,12 @@ Window_BattleLog.prototype.backRect = function () {
         x: 0,
         y: this.padding,
         width: this.width,
-        height: this.numLines() * this.lineHeight()
+        height: this.numLines() * this.lineHeight(),
     };
 };
 
 Window_BattleLog.prototype.backColor = function () {
-    return '#000000';
+    return "#000000";
 };
 
 Window_BattleLog.prototype.backPaintOpacity = function () {
@@ -5035,96 +5512,96 @@ Window_BattleLog.prototype.drawLineText = function (index) {
 };
 
 Window_BattleLog.prototype.startTurn = function () {
-    this.push('wait');
+    this.push("wait");
 };
 
 Window_BattleLog.prototype.startAction = function (subject, action, targets) {
     var item = action.item();
-    this.push('performActionStart', subject, action);
-    this.push('waitForMovement');
-    this.push('performAction', subject, action);
-    this.push('showAnimation', subject, targets.clone(), item.animationId);
+    this.push("performActionStart", subject, action);
+    this.push("waitForMovement");
+    this.push("performAction", subject, action);
+    this.push("showAnimation", subject, targets.clone(), item.animationId);
     this.displayAction(subject, item);
 };
 
 Window_BattleLog.prototype.endAction = function (subject) {
-    this.push('waitForNewLine');
-    this.push('clear');
-    this.push('performActionEnd', subject);
+    this.push("waitForNewLine");
+    this.push("clear");
+    this.push("performActionEnd", subject);
 };
 
 Window_BattleLog.prototype.displayCurrentState = function (subject) {
     var stateText = subject.mostImportantStateText();
     if (stateText) {
-        this.push('addText', subject.name() + stateText);
-        this.push('wait');
-        this.push('clear');
+        this.push("addText", subject.name() + stateText);
+        this.push("wait");
+        this.push("clear");
     }
 };
 
 Window_BattleLog.prototype.displayRegeneration = function (subject) {
-    this.push('popupDamage', subject);
+    this.push("popupDamage", subject);
 };
 
 Window_BattleLog.prototype.displayAction = function (subject, item) {
     var numMethods = this._methods.length;
     if (DataManager.isSkill(item)) {
         if (item.message1) {
-            this.push('addText', subject.name() + item.message1.format(item.name));
+            this.push("addText", subject.name() + item.message1.format(item.name));
         }
         if (item.message2) {
-            this.push('addText', item.message2.format(item.name));
+            this.push("addText", item.message2.format(item.name));
         }
     } else {
-        this.push('addText', TextManager.useItem.format(subject.name(), item.name));
+        this.push("addText", TextManager.useItem.format(subject.name(), item.name));
     }
     if (this._methods.length === numMethods) {
-        this.push('wait');
+        this.push("wait");
     }
 };
 
 Window_BattleLog.prototype.displayCounter = function (target) {
-    this.push('performCounter', target);
-    this.push('addText', TextManager.counterAttack.format(target.name()));
+    this.push("performCounter", target);
+    this.push("addText", TextManager.counterAttack.format(target.name()));
 };
 
 Window_BattleLog.prototype.displayReflection = function (target) {
-    this.push('performReflection', target);
-    this.push('addText', TextManager.magicReflection.format(target.name()));
+    this.push("performReflection", target);
+    this.push("addText", TextManager.magicReflection.format(target.name()));
 };
 
 Window_BattleLog.prototype.displaySubstitute = function (substitute, target) {
     var substName = substitute.name();
-    this.push('performSubstitute', substitute, target);
-    this.push('addText', TextManager.substitute.format(substName, target.name()));
+    this.push("performSubstitute", substitute, target);
+    this.push("addText", TextManager.substitute.format(substName, target.name()));
 };
 
 Window_BattleLog.prototype.displayActionResults = function (subject, target) {
     if (target.result().used) {
-        this.push('pushBaseLine');
+        this.push("pushBaseLine");
         this.displayCritical(target);
-        this.push('popupDamage', target);
-        this.push('popupDamage', subject);
+        this.push("popupDamage", target);
+        this.push("popupDamage", subject);
         this.displayDamage(target);
         this.displayAffectedStatus(target);
         this.displayFailure(target);
-        this.push('waitForNewLine');
-        this.push('popBaseLine');
+        this.push("waitForNewLine");
+        this.push("popBaseLine");
     }
 };
 
 Window_BattleLog.prototype.displayFailure = function (target) {
     if (target.result().isHit() && !target.result().success) {
-        this.push('addText', TextManager.actionFailure.format(target.name()));
+        this.push("addText", TextManager.actionFailure.format(target.name()));
     }
 };
 
 Window_BattleLog.prototype.displayCritical = function (target) {
     if (target.result().critical) {
         if (target.isActor()) {
-            this.push('addText', TextManager.criticalToActor);
+            this.push("addText", TextManager.criticalToActor);
         } else {
-            this.push('addText', TextManager.criticalToEnemy);
+            this.push("addText", TextManager.criticalToEnemy);
         }
     }
 };
@@ -5145,69 +5622,69 @@ Window_BattleLog.prototype.displayMiss = function (target) {
     var fmt;
     if (target.result().physical) {
         fmt = target.isActor() ? TextManager.actorNoHit : TextManager.enemyNoHit;
-        this.push('performMiss', target);
+        this.push("performMiss", target);
     } else {
         fmt = TextManager.actionFailure;
     }
-    this.push('addText', fmt.format(target.name()));
+    this.push("addText", fmt.format(target.name()));
 };
 
 Window_BattleLog.prototype.displayEvasion = function (target) {
     var fmt;
     if (target.result().physical) {
         fmt = TextManager.evasion;
-        this.push('performEvasion', target);
+        this.push("performEvasion", target);
     } else {
         fmt = TextManager.magicEvasion;
-        this.push('performMagicEvasion', target);
+        this.push("performMagicEvasion", target);
     }
-    this.push('addText', fmt.format(target.name()));
+    this.push("addText", fmt.format(target.name()));
 };
 
 Window_BattleLog.prototype.displayHpDamage = function (target) {
     if (target.result().hpAffected) {
         if (target.result().hpDamage > 0 && !target.result().drain) {
-            this.push('performDamage', target);
+            this.push("performDamage", target);
         }
         if (target.result().hpDamage < 0) {
-            this.push('performRecovery', target);
+            this.push("performRecovery", target);
         }
-        this.push('addText', this.makeHpDamageText(target));
+        this.push("addText", this.makeHpDamageText(target));
     }
 };
 
 Window_BattleLog.prototype.displayMpDamage = function (target) {
     if (target.isAlive() && target.result().mpDamage !== 0) {
         if (target.result().mpDamage < 0) {
-            this.push('performRecovery', target);
+            this.push("performRecovery", target);
         }
-        this.push('addText', this.makeMpDamageText(target));
+        this.push("addText", this.makeMpDamageText(target));
     }
 };
 
 Window_BattleLog.prototype.displayTpDamage = function (target) {
     if (target.isAlive() && target.result().tpDamage !== 0) {
         if (target.result().tpDamage < 0) {
-            this.push('performRecovery', target);
+            this.push("performRecovery", target);
         }
-        this.push('addText', this.makeTpDamageText(target));
+        this.push("addText", this.makeTpDamageText(target));
     }
 };
 
 Window_BattleLog.prototype.displayAffectedStatus = function (target) {
     if (target.result().isStatusAffected()) {
-        this.push('pushBaseLine');
+        this.push("pushBaseLine");
         this.displayChangedStates(target);
         this.displayChangedBuffs(target);
-        this.push('waitForNewLine');
-        this.push('popBaseLine');
+        this.push("waitForNewLine");
+        this.push("popBaseLine");
     }
 };
 
 Window_BattleLog.prototype.displayAutoAffectedStatus = function (target) {
     if (target.result().isStatusAffected()) {
         this.displayAffectedStatus(target, null);
-        this.push('clear');
+        this.push("clear");
     }
 };
 
@@ -5217,28 +5694,34 @@ Window_BattleLog.prototype.displayChangedStates = function (target) {
 };
 
 Window_BattleLog.prototype.displayAddedStates = function (target) {
-    target.result().addedStateObjects().forEach(function (state) {
-        var stateMsg = target.isActor() ? state.message1 : state.message2;
-        if (state.id === target.deathStateId()) {
-            this.push('performCollapse', target);
-        }
-        if (stateMsg) {
-            this.push('popBaseLine');
-            this.push('pushBaseLine');
-            this.push('addText', target.name() + stateMsg);
-            this.push('waitForEffect');
-        }
-    }, this);
+    target
+        .result()
+        .addedStateObjects()
+        .forEach(function (state) {
+            var stateMsg = target.isActor() ? state.message1 : state.message2;
+            if (state.id === target.deathStateId()) {
+                this.push("performCollapse", target);
+            }
+            if (stateMsg) {
+                this.push("popBaseLine");
+                this.push("pushBaseLine");
+                this.push("addText", target.name() + stateMsg);
+                this.push("waitForEffect");
+            }
+        }, this);
 };
 
 Window_BattleLog.prototype.displayRemovedStates = function (target) {
-    target.result().removedStateObjects().forEach(function (state) {
-        if (state.message4) {
-            this.push('popBaseLine');
-            this.push('pushBaseLine');
-            this.push('addText', target.name() + state.message4);
-        }
-    }, this);
+    target
+        .result()
+        .removedStateObjects()
+        .forEach(function (state) {
+            if (state.message4) {
+                this.push("popBaseLine");
+                this.push("pushBaseLine");
+                this.push("addText", target.name() + state.message4);
+            }
+        }, this);
 };
 
 Window_BattleLog.prototype.displayChangedBuffs = function (target) {
@@ -5250,9 +5733,9 @@ Window_BattleLog.prototype.displayChangedBuffs = function (target) {
 
 Window_BattleLog.prototype.displayBuffs = function (target, buffs, fmt) {
     buffs.forEach(function (paramId) {
-        this.push('popBaseLine');
-        this.push('pushBaseLine');
-        this.push('addText', fmt.format(target.name(), TextManager.param(paramId)));
+        this.push("popBaseLine");
+        this.push("pushBaseLine");
+        this.push("addText", fmt.format(target.name(), TextManager.param(paramId)));
     }, this);
 };
 
@@ -5291,7 +5774,7 @@ Window_BattleLog.prototype.makeMpDamageText = function (target) {
         fmt = isActor ? TextManager.actorRecovery : TextManager.enemyRecovery;
         return fmt.format(target.name(), TextManager.mp, -damage);
     } else {
-        return '';
+        return "";
     }
 };
 
@@ -5307,7 +5790,7 @@ Window_BattleLog.prototype.makeTpDamageText = function (target) {
         fmt = isActor ? TextManager.actorGain : TextManager.enemyGain;
         return fmt.format(target.name(), TextManager.tp, -damage);
     } else {
-        return '';
+        return "";
     }
 };
 
@@ -5339,8 +5822,8 @@ Window_PartyCommand.prototype.numVisibleRows = function () {
 };
 
 Window_PartyCommand.prototype.makeCommandList = function () {
-    this.addCommand(TextManager.fight, 'fight');
-    this.addCommand(TextManager.escape, 'escape', BattleManager.canEscape());
+    this.addCommand(TextManager.fight, "fight");
+    this.addCommand(TextManager.escape, "escape", BattleManager.canEscape());
 };
 
 Window_PartyCommand.prototype.setup = function () {
@@ -5390,7 +5873,7 @@ Window_ActorCommand.prototype.makeCommandList = function () {
 };
 
 Window_ActorCommand.prototype.addAttackCommand = function () {
-    this.addCommand(TextManager.attack, 'attack', this._actor.canAttack());
+    this.addCommand(TextManager.attack, "attack", this._actor.canAttack());
 };
 
 Window_ActorCommand.prototype.addSkillCommands = function () {
@@ -5400,16 +5883,16 @@ Window_ActorCommand.prototype.addSkillCommands = function () {
     });
     skillTypes.forEach(function (stypeId) {
         var name = $dataSystem.skillTypes[stypeId];
-        this.addCommand(name, 'skill', true, stypeId);
+        this.addCommand(name, "skill", true, stypeId);
     }, this);
 };
 
 Window_ActorCommand.prototype.addGuardCommand = function () {
-    this.addCommand(TextManager.guard, 'guard', this._actor.canGuard());
+    this.addCommand(TextManager.guard, "guard", this._actor.canGuard());
 };
 
 Window_ActorCommand.prototype.addItemCommand = function () {
-    this.addCommand(TextManager.item, 'item');
+    this.addCommand(TextManager.item, "item");
 };
 
 Window_ActorCommand.prototype.setup = function (actor) {
@@ -5427,7 +5910,7 @@ Window_ActorCommand.prototype.processOk = function () {
         if (ConfigManager.commandRemember) {
             this._actor.setLastCommandSymbol(this.currentSymbol());
         } else {
-            this._actor.setLastCommandSymbol('');
+            this._actor.setLastCommandSymbol("");
         }
     }
     Window_Command.prototype.processOk.call(this);
@@ -5438,7 +5921,7 @@ Window_ActorCommand.prototype.selectLast = function () {
     if (this._actor && ConfigManager.commandRemember) {
         var symbol = this._actor.lastCommandSymbol();
         this.selectSymbol(symbol);
-        if (symbol === 'skill') {
+        if (symbol === "skill") {
             var skill = this._actor.lastBattleSkill();
             if (skill) {
                 this.selectExt(skill.stypeId);
@@ -5749,9 +6232,9 @@ Window_TitleCommand.prototype.updatePlacement = function () {
 };
 
 Window_TitleCommand.prototype.makeCommandList = function () {
-    this.addCommand(TextManager.newGame, 'newGame');
-    this.addCommand(TextManager.continue_, 'continue', this.isContinueEnabled());
-    this.addCommand(TextManager.options, 'options');
+    this.addCommand(TextManager.newGame, "newGame");
+    this.addCommand(TextManager.continue_, "continue", this.isContinueEnabled());
+    this.addCommand(TextManager.options, "options");
 };
 
 Window_TitleCommand.prototype.isContinueEnabled = function () {
@@ -5767,7 +6250,7 @@ Window_TitleCommand.prototype.selectLast = function () {
     if (Window_TitleCommand._lastCommandSymbol) {
         this.selectSymbol(Window_TitleCommand._lastCommandSymbol);
     } else if (this.isContinueEnabled()) {
-        this.selectSymbol('continue');
+        this.selectSymbol("continue");
     }
 };
 
@@ -5800,8 +6283,8 @@ Window_GameEnd.prototype.updatePlacement = function () {
 };
 
 Window_GameEnd.prototype.makeCommandList = function () {
-    this.addCommand(TextManager.toTitle, 'toTitle');
-    this.addCommand(TextManager.cancel, 'cancel');
+    this.addCommand(TextManager.toTitle, "toTitle");
+    this.addCommand(TextManager.cancel, "cancel");
 };
 
 //-----------------------------------------------------------------------------
@@ -5852,7 +6335,7 @@ Window_DebugRange.prototype.update = function () {
 };
 
 Window_DebugRange.prototype.mode = function () {
-    return this.index() < this._maxSwitches ? 'switch' : 'variable';
+    return this.index() < this._maxSwitches ? "switch" : "variable";
 };
 
 Window_DebugRange.prototype.topId = function () {
@@ -5875,19 +6358,18 @@ Window_DebugRange.prototype.drawItem = function (index) {
     var text;
     if (index < this._maxSwitches) {
         start = index * 10 + 1;
-        text = 'S';
+        text = "S";
     } else {
         start = (index - this._maxSwitches) * 10 + 1;
-        text = 'V';
+        text = "V";
     }
     var end = start + 9;
-    text += ' [' + start.padZero(4) + '-' + end.padZero(4) + ']';
+    text += " [" + start.padZero(4) + "-" + end.padZero(4) + "]";
     this.drawText(text, rect.x, rect.y, rect.width);
 };
 
 Window_DebugRange.prototype.isCancelTriggered = function () {
-    return (Window_Selectable.prototype.isCancelTriggered() ||
-        Input.isTriggered('debug'));
+    return Window_Selectable.prototype.isCancelTriggered() || Input.isTriggered("debug");
 };
 
 Window_DebugRange.prototype.processCancel = function () {
@@ -5915,7 +6397,7 @@ Window_DebugEdit.prototype.constructor = Window_DebugEdit;
 Window_DebugEdit.prototype.initialize = function (x, y, width) {
     var height = this.fittingHeight(10);
     Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-    this._mode = 'switch';
+    this._mode = "switch";
     this._topId = 1;
     this.refresh();
 };
@@ -5931,9 +6413,9 @@ Window_DebugEdit.prototype.refresh = function () {
 
 Window_DebugEdit.prototype.drawItem = function (index) {
     var dataId = this._topId + index;
-    var idText = dataId.padZero(4) + ':';
+    var idText = dataId.padZero(4) + ":";
     var idWidth = this.textWidth(idText);
-    var statusWidth = this.textWidth('-00000000');
+    var statusWidth = this.textWidth("-00000000");
     var name = this.itemName(dataId);
     var status = this.itemStatus(dataId);
     var rect = this.itemRectForText(index);
@@ -5942,11 +6424,11 @@ Window_DebugEdit.prototype.drawItem = function (index) {
     rect.x += idWidth;
     rect.width -= idWidth + statusWidth;
     this.drawText(name, rect.x, rect.y, rect.width);
-    this.drawText(status, rect.x + rect.width, rect.y, statusWidth, 'right');
+    this.drawText(status, rect.x + rect.width, rect.y, statusWidth, "right");
 };
 
 Window_DebugEdit.prototype.itemName = function (dataId) {
-    if (this._mode === 'switch') {
+    if (this._mode === "switch") {
         return $dataSystem.switches[dataId];
     } else {
         return $dataSystem.variables[dataId];
@@ -5954,8 +6436,8 @@ Window_DebugEdit.prototype.itemName = function (dataId) {
 };
 
 Window_DebugEdit.prototype.itemStatus = function (dataId) {
-    if (this._mode === 'switch') {
-        return $gameSwitches.value(dataId) ? '[ON]' : '[OFF]';
+    if (this._mode === "switch") {
+        return $gameSwitches.value(dataId) ? "[ON]" : "[OFF]";
     } else {
         return String($gameVariables.value(dataId));
     }
@@ -5982,7 +6464,7 @@ Window_DebugEdit.prototype.currentId = function () {
 Window_DebugEdit.prototype.update = function () {
     Window_Selectable.prototype.update.call(this);
     if (this.active) {
-        if (this._mode === 'switch') {
+        if (this._mode === "switch") {
             this.updateSwitch();
         } else {
             this.updateVariable();
@@ -5991,7 +6473,7 @@ Window_DebugEdit.prototype.update = function () {
 };
 
 Window_DebugEdit.prototype.updateSwitch = function () {
-    if (Input.isRepeated('ok')) {
+    if (Input.isRepeated("ok")) {
         var switchId = this.currentId();
         SoundManager.playCursor();
         $gameSwitches.setValue(switchId, !$gameSwitches.value(switchId));
@@ -6002,17 +6484,17 @@ Window_DebugEdit.prototype.updateSwitch = function () {
 Window_DebugEdit.prototype.updateVariable = function () {
     var variableId = this.currentId();
     var value = $gameVariables.value(variableId);
-    if (typeof value === 'number') {
-        if (Input.isRepeated('right')) {
+    if (typeof value === "number") {
+        if (Input.isRepeated("right")) {
             value++;
         }
-        if (Input.isRepeated('left')) {
+        if (Input.isRepeated("left")) {
             value--;
         }
-        if (Input.isRepeated('pagedown')) {
+        if (Input.isRepeated("pagedown")) {
             value += 10;
         }
-        if (Input.isRepeated('pageup')) {
+        if (Input.isRepeated("pageup")) {
             value -= 10;
         }
         if ($gameVariables.value(variableId) !== value) {

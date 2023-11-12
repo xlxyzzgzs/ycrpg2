@@ -57,7 +57,7 @@ var SF_Plugins = SF_Plugins || {};
  * 1. 添加状态 125 前，
  *    如果目标已经拥有状态 124，则删除状态 124，添加状态 125
  *    否则，添加状态 125、
- * 
+ *
  * <SF_StatesCustomAddtion_Before>
  * var result = {
  *   "result": false,
@@ -81,7 +81,7 @@ var SF_Plugins = SF_Plugins || {};
  * 2. 添加状态60前，
  * 生成整随机数1~10，如果随机数小于等于5，则添加状态148
  * （随机数结果不影响状态60）的添加
- * 
+ *
  * <SF_StatesCustomAddtion_Before>
  * var result = {
  *   "result": false,
@@ -97,7 +97,7 @@ var SF_Plugins = SF_Plugins || {};
  * return result;
  * </SF_StatesCustomAddtion_Before>
  *
- * 
+ *
  * ============================================================================
  * 已知问题
  * ============================================================================

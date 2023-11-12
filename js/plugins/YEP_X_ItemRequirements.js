@@ -11,7 +11,7 @@ Yanfly.ItemReq = Yanfly.ItemReq || {};
 Yanfly.ItemReq.version = 1.01;
 
 //=============================================================================
- /*:
+/*:
  * @plugindesc v1.01 物品使用限制★
  * @author Yanfly Engine Plugins
  *
@@ -19,24 +19,24 @@ Yanfly.ItemReq.version = 1.01;
  * ============================================================================
  * 导言
  *  ============================================================================
- * 
+ *
  * 这个插件需要YEP\u ItemCore。确保此插件位于
  * 是的，插件列表中有ItemCore。
- * 
+ *
  * 在RPG Maker MV中，默认情况下物品只有一些限制，
  * 不管他们是否能在战场上使用，或者永远不会使用。没有
  * 您可以设置的任何其他条件，这些条件将决定
  * 项目可以使用，也不能使用。这个插件提供了更多的方法来限制项目
  * 使用基于开关、变量、使用它们的参与者、类、状态
  * 要求，等等。
- * 
+ *
  *  ============================================================================
  * 便签
  *  ============================================================================
- * 
+ *
  * 使用以下NoteTag强制项目的要求，然后才可以
  * 被使用。
- * 
+ *
  * 项目注释标签：
  *
  *   <Enable Requirements>
@@ -286,384 +286,380 @@ Yanfly.ItemReq.version = 1.01;
 //=============================================================================
 
 if (Imported.YEP_ItemCore) {
+    //=============================================================================
+    // DataManager
+    //=============================================================================
 
-//=============================================================================
-// DataManager
-//=============================================================================
+    Yanfly.ItemReq.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    DataManager.isDatabaseLoaded = function () {
+        if (!Yanfly.ItemReq.DataManager_isDatabaseLoaded.call(this)) return false;
 
-Yanfly.ItemReq.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
-DataManager.isDatabaseLoaded = function() {
-  if (!Yanfly.ItemReq.DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!Yanfly._loaded_YEP_X_ItemRequirements) {
+            this.processItemRequirementsNotetags1($dataItems);
+            Yanfly._loaded_YEP_X_ItemRequirements = true;
+        }
 
-  if (!Yanfly._loaded_YEP_X_ItemRequirements) {
-    this.processItemRequirementsNotetags1($dataItems);
-    Yanfly._loaded_YEP_X_ItemRequirements = true;
-  }
-  
-  return true;
-};
+        return true;
+    };
 
-DataManager.processItemRequirementsNotetags1 = function(group) {
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    var notedata = obj.note.split(/[\r\n]+/);
+    DataManager.processItemRequirementsNotetags1 = function (group) {
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
 
-    obj.itemRequirements = [];
-    var evalMode = 'none';
-    obj.customItemRequirements = '';
+            obj.itemRequirements = [];
+            var evalMode = "none";
+            obj.customItemRequirements = "";
 
-    for (var i = 0; i < notedata.length; i++) {
-      var line = notedata[i];
-      if (line.match(/<ENABLE (?:REQUIREMENT|REQUIREMENTS)>/i)) {
-        evalMode = 'enable requirements';
-      } else if (line.match(/<\/ENABLE (?:REQUIREMENT|REQUIREMENTS)>/i)) {
-        evalMode = 'none';
-      } else if (evalMode === 'enable requirements') {
-        obj.itemRequirements.push(line);
-      } else if (line.match(/<CUSTOM ENABLE (?:REQUIREMENT|REQUIREMENTS)>/i)) {
-        evalMode = 'custom enable requirements';
-      } else if (line.match(/<\/CUSTOM ENABLE (?:REQUIREMENT|REQUIREMENTS)>/i)) {
-        evalMode = 'none';
-      } else if (evalMode === 'custom enable requirements') {
-        obj.customItemRequirements += line + '\n';
-      }
-    }
-  }
-};
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(/<ENABLE (?:REQUIREMENT|REQUIREMENTS)>/i)) {
+                    evalMode = "enable requirements";
+                } else if (line.match(/<\/ENABLE (?:REQUIREMENT|REQUIREMENTS)>/i)) {
+                    evalMode = "none";
+                } else if (evalMode === "enable requirements") {
+                    obj.itemRequirements.push(line);
+                } else if (line.match(/<CUSTOM ENABLE (?:REQUIREMENT|REQUIREMENTS)>/i)) {
+                    evalMode = "custom enable requirements";
+                } else if (line.match(/<\/CUSTOM ENABLE (?:REQUIREMENT|REQUIREMENTS)>/i)) {
+                    evalMode = "none";
+                } else if (evalMode === "custom enable requirements") {
+                    obj.customItemRequirements += line + "\n";
+                }
+            }
+        }
+    };
 
-//=============================================================================
-// Game_BattlerBase
-//=============================================================================
+    //=============================================================================
+    // Game_BattlerBase
+    //=============================================================================
 
-Yanfly.ItemReq.Game_BattlerBase_mIC =
-  Game_BattlerBase.prototype.meetsItemConditions;
-Game_BattlerBase.prototype.meetsItemConditions = function(item) {
-  if (!Yanfly.ItemReq.Game_BattlerBase_mIC.call(this, item)) {
-    return false;
-  }
-  return ItemManager.meetsUsableItemRequirements(item, this);
-};
+    Yanfly.ItemReq.Game_BattlerBase_mIC = Game_BattlerBase.prototype.meetsItemConditions;
+    Game_BattlerBase.prototype.meetsItemConditions = function (item) {
+        if (!Yanfly.ItemReq.Game_BattlerBase_mIC.call(this, item)) {
+            return false;
+        }
+        return ItemManager.meetsUsableItemRequirements(item, this);
+    };
 
-//=============================================================================
-// Game_Actor
-//=============================================================================
+    //=============================================================================
+    // Game_Actor
+    //=============================================================================
 
-Game_Actor.prototype.isAtypeEquipped = function(atypeId) {
-  return this.armors().some(function(armor) {
-    return armor.atypeId === atypeId;
-  });
-};
+    Game_Actor.prototype.isAtypeEquipped = function (atypeId) {
+        return this.armors().some(function (armor) {
+            return armor.atypeId === atypeId;
+        });
+    };
 
-//=============================================================================
-// ItemManager
-//=============================================================================
+    //=============================================================================
+    // ItemManager
+    //=============================================================================
 
-ItemManager.meetsUsableItemRequirements = function(item, battler) {
-  if (!item) return false;
-  if (!item.itemRequirements) {
-    var baseItem = DataManager.getBaseItem(item);
-    item.itemRequirements = JsonEx.makeDeepCopy(baseItem.itemRequirements);
-  }
-  var length = item.itemRequirements.length;
-  if ($gameParty.inBattle()) var battler = this.battleSubject() || battler;
-  for (var i = 0; i < length; ++i) {
-    var line = item.itemRequirements[i];
-    if (!line) continue;
-    if (!this.checkUsableItemRequirement(line, item, battler)) return false;
-  }
-  if (item.customItemRequirements && item.customItemRequirements.length >= 1) {
-    if (!this.checkCustomUsableItemRequirement(item, battler)) return false;
-  }
-  return true;
-};
+    ItemManager.meetsUsableItemRequirements = function (item, battler) {
+        if (!item) return false;
+        if (!item.itemRequirements) {
+            var baseItem = DataManager.getBaseItem(item);
+            item.itemRequirements = JsonEx.makeDeepCopy(baseItem.itemRequirements);
+        }
+        var length = item.itemRequirements.length;
+        if ($gameParty.inBattle()) var battler = this.battleSubject() || battler;
+        for (var i = 0; i < length; ++i) {
+            var line = item.itemRequirements[i];
+            if (!line) continue;
+            if (!this.checkUsableItemRequirement(line, item, battler)) return false;
+        }
+        if (item.customItemRequirements && item.customItemRequirements.length >= 1) {
+            if (!this.checkCustomUsableItemRequirement(item, battler)) return false;
+        }
+        return true;
+    };
 
-ItemManager.battleSubject = function() {
-  return BattleManager.actor() || BattleManager._subject;
-};
+    ItemManager.battleSubject = function () {
+        return BattleManager.actor() || BattleManager._subject;
+    };
 
-ItemManager.checkUsableItemRequirement = function(line, item, battler) {
-  // EVAL
-  if (line.match(/EVAL:(.*)/i)) {
-    var code = String(RegExp.$1);
-    return this.usableItemRequirementEval(code);
-  }
-  // NOT ACTOR
-  if (line.match(/NOT ACTOR:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementActor(data, battler, false);
-  }
-  // ACTOR
-  if (line.match(/ACTOR:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementActor(data, battler, true);
-  }
-  // NOT ARMOR TYPE
-  if (line.match(/NOT ARMOR TYPE:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementAtype(data, battler, false);
-  }
-  // ARMOR TYPE
-  if (line.match(/ARMOR TYPE:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementAtype(data, battler, true);
-  }
-  // NOT ARMOR
-  if (line.match(/NOT ARMOR:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementArmor(data, battler, false);
-  }
-  // ARMOR
-  if (line.match(/ARMOR:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementArmor(data, battler, true);
-  }
-  if (Imported.YEP_X_Subclass) {
-    // NOT SUBCLASS
-    if (line.match(/NOT SUBCLASS:(.*)/i)) {
-      var data = String(RegExp.$1);
-      return this.usableItemRequirementSubclass(data, battler, false);
-    }
-    // SUBCLASS
-    if (line.match(/SUBCLASS:(.*)/i)) {
-      var data = String(RegExp.$1);
-      return this.usableItemRequirementSubclass(data, battler, true);
-    }
-    // EITHER CLASS
-    if (line.match(/EITHER CLASS:(.*)/i)) {
-      var data = String(RegExp.$1);
-      return this.usableItemRequirementDuoClass(data, battler, true);
-    }
-    // NEITHER CLASS
-    if (line.match(/NEITHER CLASS:(.*)/i)) {
-      var data = String(RegExp.$1);
-      return this.usableItemRequirementDuoClass(data, battler, false);
-    }
-  }
-  // NOT CLASS
-  if (line.match(/NOT CLASS:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementClass(data, battler, false);
-  }
-  // CLASS
-  if (line.match(/CLASS:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementClass(data, battler, true);
-  }
-  // NOT STATE
-  if (line.match(/NOT STATE:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementState(data, battler, false);
-  }
-  // STATE
-  if (line.match(/STATE:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementState(data, battler, true);
-  }
-  // NOT WEAPON TYPE
-  if (line.match(/NOT WEAPON TYPE:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementWtype(data, battler, false);
-  }
-  // WEAPON TYPE
-  if (line.match(/WEAPON TYPE:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementWtype(data, battler, true);
-  }
-  // NOT WEAPON
-  if (line.match(/NOT WEAPON:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementWeapon(data, battler, false);
-  }
-  // WEAPON
-  if (line.match(/WEAPON:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementWeapon(data, battler, true);
-  }
-  // SWITCH OFF
-  if (line.match(/SWITCH OFF:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementSwitch(data, false);
-  }
-  // SWITCH ON
-  if (line.match(/SWITCH ON:(.*)/i)) {
-    var data = String(RegExp.$1);
-    return this.usableItemRequirementSwitch(data, true);
-  }
-  // VARIABLE
-  if (line.match(/VARIABLE[ ](\d+)[ ](.*)/i)) {
-    var variableId = parseInt(RegExp.$1);
-    var code = String(RegExp.$2);
-    return this.usableItemRequirementVariable(variableId, code);
-  }
-  return true;
-};
+    ItemManager.checkUsableItemRequirement = function (line, item, battler) {
+        // EVAL
+        if (line.match(/EVAL:(.*)/i)) {
+            var code = String(RegExp.$1);
+            return this.usableItemRequirementEval(code);
+        }
+        // NOT ACTOR
+        if (line.match(/NOT ACTOR:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementActor(data, battler, false);
+        }
+        // ACTOR
+        if (line.match(/ACTOR:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementActor(data, battler, true);
+        }
+        // NOT ARMOR TYPE
+        if (line.match(/NOT ARMOR TYPE:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementAtype(data, battler, false);
+        }
+        // ARMOR TYPE
+        if (line.match(/ARMOR TYPE:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementAtype(data, battler, true);
+        }
+        // NOT ARMOR
+        if (line.match(/NOT ARMOR:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementArmor(data, battler, false);
+        }
+        // ARMOR
+        if (line.match(/ARMOR:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementArmor(data, battler, true);
+        }
+        if (Imported.YEP_X_Subclass) {
+            // NOT SUBCLASS
+            if (line.match(/NOT SUBCLASS:(.*)/i)) {
+                var data = String(RegExp.$1);
+                return this.usableItemRequirementSubclass(data, battler, false);
+            }
+            // SUBCLASS
+            if (line.match(/SUBCLASS:(.*)/i)) {
+                var data = String(RegExp.$1);
+                return this.usableItemRequirementSubclass(data, battler, true);
+            }
+            // EITHER CLASS
+            if (line.match(/EITHER CLASS:(.*)/i)) {
+                var data = String(RegExp.$1);
+                return this.usableItemRequirementDuoClass(data, battler, true);
+            }
+            // NEITHER CLASS
+            if (line.match(/NEITHER CLASS:(.*)/i)) {
+                var data = String(RegExp.$1);
+                return this.usableItemRequirementDuoClass(data, battler, false);
+            }
+        }
+        // NOT CLASS
+        if (line.match(/NOT CLASS:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementClass(data, battler, false);
+        }
+        // CLASS
+        if (line.match(/CLASS:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementClass(data, battler, true);
+        }
+        // NOT STATE
+        if (line.match(/NOT STATE:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementState(data, battler, false);
+        }
+        // STATE
+        if (line.match(/STATE:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementState(data, battler, true);
+        }
+        // NOT WEAPON TYPE
+        if (line.match(/NOT WEAPON TYPE:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementWtype(data, battler, false);
+        }
+        // WEAPON TYPE
+        if (line.match(/WEAPON TYPE:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementWtype(data, battler, true);
+        }
+        // NOT WEAPON
+        if (line.match(/NOT WEAPON:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementWeapon(data, battler, false);
+        }
+        // WEAPON
+        if (line.match(/WEAPON:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementWeapon(data, battler, true);
+        }
+        // SWITCH OFF
+        if (line.match(/SWITCH OFF:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementSwitch(data, false);
+        }
+        // SWITCH ON
+        if (line.match(/SWITCH ON:(.*)/i)) {
+            var data = String(RegExp.$1);
+            return this.usableItemRequirementSwitch(data, true);
+        }
+        // VARIABLE
+        if (line.match(/VARIABLE[ ](\d+)[ ](.*)/i)) {
+            var variableId = parseInt(RegExp.$1);
+            var code = String(RegExp.$2);
+            return this.usableItemRequirementVariable(variableId, code);
+        }
+        return true;
+    };
 
-ItemManager.usableItemRequirementEval = function(code) {
-  var value = false;
-  try {
-    eval(code);
-  } catch (e) {
-    Yanfly.Util.displayError(e, code, 'CUSTOM ITEM USE EVAL CODE ERROR');
-  }
-  return value;
-};
+    ItemManager.usableItemRequirementEval = function (code) {
+        var value = false;
+        try {
+            eval(code);
+        } catch (e) {
+            Yanfly.Util.displayError(e, code, "CUSTOM ITEM USE EVAL CODE ERROR");
+        }
+        return value;
+    };
 
-ItemManager.usableItemRequirementActor = function(data, battler, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var actorId = parseInt(array[i].trim());
-    if (battler.actorId() === actorId) return condition;
-  }
-  return !condition;
-};
+    ItemManager.usableItemRequirementActor = function (data, battler, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var actorId = parseInt(array[i].trim());
+            if (battler.actorId() === actorId) return condition;
+        }
+        return !condition;
+    };
 
-ItemManager.usableItemRequirementClass = function(data, battler, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var classId = parseInt(array[i].trim());
-    if (battler._classId === classId) return condition;
-  }
-  return !condition;
-};
+    ItemManager.usableItemRequirementClass = function (data, battler, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var classId = parseInt(array[i].trim());
+            if (battler._classId === classId) return condition;
+        }
+        return !condition;
+    };
 
-ItemManager.usableItemRequirementDuoClass = function(data, battler, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var classId = parseInt(array[i].trim());
-    var subclassId = parseInt(array[i].trim());
-    if (battler._classId === classId || battler._subclassId === subclassId) {
-      return condition;
-    }
-  }
-  return !condition;
-};
+    ItemManager.usableItemRequirementDuoClass = function (data, battler, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var classId = parseInt(array[i].trim());
+            var subclassId = parseInt(array[i].trim());
+            if (battler._classId === classId || battler._subclassId === subclassId) {
+                return condition;
+            }
+        }
+        return !condition;
+    };
 
-ItemManager.usableItemRequirementSubclass = function(data, battler, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var subclassId = parseInt(array[i].trim());
-    if (battler._subclassId === subclassId) return condition;
-  }
-  return !condition;
-};
+    ItemManager.usableItemRequirementSubclass = function (data, battler, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var subclassId = parseInt(array[i].trim());
+            if (battler._subclassId === subclassId) return condition;
+        }
+        return !condition;
+    };
 
-ItemManager.usableItemRequirementState = function(data, battler, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var stateId = parseInt(array[i].trim());
-    var state = $dataStates[stateId];
-    if (battler.states().contains(state)) return condition;
-  }
-  return !condition;
-};
+    ItemManager.usableItemRequirementState = function (data, battler, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var stateId = parseInt(array[i].trim());
+            var state = $dataStates[stateId];
+            if (battler.states().contains(state)) return condition;
+        }
+        return !condition;
+    };
 
-ItemManager.usableItemRequirementWtype = function(data, battler, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var id = parseInt(array[i].trim());
-    if (battler.isWtypeEquipped(id)) return condition;
-  }
-  return !condition;
-};
+    ItemManager.usableItemRequirementWtype = function (data, battler, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var id = parseInt(array[i].trim());
+            if (battler.isWtypeEquipped(id)) return condition;
+        }
+        return !condition;
+    };
 
-ItemManager.usableItemRequirementWeapon = function(data, battler, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var id = parseInt(array[i].trim());
-    var equip = $dataWeapons[id];
-    if (battler.hasWeapon(equip)) return condition;
-  }
-  return !condition;
-};
+    ItemManager.usableItemRequirementWeapon = function (data, battler, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var id = parseInt(array[i].trim());
+            var equip = $dataWeapons[id];
+            if (battler.hasWeapon(equip)) return condition;
+        }
+        return !condition;
+    };
 
-ItemManager.usableItemRequirementAtype = function(data, battler, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var id = parseInt(array[i].trim());
-    if (battler.isAtypeEquipped(id)) return condition;
-  }
-  return !condition;
-};
+    ItemManager.usableItemRequirementAtype = function (data, battler, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var id = parseInt(array[i].trim());
+            if (battler.isAtypeEquipped(id)) return condition;
+        }
+        return !condition;
+    };
 
-ItemManager.usableItemRequirementArmor = function(data, battler, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var id = parseInt(array[i].trim());
-    var equip = $dataArmors[id];
-    if (battler.hasArmor(equip)) return condition;
-  }
-  return !condition;
-};
+    ItemManager.usableItemRequirementArmor = function (data, battler, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var id = parseInt(array[i].trim());
+            var equip = $dataArmors[id];
+            if (battler.hasArmor(equip)) return condition;
+        }
+        return !condition;
+    };
 
-ItemManager.usableItemRequirementSwitch = function(data, condition) {
-  var array = data.split(',');
-  var length = array.length;
-  for (var i = 0; i < length; ++i) {
-    var switchId = parseInt(array[i].trim());
-    if ($gameSwitches.value(switchId) !== condition) return false;
-  }
-  return true;
-};
+    ItemManager.usableItemRequirementSwitch = function (data, condition) {
+        var array = data.split(",");
+        var length = array.length;
+        for (var i = 0; i < length; ++i) {
+            var switchId = parseInt(array[i].trim());
+            if ($gameSwitches.value(switchId) !== condition) return false;
+        }
+        return true;
+    };
 
-ItemManager.usableItemRequirementVariable = function(variableId, code) {
-  return eval('$gameVariables.value(variableId) ' + code);
-};
+    ItemManager.usableItemRequirementVariable = function (variableId, code) {
+        return eval("$gameVariables.value(variableId) " + code);
+    };
 
-ItemManager.checkCustomUsableItemRequirement = function(item, battler) {
-  var condition = false;
-  var user = battler;
-  var a = battler;
-  var b = battler;
-  var target = battler;
-  var subject = battler;
-  var s = $gameSwitches._data;
-  var v = $gameVariables._data;
-  var code = item.customItemRequirements;
-  try {
-    eval(code);
-  } catch (e) {
-    Yanfly.Util.displayError(e, code, 'CUSTOM ITEM USE REQUIREMENT CODE ERROR');
-  }
-  return condition;
-};
+    ItemManager.checkCustomUsableItemRequirement = function (item, battler) {
+        var condition = false;
+        var user = battler;
+        var a = battler;
+        var b = battler;
+        var target = battler;
+        var subject = battler;
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var code = item.customItemRequirements;
+        try {
+            eval(code);
+        } catch (e) {
+            Yanfly.Util.displayError(e, code, "CUSTOM ITEM USE REQUIREMENT CODE ERROR");
+        }
+        return condition;
+    };
 
-//=============================================================================
-// Utilities
-//=============================================================================
+    //=============================================================================
+    // Utilities
+    //=============================================================================
 
-Yanfly.Util = Yanfly.Util || {};
+    Yanfly.Util = Yanfly.Util || {};
 
-Yanfly.Util.displayError = function(e, code, message) {
-  console.log(message);
-  console.log(code || 'NON-EXISTENT');
-  console.error(e);
-  if (Utils.isNwjs() && Utils.isOptionValid('test')) {
-    if (!require('nw.gui').Window.get().isDevToolsOpen()) {
-      require('nw.gui').Window.get().showDevTools();
-    }
-  }
-};
+    Yanfly.Util.displayError = function (e, code, message) {
+        console.log(message);
+        console.log(code || "NON-EXISTENT");
+        console.error(e);
+        if (Utils.isNwjs() && Utils.isOptionValid("test")) {
+            if (!require("nw.gui").Window.get().isDevToolsOpen()) {
+                require("nw.gui").Window.get().showDevTools();
+            }
+        }
+    };
 
-//=============================================================================
-// End of File
-//=============================================================================
+    //=============================================================================
+    // End of File
+    //=============================================================================
 } else {
-
-var text = '================================================================\n';
-text += 'YEP_X_ItemRequirements requires YEP_ItemCore to be at the ';
-text += 'latest version to run properly.\n\nPlease go to www.yanfly.moe and ';
-text += 'update to the latest version for the YEP_ItemCore plugin.\n';
-text += '================================================================\n';
-console.log(text);
-require('nw.gui').Window.get().showDevTools();
-
+    var text = "================================================================\n";
+    text += "YEP_X_ItemRequirements requires YEP_ItemCore to be at the ";
+    text += "latest version to run properly.\n\nPlease go to www.yanfly.moe and ";
+    text += "update to the latest version for the YEP_ItemCore plugin.\n";
+    text += "================================================================\n";
+    console.log(text);
+    require("nw.gui").Window.get().showDevTools();
 } // // Imported.YEP_ItemCore

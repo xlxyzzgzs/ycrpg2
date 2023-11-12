@@ -6,17 +6,17 @@ onmessage = function (e) {
     result_files.update_list = [];
 
     switch (request.command) {
-        case 'compare':
+        case "compare":
             compare_file_info(request.local_file_info, request.remote_file_info, result_files);
-            send_command('delete', result_files.delete_list);
-            send_command('update', result_files.update_list);
-            send_command('finish', []);
+            send_command("delete", result_files.delete_list);
+            send_command("update", result_files.update_list);
+            send_command("finish", []);
             break;
-        case 'finish':
-            send_command('finish');
+        case "finish":
+            send_command("finish");
             break;
     }
-}
+};
 
 function compare_file_info(local_file_info, remote_file_info, result_files) {
     if (!remote_file_info) {
@@ -35,7 +35,9 @@ function compare_file_info(local_file_info, remote_file_info, result_files) {
             }
             for (var i in remote_file_info.children) {
                 if (!visited_children.has(i)) {
-                    result_files.update_list = result_files.update_list.concat(generate_file_list(remote_file_info.children[i]));
+                    result_files.update_list = result_files.update_list.concat(
+                        generate_file_list(remote_file_info.children[i])
+                    );
                 }
             }
         } else {
@@ -44,9 +46,10 @@ function compare_file_info(local_file_info, remote_file_info, result_files) {
     }
 }
 
-
 function generate_file_list(file_info) {
-    if (!file_info) { return []; }
+    if (!file_info) {
+        return [];
+    }
 
     var file_list = [];
     if (file_info.is_dir) {
@@ -55,10 +58,10 @@ function generate_file_list(file_info) {
         }
     }
     file_list.push({
-        "file_name": file_info.file_name,
-        "is_dir": file_info.is_dir,
-        "is_file": file_info.is_file,
-        "sha_512": file_info.sha_512
+        file_name: file_info.file_name,
+        is_dir: file_info.is_dir,
+        is_file: file_info.is_file,
+        sha_512: file_info.sha_512,
     });
     return file_list;
 }
@@ -67,7 +70,7 @@ function generate_file_list(file_info) {
 function send_command(command, file_list) {
     var command_data = {
         command: command,
-        file_list: file_list
+        file_list: file_list,
     };
     postMessage(command_data);
 }

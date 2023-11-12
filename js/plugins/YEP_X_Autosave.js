@@ -8,10 +8,10 @@ Imported.YEP_X_Autosave = true;
 
 var Yanfly = Yanfly || {};
 Yanfly.Autosave = Yanfly.Autosave || {};
-Yanfly.Autosave.version = 1.00;
+Yanfly.Autosave.version = 1.0;
 
 //=============================================================================
- /*:
+/*:
  * @plugindesc v1.00 (Req YEP_SaveCore.js) Adds Autosave functionality to your
  * RPG Maker game.
  * @author Yanfly Engine Plugins
@@ -114,7 +114,7 @@ Yanfly.Autosave.version = 1.00;
  * ---------
  * Settings:
  * ---------
- * 
+ *
  * Name:
  * \i[231]Autosave
  *
@@ -137,7 +137,7 @@ Yanfly.Autosave.version = 1.00;
  * ----------
  * Functions:
  * ----------
- * 
+ *
  * Make Option Code:
  * this.addCommand(name, symbol, enabled, ext);
  *
@@ -161,7 +161,7 @@ Yanfly.Autosave.version = 1.00;
  * var symbol = this.commandSymbol(index);
  * var value = this.getConfigValue(symbol);
  * this.changeValue(symbol, true);
- * 
+ *
  * Cursor Left Code:
  * var index = this.index();
  * var symbol = this.commandSymbol(index);
@@ -316,329 +316,322 @@ Yanfly.Autosave.version = 1.00;
 //=============================================================================
 
 if (Imported.YEP_SaveCore) {
+    //=============================================================================
+    // Parameter Variables
+    //=============================================================================
 
-//=============================================================================
-// Parameter Variables
-//=============================================================================
+    Yanfly.Parameters = PluginManager.parameters("YEP_X_Autosave");
+    Yanfly.Param = Yanfly.Param || {};
 
-Yanfly.Parameters = PluginManager.parameters('YEP_X_Autosave');
-Yanfly.Param = Yanfly.Param || {};
+    Yanfly.Param.AutosaveOnMapLoad = eval(String(Yanfly.Parameters["OnMapLoad"]));
+    Yanfly.Param.AutosaveOnMainMenu = eval(String(Yanfly.Parameters["OnMainMenu"]));
 
-Yanfly.Param.AutosaveOnMapLoad = eval(String(Yanfly.Parameters['OnMapLoad']));
-Yanfly.Param.AutosaveOnMainMenu = eval(String(Yanfly.Parameters['OnMainMenu']));
+    Yanfly.Param.AutosaveShowOpt = eval(String(Yanfly.Parameters["Show Option"]));
+    Yanfly.Param.AutosaveOptionCmd = String(Yanfly.Parameters["Option Name"]);
+    Yanfly.Param.AutosaveDefault = eval(String(Yanfly.Parameters["Default"]));
 
-Yanfly.Param.AutosaveShowOpt = eval(String(Yanfly.Parameters['Show Option']));
-Yanfly.Param.AutosaveOptionCmd = String(Yanfly.Parameters['Option Name']);
-Yanfly.Param.AutosaveDefault = eval(String(Yanfly.Parameters['Default']));
+    Yanfly.Param.AutosaveShowMsg = eval(String(Yanfly.Parameters["ShowAutosave"]));
+    Yanfly.Param.AutosaveMsgSave = String(Yanfly.Parameters["AutosaveMsgSave"]);
+    Yanfly.Param.AutosaveMsgLoad = String(Yanfly.Parameters["AutosaveMsgLoad"]);
+    Yanfly.Param.AutosaveMsgColor1 = String(Yanfly.Parameters["MsgGradient1"]);
+    Yanfly.Param.AutosaveMsgColor2 = String(Yanfly.Parameters["MsgGradient2"]);
+    Yanfly.Param.AutosaveMsgCode = JSON.parse(Yanfly.Parameters["MsgGradientCode"]);
+    Yanfly.Param.AutosaveMsgX = String(Yanfly.Parameters["MsgX"]);
+    Yanfly.Param.AutosaveMsgY = String(Yanfly.Parameters["MsgY"]);
+    Yanfly.Param.AutosaveMsgDur = Number(Yanfly.Parameters["MsgDuration"]) || 120;
+    Yanfly.Param.AutosaveMsgFade = Number(Yanfly.Parameters["FadeSpeed"]) || 16;
 
-Yanfly.Param.AutosaveShowMsg = eval(String(Yanfly.Parameters['ShowAutosave']));
-Yanfly.Param.AutosaveMsgSave = String(Yanfly.Parameters['AutosaveMsgSave']);
-Yanfly.Param.AutosaveMsgLoad = String(Yanfly.Parameters['AutosaveMsgLoad']);
-Yanfly.Param.AutosaveMsgColor1 = String(Yanfly.Parameters['MsgGradient1']);
-Yanfly.Param.AutosaveMsgColor2 = String(Yanfly.Parameters['MsgGradient2']);
-Yanfly.Param.AutosaveMsgCode = JSON.parse(Yanfly.Parameters['MsgGradientCode']);
-Yanfly.Param.AutosaveMsgX = String(Yanfly.Parameters['MsgX']);
-Yanfly.Param.AutosaveMsgY = String(Yanfly.Parameters['MsgY']);
-Yanfly.Param.AutosaveMsgDur = Number(Yanfly.Parameters['MsgDuration']) || 120;
-Yanfly.Param.AutosaveMsgFade = Number(Yanfly.Parameters['FadeSpeed']) || 16;
+    //=============================================================================
+    // ConfigManager
+    //=============================================================================
 
-//=============================================================================
-// ConfigManager
-//=============================================================================
+    ConfigManager.autosave = Yanfly.Param.AutosaveDefault;
 
-ConfigManager.autosave = Yanfly.Param.AutosaveDefault;
+    Yanfly.Autosave.ConfigManager_makeData = ConfigManager.makeData;
+    ConfigManager.makeData = function () {
+        var config = Yanfly.Autosave.ConfigManager_makeData.call(this);
+        config.autosave = this.autosave;
+        return config;
+    };
 
-Yanfly.Autosave.ConfigManager_makeData = ConfigManager.makeData;
-ConfigManager.makeData = function() {
-  var config = Yanfly.Autosave.ConfigManager_makeData.call(this);
-  config.autosave = this.autosave;
-  return config;
-};
+    Yanfly.Autosave.ConfigManager_applyData = ConfigManager.applyData;
+    ConfigManager.applyData = function (config) {
+        Yanfly.Autosave.ConfigManager_applyData.call(this, config);
+        this.autosave = config["autosave"] || Yanfly.Param.AutosaveDefault;
+    };
 
-Yanfly.Autosave.ConfigManager_applyData = ConfigManager.applyData;
-ConfigManager.applyData = function(config) {
-  Yanfly.Autosave.ConfigManager_applyData.call(this, config);
-  this.autosave = config['autosave'] || Yanfly.Param.AutosaveDefault;
-};
+    //=============================================================================
+    // DataManager
+    //=============================================================================
 
-//=============================================================================
-// DataManager
-//=============================================================================
+    Yanfly.Autosave.DataManager_setupNewGame = DataManager.setupNewGame;
+    DataManager.setupNewGame = function () {
+        Yanfly.Autosave.DataManager_setupNewGame.call(this);
+        StorageManager.setCurrentAutosaveSlot(this._lastAccessedId);
+        $gameTemp._autosaveNewGame = false;
+        $gameTemp._autosaveLoading = false;
+    };
 
-Yanfly.Autosave.DataManager_setupNewGame = DataManager.setupNewGame;
-DataManager.setupNewGame = function() {
-  Yanfly.Autosave.DataManager_setupNewGame.call(this);
-  StorageManager.setCurrentAutosaveSlot(this._lastAccessedId);
-  $gameTemp._autosaveNewGame = false;
-  $gameTemp._autosaveLoading = false;
-};
+    Yanfly.Autosave.DataManager_saveGame = DataManager.saveGameWithoutRescue;
+    DataManager.saveGameWithoutRescue = function (savefileId) {
+        var value = Yanfly.Autosave.DataManager_saveGame.call(this, savefileId);
+        $gameTemp._autosaveNewGame = false;
+        $gameTemp._autosaveLoading = false;
+        StorageManager.setCurrentAutosaveSlot(savefileId);
+        return value;
+    };
 
-Yanfly.Autosave.DataManager_saveGame = DataManager.saveGameWithoutRescue;
-DataManager.saveGameWithoutRescue = function(savefileId) {
-  var value = Yanfly.Autosave.DataManager_saveGame.call(this, savefileId);
-  $gameTemp._autosaveNewGame = false;
-  $gameTemp._autosaveLoading = false;
-  StorageManager.setCurrentAutosaveSlot(savefileId);
-  return value;
-};
+    Yanfly.Autosave.DataManager_loadGame = DataManager.loadGameWithoutRescue;
+    DataManager.loadGameWithoutRescue = function (savefileId) {
+        var value = Yanfly.Autosave.DataManager_loadGame.call(this, savefileId);
+        $gameTemp._autosaveNewGame = false;
+        $gameTemp._autosaveLoading = true;
+        StorageManager.setCurrentAutosaveSlot(savefileId);
+        return value;
+    };
 
-Yanfly.Autosave.DataManager_loadGame = DataManager.loadGameWithoutRescue;
-DataManager.loadGameWithoutRescue = function(savefileId) {
-  var value = Yanfly.Autosave.DataManager_loadGame.call(this, savefileId);
-  $gameTemp._autosaveNewGame = false;
-  $gameTemp._autosaveLoading = true;
-  StorageManager.setCurrentAutosaveSlot(savefileId);
-  return value;
-};
+    //=============================================================================
+    // StorageManager
+    //=============================================================================
 
-//=============================================================================
-// StorageManager
-//=============================================================================
+    StorageManager.getCurrentAutosaveSlot = function () {
+        return this._currentAutosaveSlot;
+    };
 
-StorageManager.getCurrentAutosaveSlot = function() {
-  return this._currentAutosaveSlot;
-};
+    StorageManager.setCurrentAutosaveSlot = function (savefileId) {
+        this._currentAutosaveSlot = 1;
+    };
 
-StorageManager.setCurrentAutosaveSlot = function(savefileId) {
-  this._currentAutosaveSlot = 1;
-};
+    StorageManager.performAutosave = function () {
+        if ($gameMap.mapId() <= 0) return;
+        if ($gameTemp._autosaveNewGame) return;
+        if (!$gameSystem.canAutosave()) return;
+        SceneManager._scene.performAutosave();
+    };
 
-StorageManager.performAutosave = function() {
-  if ($gameMap.mapId() <= 0) return;
-  if ($gameTemp._autosaveNewGame) return;
-  if (!$gameSystem.canAutosave()) return;
-  SceneManager._scene.performAutosave();
-};
+    //=============================================================================
+    // Game_System
+    //=============================================================================
 
-//=============================================================================
-// Game_System
-//=============================================================================
+    Yanfly.Autosave.Game_System_initialize = Game_System.prototype.initialize;
+    Game_System.prototype.initialize = function () {
+        Yanfly.Autosave.Game_System_initialize.call(this);
+        this.initAutosave();
+    };
 
-Yanfly.Autosave.Game_System_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-  Yanfly.Autosave.Game_System_initialize.call(this);
-  this.initAutosave();
-};
+    Game_System.prototype.initAutosave = function () {
+        this._allowAutosave = true;
+    };
 
-Game_System.prototype.initAutosave = function() {
-  this._allowAutosave = true;
-};
+    Game_System.prototype.canAutosave = function () {
+        if (this._allowAutosave === undefined) this.initAutosave();
+        return this._allowAutosave;
+    };
 
-Game_System.prototype.canAutosave = function() {
-  if (this._allowAutosave === undefined) this.initAutosave();
-  return this._allowAutosave;
-};
+    Game_System.prototype.setAutosave = function (value) {
+        if (this._allowAutosave === undefined) this.initAutosave();
+        this._allowAutosave = value;
+    };
 
-Game_System.prototype.setAutosave = function(value) {
-  if (this._allowAutosave === undefined) this.initAutosave();
-  this._allowAutosave = value;
-};
+    //=============================================================================
+    // Game_Interpreter
+    //=============================================================================
 
-//=============================================================================
-// Game_Interpreter
-//=============================================================================
+    Yanfly.Autosave.Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+    Game_Interpreter.prototype.pluginCommand = function (command, args) {
+        Yanfly.Autosave.Game_Interpreter_pluginCommand.call(this, command, args);
+        if (command.match(/EnableAutosave/i)) {
+            $gameSystem.setAutosave(true);
+        } else if (command.match(/DisableAutosave/i)) {
+            $gameSystem.setAutosave(false);
+        } else if (command.match(/Autosave/i)) {
+            StorageManager.performAutosave();
+        }
+    };
 
-Yanfly.Autosave.Game_Interpreter_pluginCommand =
-  Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-  Yanfly.Autosave.Game_Interpreter_pluginCommand.call(this, command, args);
-  if (command.match(/EnableAutosave/i)) {
-    $gameSystem.setAutosave(true);
-  } else if (command.match(/DisableAutosave/i)) {
-    $gameSystem.setAutosave(false);
-  } else if (command.match(/Autosave/i)) {
-    StorageManager.performAutosave();
-  }
-};
+    //=============================================================================
+    // Window_Options
+    //=============================================================================
 
-//=============================================================================
-// Window_Options
-//=============================================================================
+    Yanfly.Autosave.Window_Options_addGeneralOptions = Window_Options.prototype.addGeneralOptions;
+    Window_Options.prototype.addGeneralOptions = function () {
+        Yanfly.Autosave.Window_Options_addGeneralOptions.call(this);
+        if (!Imported.YEP_OptionsCore && Yanfly.Param.AutosaveShowOpt) {
+            this.addCommand(Yanfly.Param.AutosaveOptionCmd, "autosave");
+        }
+    };
 
-Yanfly.Autosave.Window_Options_addGeneralOptions =
-  Window_Options.prototype.addGeneralOptions;
-Window_Options.prototype.addGeneralOptions = function() {
-  Yanfly.Autosave.Window_Options_addGeneralOptions.call(this);
-  if (!Imported.YEP_OptionsCore && Yanfly.Param.AutosaveShowOpt) {
-    this.addCommand(Yanfly.Param.AutosaveOptionCmd, 'autosave');
-  }
-};
+    //=============================================================================
+    // Window_Autosave
+    //=============================================================================
 
-//=============================================================================
-// Window_Autosave
-//=============================================================================
+    function Window_Autosave() {
+        this.initialize.apply(this, arguments);
+    }
 
-function Window_Autosave() {
-  this.initialize.apply(this, arguments);
-}
+    Window_Autosave.prototype = Object.create(Window_Base.prototype);
+    Window_Autosave.prototype.constructor = Window_Autosave;
 
-Window_Autosave.prototype = Object.create(Window_Base.prototype);
-Window_Autosave.prototype.constructor = Window_Autosave;
+    Window_Autosave.prototype.initialize = function () {
+        var width = this.windowWidth();
+        var height = this.windowHeight();
+        var x = eval(Yanfly.Param.AutosaveMsgX);
+        var y = eval(Yanfly.Param.AutosaveMsgY);
+        Window_Base.prototype.initialize.call(this, x, y, width, height);
+        this.opacity = 0;
+        this.contentsOpacity = 0;
+        this._showCount = 0;
+        this.refresh();
+        if ($gameTemp._autosaveLoading) {
+            this.reveal();
+            $gameTemp._autosaveLoading = false;
+        }
+    };
 
-Window_Autosave.prototype.initialize = function() {
-  var width = this.windowWidth();
-  var height = this.windowHeight();
-  var x = eval(Yanfly.Param.AutosaveMsgX);
-  var y = eval(Yanfly.Param.AutosaveMsgY);
-  Window_Base.prototype.initialize.call(this, x, y, width, height);
-  this.opacity = 0;
-  this.contentsOpacity = 0;
-  this._showCount = 0;
-  this.refresh();
-  if ($gameTemp._autosaveLoading) {
-    this.reveal();
-    $gameTemp._autosaveLoading = false;
-  }
-};
+    Window_Autosave.prototype.standardPadding = function () {
+        return 0;
+    };
 
-Window_Autosave.prototype.standardPadding = function() {
-  return 0;
-};
+    Window_Autosave.prototype.windowWidth = function () {
+        return Graphics.boxWidth;
+    };
 
-Window_Autosave.prototype.windowWidth = function() {
-  return Graphics.boxWidth;
-};
+    Window_Autosave.prototype.windowHeight = function () {
+        return this.fittingHeight(1);
+    };
 
-Window_Autosave.prototype.windowHeight = function() {
-  return this.fittingHeight(1);
-};
+    Window_Autosave.prototype.update = function () {
+        Window_Base.prototype.update.call(this);
+        if (this._showCount > 0) {
+            this.updateFadeIn();
+            this._showCount--;
+        } else {
+            this.updateFadeOut();
+        }
+    };
 
-Window_Autosave.prototype.update = function() {
-  Window_Base.prototype.update.call(this);
-  if (this._showCount > 0) {
-    this.updateFadeIn();
-    this._showCount--;
-  } else {
-    this.updateFadeOut();
-  }
-};
+    Window_Autosave.prototype.updateFadeIn = function () {
+        this.contentsOpacity += Yanfly.Param.AutosaveMsgFade;
+    };
 
-Window_Autosave.prototype.updateFadeIn = function() {
-  this.contentsOpacity += Yanfly.Param.AutosaveMsgFade;
-};
+    Window_Autosave.prototype.updateFadeOut = function () {
+        this.contentsOpacity -= Yanfly.Param.AutosaveMsgFade;
+    };
 
-Window_Autosave.prototype.updateFadeOut = function() {
-  this.contentsOpacity -= Yanfly.Param.AutosaveMsgFade;
-};
+    Window_Autosave.prototype.reveal = function () {
+        if (!Yanfly.Param.AutosaveShowMsg) return;
+        if (this._showCount > 0) return;
+        this._showCount = Yanfly.Param.AutosaveMsgDur;
+        this.refresh();
+    };
 
-Window_Autosave.prototype.reveal = function() {
-  if (!Yanfly.Param.AutosaveShowMsg) return;
-  if (this._showCount > 0) return;
-  this._showCount = Yanfly.Param.AutosaveMsgDur;
-  this.refresh();
-};
+    Window_Autosave.prototype.message = function () {
+        if ($gameTemp._autosaveLoading) {
+            return Yanfly.Param.AutosaveMsgLoad;
+        } else {
+            return Yanfly.Param.AutosaveMsgSave;
+        }
+    };
 
-Window_Autosave.prototype.message = function() {
-  if ($gameTemp._autosaveLoading) {
-    return Yanfly.Param.AutosaveMsgLoad;
-  } else {
-    return Yanfly.Param.AutosaveMsgSave;
-  }
-};
+    Window_Autosave.prototype.refresh = function () {
+        this.contents.clear();
+        this.drawGradient();
+        this.drawTextEx(this.message(), this.textPadding(), 0);
+    };
 
-Window_Autosave.prototype.refresh = function() {
-  this.contents.clear();
-  this.drawGradient();
-  this.drawTextEx(this.message(), this.textPadding(), 0);
-};
+    Window_Autosave.prototype.drawGradient = function () {
+        eval(Yanfly.Param.AutosaveMsgCode);
+    };
 
-Window_Autosave.prototype.drawGradient = function() {
-  eval(Yanfly.Param.AutosaveMsgCode);
-};
+    Window_Autosave.prototype.textWidthEx = function (text) {
+        return this.drawTextEx(text, 0, this.contents.height);
+    };
 
-Window_Autosave.prototype.textWidthEx = function(text) {
-  return this.drawTextEx(text, 0, this.contents.height);
-};
+    //=============================================================================
+    // Scene_Base
+    //=============================================================================
 
-//=============================================================================
-// Scene_Base
-//=============================================================================
+    Scene_Base.prototype.performAutosave = function () {};
 
-Scene_Base.prototype.performAutosave = function() {
-};
+    //=============================================================================
+    // Scene_Map
+    //=============================================================================
 
-//=============================================================================
-// Scene_Map
-//=============================================================================
+    Yanfly.Autosave.Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
+    Scene_Map.prototype.createAllWindows = function () {
+        Yanfly.Autosave.Scene_Map_createAllWindows.call(this);
+        this.createAutosaveMessageWindow();
+    };
 
-Yanfly.Autosave.Scene_Map_createAllWindows =
-  Scene_Map.prototype.createAllWindows;
-Scene_Map.prototype.createAllWindows = function() {
-  Yanfly.Autosave.Scene_Map_createAllWindows.call(this);
-  this.createAutosaveMessageWindow();
-};
+    Scene_Map.prototype.createAutosaveMessageWindow = function () {
+        this._autosaveMsgWindow = new Window_Autosave();
+        this.addChild(this._autosaveMsgWindow);
+    };
 
-Scene_Map.prototype.createAutosaveMessageWindow = function() {
-  this._autosaveMsgWindow = new Window_Autosave();
-  this.addChild(this._autosaveMsgWindow);
-};
+    Yanfly.Autosave.Scene_Map_onMapLoaded = Scene_Map.prototype.onMapLoaded;
+    Scene_Map.prototype.onMapLoaded = function () {
+        Yanfly.Autosave.Scene_Map_onMapLoaded.call(this);
+        if (Yanfly.Param.AutosaveOnMapLoad) StorageManager.performAutosave();
+    };
 
-Yanfly.Autosave.Scene_Map_onMapLoaded = Scene_Map.prototype.onMapLoaded;
-Scene_Map.prototype.onMapLoaded = function() {
-  Yanfly.Autosave.Scene_Map_onMapLoaded.call(this);
-  if (Yanfly.Param.AutosaveOnMapLoad) StorageManager.performAutosave();
-};
+    Yanfly.Autosave.Scene_Map_callMenu = Scene_Map.prototype.callMenu;
+    Scene_Map.prototype.callMenu = function () {
+        Yanfly.Autosave.Scene_Map_callMenu.call(this);
+        if (Yanfly.Param.AutosaveOnMainMenu) StorageManager.performAutosave();
+    };
 
-Yanfly.Autosave.Scene_Map_callMenu = Scene_Map.prototype.callMenu;
-Scene_Map.prototype.callMenu = function() {
-  Yanfly.Autosave.Scene_Map_callMenu.call(this);
-  if (Yanfly.Param.AutosaveOnMainMenu) StorageManager.performAutosave();
-};
+    Scene_Map.prototype.performAutosave = function () {
+        if ($gameMap.mapId() <= 0) return;
+        if ($gameTemp._autosaveNewGame) return;
+        if (!$gameSystem.canAutosave()) return;
+        $gameSystem.onBeforeSave();
+        DataManager.saveGameWithoutRescue(StorageManager.getCurrentAutosaveSlot());
+        if (this._autosaveMsgWindow) this._autosaveMsgWindow.reveal();
+    };
 
-Scene_Map.prototype.performAutosave = function() {
-  if ($gameMap.mapId() <= 0) return;
-  if ($gameTemp._autosaveNewGame) return;
-  if (!$gameSystem.canAutosave()) return;
-  $gameSystem.onBeforeSave();
-  DataManager.saveGameWithoutRescue(StorageManager.getCurrentAutosaveSlot());
-  if (this._autosaveMsgWindow) this._autosaveMsgWindow.reveal();
-};
+    //=============================================================================
+    // Window_SavefileList
+    //=============================================================================
+    Yanfly.Autosave.Window_SavefileList_drawItem = Window_SavefileList.prototype.drawItem;
+    Window_SavefileList.prototype.drawItem = function (index) {
+        var id = index + 1;
+        var valid = DataManager.isThisGameFile(id);
+        var rect = this.itemRect(index);
+        this.resetTextColor();
+        //if (this._mode === 'load') this.changePaintOpacity(valid);
+        this.changePaintOpacity(valid);
+        var icon = valid ? Yanfly.Param.SaveIconSaved : Yanfly.Param.SaveIconEmpty;
+        this.drawIcon(icon, rect.x + 2, rect.y + 2);
+        if (id === 1) {
+            //First is AutoSaved
+            this.drawText("自动存档", rect.x + Window_Base._iconWidth + 4, rect.y, 180);
+        } else {
+            this.drawFileId(id - 1, rect.x + Window_Base._iconWidth + 4, rect.y);
+        }
+    };
 
+    //=============================================================================
+    // Window_SaveAction
+    //=============================================================================
+    Yanfly.Autosave.Window_SaveAction_isSaveEnabled = Window_SaveAction.prototype.isSaveEnabled;
+    Window_SaveAction.prototype.isSaveEnabled = function () {
+        if (this._mode !== "save") return false;
+        if (this._currentFile === 1) return false;
+        return $gameSystem.isSaveEnabled();
+    };
 
-//=============================================================================
-// Window_SavefileList
-//=============================================================================
-Yanfly.Autosave.Window_SavefileList_drawItem = Window_SavefileList.prototype.drawItem;
-Window_SavefileList.prototype.drawItem = function(index) {
-  var id = index + 1;
-  var valid = DataManager.isThisGameFile(id);
-  var rect = this.itemRect(index);
-  this.resetTextColor();
-  //if (this._mode === 'load') this.changePaintOpacity(valid);
-  this.changePaintOpacity(valid);
-  var icon = valid ? Yanfly.Param.SaveIconSaved : Yanfly.Param.SaveIconEmpty;
-  this.drawIcon(icon, rect.x + 2, rect.y + 2);
-  if(id === 1){ //First is AutoSaved
-    this.drawText("自动存档",rect.x + Window_Base._iconWidth + 4, rect.y, 180);
-  } else {
-    this.drawFileId(id-1, rect.x + Window_Base._iconWidth + 4, rect.y);
-  }
-};
-
-//=============================================================================
-// Window_SaveAction
-//=============================================================================
-Yanfly.Autosave.Window_SaveAction_isSaveEnabled = Window_SaveAction.prototype.isSaveEnabled;
-Window_SaveAction.prototype.isSaveEnabled = function() {
-  if (this._mode !== 'save') return false;
-  if (this._currentFile === 1)return false;
-  return $gameSystem.isSaveEnabled();
-};
-
-//=============================================================================
-// Save Core Check
-//=============================================================================
+    //=============================================================================
+    // Save Core Check
+    //=============================================================================
 } else {
-
-Imported.YEP_X_Autosave = false;
-var text = '';
-text += 'You are getting this error because you are trying to run ';
-text += 'YEP_X_Autosave without the required plugins. Please visit ';
-text += 'Yanfly.moe and install the required plugins neede for this plugin ';
-text += 'found in this plugin\'s help file before you can use it.';
-console.log(text);
-require('nw.gui').Window.get().showDevTools();
-
+    Imported.YEP_X_Autosave = false;
+    var text = "";
+    text += "You are getting this error because you are trying to run ";
+    text += "YEP_X_Autosave without the required plugins. Please visit ";
+    text += "Yanfly.moe and install the required plugins neede for this plugin ";
+    text += "found in this plugin's help file before you can use it.";
+    console.log(text);
+    require("nw.gui").Window.get().showDevTools();
 }
 //=============================================================================
 // End of File

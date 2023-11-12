@@ -11,46 +11,46 @@ var SF_Plugins = SF_Plugins || {};
 
 //=============================================================================
 /*:
-    * @plugindesc v1.0.0 - Automatically revive dead party members.
-    * @author Salted Fish
-    * 
-    * @help
-    * 
-    * ===========================================================================
-    * Introduction
-    * ===========================================================================
-    * 
-    * This plugin automatically revives dead party members before Game Over.
-    * 
-    * ===========================================================================
-    * Map Notetags
-    * ===========================================================================
-    * 
-    * You can use the following notetags to specify the position of the revive
-    * 
-    * <Revive Position:x,y,d>
-    *  - x and y are the coordinates of the revive position.
-    *   - x and y are relative to the map.
-    *   - d is the direction the revive will face.
-    *       - 0 is same as before.
-    *       - 1 is down.
-    *       - 2 is left.
-    *       - 3 is right.
-    *       - 4 is up.
-    *
-    * ===========================================================================
-    * Plugin Commands
-    * ===========================================================================
-    * 
-    * You can use the following plugin commands to change the settings.
-    * 
-    * SF_AutoRevive_Enable
-    *   - Enables the revive system.
-    * 
-    * SF_AutoRevive_Disable
-    *   - Disables the revive system.
-    * 
-    */
+ * @plugindesc v1.0.0 - Automatically revive dead party members.
+ * @author Salted Fish
+ *
+ * @help
+ *
+ * ===========================================================================
+ * Introduction
+ * ===========================================================================
+ *
+ * This plugin automatically revives dead party members before Game Over.
+ *
+ * ===========================================================================
+ * Map Notetags
+ * ===========================================================================
+ *
+ * You can use the following notetags to specify the position of the revive
+ *
+ * <Revive Position:x,y,d>
+ *  - x and y are the coordinates of the revive position.
+ *   - x and y are relative to the map.
+ *   - d is the direction the revive will face.
+ *       - 0 is same as before.
+ *       - 1 is down.
+ *       - 2 is left.
+ *       - 3 is right.
+ *       - 4 is up.
+ *
+ * ===========================================================================
+ * Plugin Commands
+ * ===========================================================================
+ *
+ * You can use the following plugin commands to change the settings.
+ *
+ * SF_AutoRevive_Enable
+ *   - Enables the revive system.
+ *
+ * SF_AutoRevive_Disable
+ *   - Disables the revive system.
+ *
+ */
 //=============================================================================
 
 (function () {
@@ -71,15 +71,15 @@ var SF_Plugins = SF_Plugins || {};
 
     Game_System.prototype.isAutoReviveEnabled = function () {
         return this._autoRevive;
-    }
+    };
 
     Game_System.prototype.setAutoReviveEnabled = function (value) {
         this._autoRevive = value;
-    }
+    };
 
     Game_System.prototype.isSupportAutoRevive = function () {
         return this.isAutoReviveEnabled && $gameMap.getRevivePosition();
-    }
+    };
 
     //=============================================================================
     // Game_Map
@@ -101,11 +101,11 @@ var SF_Plugins = SF_Plugins || {};
             this._revivePosition = {
                 x: Number(position[0]),
                 y: Number(position[1]),
-                d: Number(position[2])
+                d: Number(position[2]),
             };
         }
         return this._revivePosition;
-    }
+    };
 
     //=============================================================================
     // Game_Interpreter
@@ -114,9 +114,9 @@ var SF_Plugins = SF_Plugins || {};
     SF_AutoRevive.Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
     Game_Interpreter.prototype.pluginCommand = function (command, args) {
         SF_AutoRevive.Game_Interpreter_pluginCommand.call(this, command, args);
-        if (command === 'SF_AutoRevive_Enable') {
+        if (command === "SF_AutoRevive_Enable") {
             $gameSystem.setAutoReviveEnabled(true);
-        } else if (command === 'SF_AutoRevive_Disable') {
+        } else if (command === "SF_AutoRevive_Disable") {
             $gameSystem.setAutoReviveEnabled(false);
         }
     };
@@ -127,7 +127,7 @@ var SF_Plugins = SF_Plugins || {};
 
     Game_BattlerBase.prototype.reviveFull = function () {
         this.recoverAll();
-    }
+    };
 
     //=============================================================================
     // Game_Party
@@ -141,7 +141,7 @@ var SF_Plugins = SF_Plugins || {};
                 member.reviveFull();
             }
         });
-    }
+    };
 
     //=============================================================================
     // Game_Player
@@ -152,7 +152,7 @@ var SF_Plugins = SF_Plugins || {};
         if (revive_position) {
             this.reserveTransfer($gameMap.mapId(), revive_position.x, revive_position.y, revive_position.d);
         }
-    }
+    };
 
     //=============================================================================
     // BattleManager
@@ -178,7 +178,7 @@ var SF_Plugins = SF_Plugins || {};
             SceneManager.pop();
         }
         this._phase = null;
-    }
+    };
 
     //=============================================================================
     // Scene_Base
@@ -194,5 +194,5 @@ var SF_Plugins = SF_Plugins || {};
                 SceneManager.goto(Scene_Gameover);
             }
         }
-    }
+    };
 })();

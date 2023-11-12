@@ -57,7 +57,7 @@ v1.0.0 新規作成
 {
     const param = PluginManager.parameters("ATBLine");
     const viewMode = param["viewMode"];
-    const useLineImage = (param["useLineImage"] === "true" ? true : false);
+    const useLineImage = param["useLineImage"] === "true" ? true : false;
     const lineImageFileName = param["lineImageFileName"];
     const defaultEnemyIconFileName = param["defaultEnemyIconFileName"];
     const defaultEnemyIconX = parseInt(param["defaultEnemyIconX"]);
@@ -66,35 +66,32 @@ v1.0.0 新規作成
     ATBConfig.drawEnemyUnderGauge = true;
     ATBConfig.drawUnderGauge = true;
 
-
-    Game_Actor.prototype.battlerIconName = function() {
+    Game_Actor.prototype.battlerIconName = function () {
         return this.characterName();
     };
 
-    Game_Actor.prototype.characterBlockX = function() {
-        return this.characterIndex() % 4 * 3;
+    Game_Actor.prototype.characterBlockX = function () {
+        return (this.characterIndex() % 4) * 3;
     };
 
-    Game_Actor.prototype.characterBlockY = function() {
+    Game_Actor.prototype.characterBlockY = function () {
         return Math.floor(this.characterIndex() / 4) * 4;
     };
 
-
-    Game_Enemy.prototype.battlerIconName = function() {
+    Game_Enemy.prototype.battlerIconName = function () {
         if (!this.enemy().meta.battlerIcon) return defaultEnemyIconFileName;
         return JSON.parse(this.enemy().meta.battlerIcon)[0];
     };
 
-    Game_Enemy.prototype.characterBlockX = function() {
+    Game_Enemy.prototype.characterBlockX = function () {
         if (!this.enemy().meta.battlerIcon) return defaultEnemyIconX;
         return JSON.parse(this.enemy().meta.battlerIcon)[1];
     };
 
-    Game_Enemy.prototype.characterBlockY = function() {
+    Game_Enemy.prototype.characterBlockY = function () {
         if (!this.enemy().meta.battlerIcon) return defaultEnemyIconY;
         return JSON.parse(this.enemy().meta.battlerIcon)[2];
     };
-
 
     class Sprite_ATBLine extends Sprite {
         static get LINE_WIDTH() {
@@ -103,7 +100,7 @@ v1.0.0 新規作成
             } else {
                 return 32;
             }
-        };
+        }
 
         static get LINE_HEIGHT() {
             if (viewMode === "wide") {
@@ -111,7 +108,7 @@ v1.0.0 新規作成
             } else {
                 return Graphics.height - 240;
             }
-        };
+        }
 
         initialize() {
             const bitmap = this.createBitmap();
@@ -142,14 +139,16 @@ v1.0.0 新規作成
     }
 
     class Sprite_LineIcon extends Sprite {
-        static get BATTLER_ICON_WIDTH() { return 48 };
+        static get BATTLER_ICON_WIDTH() {
+            return 48;
+        }
         static get BATTLER_ICON_HEIGHT() {
             if (viewMode === "wide") {
                 return Sprite_ATBLine.LINE_HEIGHT;
             } else {
                 return 32;
             }
-        };
+        }
 
         initialize(gauge, x, y) {
             this._gauge = gauge;
@@ -170,9 +169,13 @@ v1.0.0 新規作成
 
         updatePosition() {
             if (viewMode === "wide") {
-                this.x = this._baseX + (this._gauge.value / 1000) * (Sprite_ATBLine.LINE_WIDTH - Sprite_LineIcon.BATTLER_ICON_WIDTH);
+                this.x =
+                    this._baseX +
+                    (this._gauge.value / 1000) * (Sprite_ATBLine.LINE_WIDTH - Sprite_LineIcon.BATTLER_ICON_WIDTH);
             } else {
-                this.y = this._baseY - (this._gauge.value / 1000) * (Sprite_ATBLine.LINE_HEIGHT - Sprite_LineIcon.BATTLER_ICON_HEIGHT / 2);
+                this.y =
+                    this._baseY -
+                    (this._gauge.value / 1000) * (Sprite_ATBLine.LINE_HEIGHT - Sprite_LineIcon.BATTLER_ICON_HEIGHT / 2);
             }
         }
 
@@ -189,17 +192,19 @@ v1.0.0 新規作成
 
     /* class Spriteset_Battle */
     const _Spriteset_Battle_initialize = Spriteset_Battle.prototype.initialize;
-    Spriteset_Battle.prototype.initialize = function() {
+    Spriteset_Battle.prototype.initialize = function () {
         _Spriteset_Battle_initialize.call(this);
         this._atbLine = new Sprite_ATBLine();
         this._baseSprite.addChild(this._atbLine);
-    }
+    };
 
-    Spriteset_Battle.prototype.createGaugeLine = function(battler) {
+    Spriteset_Battle.prototype.createGaugeLine = function (battler) {
         if (viewMode === "wide") {
             this._baseSprite.addChild(new Sprite_LineIcon(battler.gauge(), this._atbLine.x, this._atbLine.y - 8));
         } else {
-            this._baseSprite.addChild(new Sprite_LineIcon(battler.gauge(), this._atbLine.x - 12, Sprite_ATBLine.LINE_HEIGHT));
+            this._baseSprite.addChild(
+                new Sprite_LineIcon(battler.gauge(), this._atbLine.x - 12, Sprite_ATBLine.LINE_HEIGHT)
+            );
         }
     };
-};
+}

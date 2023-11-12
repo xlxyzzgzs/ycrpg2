@@ -11,15 +11,14 @@ var SF_Plugins = SF_Plugins || {};
 
 //=============================================================================
 /*:
-    * @plugindesc try to skip load errors
-    * @author SaltedFish
-    * 
-    * @help
-    * just put it on the top of plugins list.
-    * 
-    */
+ * @plugindesc try to skip load errors
+ * @author SaltedFish
+ *
+ * @help
+ * just put it on the top of plugins list.
+ *
+ */
 //=============================================================================
-
 
 (function () {
     var SF_SkipLoadError = {};
@@ -31,16 +30,16 @@ var SF_Plugins = SF_Plugins || {};
     PluginManager.checkErrors = function () {
         var url = this._errorUrls.shift();
         if (url) {
-            alert('Failed to load: ' + url);
+            alert("Failed to load: " + url);
         }
-    }
+    };
 
     SF_SkipLoadError.ImageManager_isReady = ImageManager.isReady;
     ImageManager.isReady = function () {
         for (var key in this.cache._inner) {
             var bitmap = this.cache._inner[key].item;
             if (bitmap.isError()) {
-                alert('Failed to load: ' + bitmap.url);
+                alert("Failed to load: " + bitmap.url);
                 bitmap = ImageManager.loadEmptyBitmap();
                 this.cache.setItem(key, bitmap);
             }
@@ -54,7 +53,7 @@ var SF_Plugins = SF_Plugins || {};
     SF_SkipLoadError.AudioManager_checkWebAudioError = AudioManager.checkWebAudioError;
     AudioManager.checkWebAudioError = function (webAudio) {
         if (webAudio && webAudio.isError()) {
-            alert('Failed to load: ' + webAudio.url);
+            alert("Failed to load: " + webAudio.url);
             webAudio.initialize("");
         }
     };
@@ -93,17 +92,27 @@ var SF_Plugins = SF_Plugins || {};
             SceneManager.stop();
             if (this._errorPrinter.innerHTML !== "") {
                 let tempht = this._errorPrinter.innerHTML.match(/<font color="white">(.*)<\/font>/i)[1] + "<br/>";
-                this._errorPrinter.innerHTML = '<font color="yellow"><b>' + '文件加载失败，请上报问题附带截图:' + '</b></font><br>' +
-                    '<font color="white">' + tempht + 'Failed to load: ' + url + '</font><br>';
+                this._errorPrinter.innerHTML =
+                    '<font color="yellow"><b>' +
+                    "文件加载失败，请上报问题附带截图:" +
+                    "</b></font><br>" +
+                    '<font color="white">' +
+                    tempht +
+                    "Failed to load: " +
+                    url +
+                    "</font><br>";
             } else {
-                this._errorPrinter.innerHTML = this._makeErrorHtml('文件加载失败，请上报问题附带截图:', 'Failed to load: ' + url);
+                this._errorPrinter.innerHTML = this._makeErrorHtml(
+                    "文件加载失败，请上报问题附带截图:",
+                    "Failed to load: " + url
+                );
             }
-            var button = document.createElement('button');
+            var button = document.createElement("button");
             SF_SkipLoadError.FileLoadErrorList.push(url);
-            button.innerHTML = '继续';
-            button.style.fontSize = '24px';
-            button.style.color = '#ffffff';
-            button.style.backgroundColor = '#000000';
+            button.innerHTML = "继续";
+            button.style.fontSize = "24px";
+            button.style.color = "#ffffff";
+            button.style.backgroundColor = "#000000";
             button.onmousedown = button.ontouchstart = function (event) {
                 Graphics.eraseLoadingError();
                 SceneManager.resume();
@@ -113,7 +122,6 @@ var SF_Plugins = SF_Plugins || {};
             this._loadingCount = -Infinity;
             return;
         }
-
     };
 
     SF_SkipLoadError.ResourceHandler_retry = ResourceHandler.retry;
@@ -127,8 +135,8 @@ var SF_Plugins = SF_Plugins || {};
 
     SF_SkipLoadError.Bitmap_onError = Bitmap.prototype._onError;
     Bitmap.prototype._onError = function () {
-        this._image.removeEventListener('load', this._loadListener);
-        this._image.removeEventListener('error', this._errorListener);
+        this._image.removeEventListener("load", this._loadListener);
+        this._image.removeEventListener("error", this._errorListener);
         this._loadListener();
     };
 
@@ -136,7 +144,7 @@ var SF_Plugins = SF_Plugins || {};
     Graphics._paintUpperCanvas = function () {
         this._clearUpperCanvas();
         if (this._loadingImage) {
-            var context = this._upperCanvas.getContext('2d');
+            var context = this._upperCanvas.getContext("2d");
             var dx = (this._width - this._loadingImage.width) / 2;
             var dy = (this._height - this._loadingImage.height) / 2;
             var alpha = ((this._loadingCount - 20) / 30).clamp(0, 1);
@@ -157,7 +165,11 @@ var SF_Plugins = SF_Plugins || {};
 
     SF_SkipLoadError.Graphics_playVideo = Graphics.playVideo;
     Graphics.playVideo = function (src) {
-        this._videoLoader = ResourceHandler.createLoader(src, this._playVideo.bind(this, src), this._onVideoError.bind(this));
+        this._videoLoader = ResourceHandler.createLoader(
+            src,
+            this._playVideo.bind(this, src),
+            this._onVideoError.bind(this)
+        );
         this._playVideo(src);
     };
 
@@ -188,11 +200,10 @@ var SF_Plugins = SF_Plugins || {};
     SF_SkipLoadError.DataManager_loadDataFile = DataManager.loadDataFile;
     DataManager.loadDataFile = function (name, src) {
         var xhr = new XMLHttpRequest();
-        var url = 'data/' + src;
-        xhr.open('GET', url);
-        xhr.overrideMimeType('application/json');
+        var url = "data/" + src;
+        xhr.open("GET", url);
+        xhr.overrideMimeType("application/json");
         xhr.onload = function () {
-
             if (xhr.status < 400) {
                 window[name] = JSON.parse(xhr.responseText);
                 DataManager.onLoad(window[name]);
@@ -202,9 +213,11 @@ var SF_Plugins = SF_Plugins || {};
             if (index >= 0) SF_SkipLoadError.FileLoadingList.splice(index, 1);
             if (xhr.status == 404) Graphics.printLoadingError(url);
         };
-        xhr.onerror = this._mapLoader || function () {
-            DataManager._errorUrl = DataManager._errorUrl || url;
-        };
+        xhr.onerror =
+            this._mapLoader ||
+            function () {
+                DataManager._errorUrl = DataManager._errorUrl || url;
+            };
         window[name] = null;
         xhr.send();
     };
@@ -214,8 +227,8 @@ var SF_Plugins = SF_Plugins || {};
         if (WebAudio._context) {
             var xhr = new XMLHttpRequest();
             if (Decrypter.hasEncryptedAudio) url = Decrypter.extToEncryptExt(url);
-            xhr.open('GET', url);
-            xhr.responseType = 'arraybuffer';
+            xhr.open("GET", url);
+            xhr.responseType = "arraybuffer";
             xhr.onload = function () {
                 if (xhr.status < 400) {
                     this._onXhrLoad(xhr);
@@ -224,15 +237,17 @@ var SF_Plugins = SF_Plugins || {};
                 if (index >= 0) SF_SkipLoadError.FileLoadingList.splice(index, 1);
                 if (xhr.status == 404) Graphics.printLoadingError(url);
             }.bind(this);
-            xhr.onerror = this._loader || function () { this._hasError = true; }.bind(this);
+            xhr.onerror =
+                this._loader ||
+                function () {
+                    this._hasError = true;
+                }.bind(this);
             xhr.send();
         }
     };
-
 
     SF_SkipLoadError.Scene_Base_isReady = Scene_Base.prototype.isReady;
     Scene_Base.prototype.isReady = function () {
         return SF_SkipLoadError.FileLoadingList.length === 0 && SF_SkipLoadError.Scene_Base_isReady.call(this);
     };
-
-})()
+})();

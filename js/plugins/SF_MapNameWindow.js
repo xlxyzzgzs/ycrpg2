@@ -11,49 +11,49 @@ var SF_Plugins = SF_Plugins || {};
 
 //=============================================================================
 /*:
-    * @plugindesc v1.0 Adds a window to the map screen that displays the name of the map.
-    * @author SaltedFish
-    * 
-    * @param Map Name Window
-    * 
-    * @param Map Name Window X
-    * @desc The X position of the map name window.
-    * @default 0
-    * @type text
-    * @parent Map Name Window
-    * 
-    * @param Map Name Window Y
-    * @desc The Y position of the map name window.
-    * @default 0
-    * @type text
-    * @parent Map Name Window
-    * 
-    * @param Map Name Window Width
-    * @desc The width of the map name window.
-    * @default Graphics.boxWidth
-    * @type text
-    * @parent Map Name Window
-    * 
-    * @param Map Name Window Height
-    * @desc The height of the map name window.
-    * @default Graphics.boxHeight
-    * @type text
-    * @parent Map Name Window
-    * 
-    * @param Map Name Window Font Size
-    * @desc The font size of the map name window.
-    * @default 28
-    * @type text
-    * @parent Map Name Window
-    * 
-    * @help
-    * ============================================================================
-    * Introduction
-    * ============================================================================
-    * 
-    * This plugin adds a window to the map screen that displays the name of the map.
-    * 
-    */
+ * @plugindesc v1.0 Adds a window to the map screen that displays the name of the map.
+ * @author SaltedFish
+ *
+ * @param Map Name Window
+ *
+ * @param Map Name Window X
+ * @desc The X position of the map name window.
+ * @default 0
+ * @type text
+ * @parent Map Name Window
+ *
+ * @param Map Name Window Y
+ * @desc The Y position of the map name window.
+ * @default 0
+ * @type text
+ * @parent Map Name Window
+ *
+ * @param Map Name Window Width
+ * @desc The width of the map name window.
+ * @default Graphics.boxWidth
+ * @type text
+ * @parent Map Name Window
+ *
+ * @param Map Name Window Height
+ * @desc The height of the map name window.
+ * @default Graphics.boxHeight
+ * @type text
+ * @parent Map Name Window
+ *
+ * @param Map Name Window Font Size
+ * @desc The font size of the map name window.
+ * @default 28
+ * @type text
+ * @parent Map Name Window
+ *
+ * @help
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin adds a window to the map screen that displays the name of the map.
+ *
+ */
 //=============================================================================
 
 (function () {
@@ -65,24 +65,23 @@ var SF_Plugins = SF_Plugins || {};
     // Parameters
     //=============================================================================
 
-    SF_MapNameWindow.Parameters = PluginManager.parameters('SF_MapNameWindow');
+    SF_MapNameWindow.Parameters = PluginManager.parameters("SF_MapNameWindow");
 
-    SF_MapNameWindow.MapNameWindow_X = SF_MapNameWindow.Parameters['Map Name Window X'] || 0;
-    SF_MapNameWindow.MapNameWindow_Y = SF_MapNameWindow.Parameters['Map Name Window Y'] || 0;
-    SF_MapNameWindow.MapNameWindow_Width = SF_MapNameWindow.Parameters['Map Name Window Width'] || Graphics.boxWidth;
-    SF_MapNameWindow.MapNameWindow_Height = SF_MapNameWindow.Parameters['Map Name Window Height'] || Graphics.boxHeight;
-    SF_MapNameWindow.MapNameWindow_FontSize = SF_MapNameWindow.Parameters['Map Name Window Font Size'] || 28;
+    SF_MapNameWindow.MapNameWindow_X = SF_MapNameWindow.Parameters["Map Name Window X"] || 0;
+    SF_MapNameWindow.MapNameWindow_Y = SF_MapNameWindow.Parameters["Map Name Window Y"] || 0;
+    SF_MapNameWindow.MapNameWindow_Width = SF_MapNameWindow.Parameters["Map Name Window Width"] || Graphics.boxWidth;
+    SF_MapNameWindow.MapNameWindow_Height = SF_MapNameWindow.Parameters["Map Name Window Height"] || Graphics.boxHeight;
+    SF_MapNameWindow.MapNameWindow_FontSize = SF_MapNameWindow.Parameters["Map Name Window Font Size"] || 28;
 
     SF_MapNameWindow.MapNameWindow_ShowOpacity = 180;
     SF_MapNameWindow.MapNameWindow_HideOpacity = 50;
     //=============================================================================
-    // Winddow_SFMapName 
+    // Winddow_SFMapName
     //=============================================================================
-
 
     /**
      * The window that displays the name of the map.
-     * 
+     *
      * this._mapNameBitmap:
      * The bitmap that displays the name of the map.
      * -----------------------------------------------------------------------------
@@ -110,28 +109,27 @@ var SF_Plugins = SF_Plugins || {};
         Window_Base.prototype.initialize.call(this, this._x, this._y, this._width, this._height);
 
         this.opacity = SF_MapNameWindow.MapNameWindow_ShowOpacity;
-
-    }
+    };
 
     Window_SFMapName.prototype.windowWidth = function () {
         return this._width;
-    }
+    };
 
     Window_SFMapName.prototype.windowHeight = function () {
         return this._height;
-    }
+    };
 
     Window_SFMapName.prototype.standardFontSize = function () {
         return this._fontSize;
-    }
+    };
 
     Window_SFMapName.prototype.lineHeight = function () {
         return this.standardFontSize() + 8;
-    }
+    };
 
     Window_SFMapName.prototype.standardPadding = function () {
         return 8;
-    }
+    };
 
     Window_SFMapName.prototype.refresh = function () {
         this.contents.clear();
@@ -139,22 +137,26 @@ var SF_Plugins = SF_Plugins || {};
             //this._windowContentsSprite.setFrame(this._mapNameOffset, 0, this.contentsWidth(), this.contentsHeight());
             this.contents.blt(
                 this._mapNameBitmap,
-                this._mapNameOffset, 0,
+                this._mapNameOffset,
+                0,
                 this.contentsWidth(),
                 this.contentsHeight(),
-                0, 0
+                0,
+                0
             );
         } else {
             //this.contents.setFrame(-this._mapNameOffset, 0, this.contentsWidth(), this.contentsHeight());
             this.contents.blt(
                 this._mapNameBitmap,
-                this.contentsWidth(), 0,
+                this.contentsWidth(),
+                0,
                 this._mapNameBitmap.width - this.contentsWidth() * 2,
                 this._mapNameBitmap.height,
-                this._mapNameOffset, 0
+                this._mapNameOffset,
+                0
             );
         }
-    }
+    };
 
     Window_SFMapName.prototype.update = function () {
         Window_Base.prototype.update.call(this);
@@ -166,7 +168,7 @@ var SF_Plugins = SF_Plugins || {};
             this.refresh();
         }
         this.updatePlayerTouched();
-    }
+    };
 
     Window_SFMapName.prototype.setMapName = function (mapName) {
         this._mapName = mapName;
@@ -188,7 +190,7 @@ var SF_Plugins = SF_Plugins || {};
         this.contents = tmp_bitmap;
 
         this.refresh();
-    }
+    };
 
     Window_SFMapName.prototype.isPlayerTouched = function () {
         var lx = $gamePlayer.screenX() - 40;
@@ -196,8 +198,8 @@ var SF_Plugins = SF_Plugins || {};
         var ty = $gamePlayer.screenY() - 80;
         var by = $gamePlayer.screenY() + 20;
         if (rx < this._x || by < this._y) return false;
-        if (lx > (this._x + this._width)) return false;
-        if (ty > (this._y + this._height)) return false;
+        if (lx > this._x + this._width) return false;
+        if (ty > this._y + this._height) return false;
         return true;
     };
 
@@ -207,7 +209,7 @@ var SF_Plugins = SF_Plugins || {};
         } else {
             this.opacity = SF_MapNameWindow.MapNameWindow_ShowOpacity;
         }
-    }
+    };
     //=============================================================================
     // Scene_Map
     //=============================================================================
@@ -222,5 +224,5 @@ var SF_Plugins = SF_Plugins || {};
             this._sfmapNameWindow.open();
             this._sfmapNameWindow.deactivate();
         }
-    }
+    };
 })();

@@ -11,7 +11,7 @@ Yanfly.Counter = Yanfly.Counter || {};
 Yanfly.Counter.version = 1.07;
 
 //=============================================================================
- /*:
+/*:
  * @plugindesc v1.07 反击控制
  * @author Yanfly Engine Plugins
  *
@@ -811,1250 +811,1235 @@ Yanfly.Counter.version = 1.07;
 //=============================================================================
 
 if (Imported.YEP_BattleEngineCore) {
+    //=============================================================================
+    // Parameter Variables
+    //=============================================================================
 
-//=============================================================================
-// Parameter Variables
-//=============================================================================
+    Yanfly.Parameters = PluginManager.parameters("YEP_X_CounterControl");
+    Yanfly.Param = Yanfly.Param || {};
 
-Yanfly.Parameters = PluginManager.parameters('YEP_X_CounterControl');
-Yanfly.Param = Yanfly.Param || {};
+    Yanfly.Param.CounterMaxQueue = Number(Yanfly.Parameters["Queue Max"]);
 
-Yanfly.Param.CounterMaxQueue = Number(Yanfly.Parameters['Queue Max']);
+    Yanfly.Param.CounterDefault = Number(Yanfly.Parameters["Counter Skill"]);
+    Yanfly.Param.CounterEvade = eval(String(Yanfly.Parameters["Evade Counter"]));
+    Yanfly.Param.CounterFmt = String(Yanfly.Parameters["Counter Name"]);
+    Yanfly.Param.CounterIcon = Number(Yanfly.Parameters["Counter Icon"]);
+    Yanfly.Param.CounterTotal = Number(Yanfly.Parameters["Counter Total"]);
+    Yanfly.Param.CounterAllyCnt = eval(String(Yanfly.Parameters["Ally Counter"]));
 
-Yanfly.Param.CounterDefault = Number(Yanfly.Parameters['Counter Skill']);
-Yanfly.Param.CounterEvade = eval(String(Yanfly.Parameters['Evade Counter']));
-Yanfly.Param.CounterFmt = String(Yanfly.Parameters['Counter Name']);
-Yanfly.Param.CounterIcon = Number(Yanfly.Parameters['Counter Icon']);
-Yanfly.Param.CounterTotal = Number(Yanfly.Parameters['Counter Total']);
-Yanfly.Param.CounterAllyCnt = eval(String(Yanfly.Parameters['Ally Counter']));
-
-Yanfly.Param.CounterConditions = [];
-if (eval(String(Yanfly.Parameters['Physical']))) {
-  Yanfly.Param.CounterConditions.push('PHYSICAL HIT');
-};
-if (eval(String(Yanfly.Parameters['Single Target']))) {
-  Yanfly.Param.CounterConditions.push('SINGLE TARGET');
-};
-if (eval(String(Yanfly.Parameters['Not Counter']))) {
-  Yanfly.Param.CounterConditions.push('NOT COUNTER HIT');
-};
-
-//=============================================================================
-// DataManager
-//=============================================================================
-
-Yanfly.Counter.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
-DataManager.isDatabaseLoaded = function() {
-  if (!Yanfly.Counter.DataManager_isDatabaseLoaded.call(this)) return false;
-  if (!Yanfly._loaded_YEP_X_CounterControl) {
-    this.processCounterNotetagsI($dataItems);
-    this.processCounterNotetagsW($dataWeapons);
-    this.processCounterNotetagsA($dataArmors);
-    this.processCounterNotetagsS($dataSkills);
-    this.processCounterNotetagsT($dataStates);
-    this.processCounterNotetagsSys($dataSystem);
-    this.processCounterNotetags1($dataActors);
-    this.processCounterNotetags1($dataEnemies);
-    this.processCounterNotetags2($dataActors);
-    this.processCounterNotetags2($dataClasses);
-    this.processCounterNotetags2($dataEnemies);
-    this.processCounterNotetags2($dataWeapons);
-    this.processCounterNotetags2($dataArmors);
-    this.processCounterNotetags2($dataStates);
-    this.processCounterNotetags3($dataSkills);
-    this.processCounterNotetags4($dataSkills);
-    this.processCounterNotetags4($dataItems);
-    Yanfly._loaded_YEP_X_CounterControl = true;
-  }
-  return true;
-};
-
-DataManager.processCounterNotetagsI = function(group) {
-  if (Yanfly.ItemIdRef) return;
-  Yanfly.ItemIdRef = {};
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    if (obj.name.length <= 0) continue;
-    Yanfly.ItemIdRef[obj.name.toUpperCase()] = n;
-  }
-};
-
-DataManager.processCounterNotetagsW = function(group) {
-  if (Yanfly.WeaponIdRef) return;
-  Yanfly.WeaponIdRef = {};
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    if (obj.name.length <= 0) continue;
-    Yanfly.WeaponIdRef[obj.name.toUpperCase()] = n;
-  }
-};
-
-DataManager.processCounterNotetagsA = function(group) {
-  if (Yanfly.ArmorIdRef) return;
-  Yanfly.ArmorIdRef = {};
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    if (obj.name.length <= 0) continue;
-    Yanfly.ArmorIdRef[obj.name.toUpperCase()] = n;
-  }
-};
-
-DataManager.processCounterNotetagsS = function(group) {
-  if (Yanfly.SkillIdRef) return;
-  Yanfly.SkillIdRef = {};
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    if (obj.name.length <= 0) continue;
-    Yanfly.SkillIdRef[obj.name.toUpperCase()] = n;
-  }
-};
-
-DataManager.processCounterNotetagsT = function(group) {
-  if (Yanfly.StateIdRef) return;
-  Yanfly.StateIdRef = {};
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    if (obj.name.length <= 0) continue;
-    Yanfly.StateIdRef[obj.name.toUpperCase()] = n;
-  }
-};
-
-DataManager.processCounterNotetagsSys = function(group) {
-  Yanfly.STypeIdRef = {};
-  for (var i = 1; i < group.skillTypes.length; ++i) {
-    var name = group.skillTypes[i].toUpperCase();
-    name = name.replace(/\\I\[(\d+)\]/gi, '');
-    Yanfly.STypeIdRef[name] = i;
-  }
-  Yanfly.ElementIdRef = {};
-  for (var i = 1; i < group.elements.length; ++i) {
-    var name = group.elements[i].toUpperCase();
-    name = name.replace(/\\I\[(\d+)\]/gi, '');
-    Yanfly.ElementIdRef[name] = i;
-  }
-};
-
-DataManager.processCounterNotetags1 = function(group) {
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    var notedata = obj.note.split(/[\r\n]+/);
-
-    obj.defaultCounter = Yanfly.Param.CounterDefault;
-    obj.counterTotal = Yanfly.Param.CounterTotal;
-
-    for (var i = 0; i < notedata.length; i++) {
-      var line = notedata[i];
-      if (line.match(/<DEFAULT COUNTER:[ ](\d+)>/i)) {
-        obj.defaultCounter = parseInt(RegExp.$1);
-      } else if (line.match(/<DEFAULT COUNTER:[ ](.*)>/i)) {
-        var name = String(RegExp.$1).toUpperCase();
-        var id = Yanfly.SkillIdRef[name];
-        if (id) obj.defaultCounter = id;
-      }
+    Yanfly.Param.CounterConditions = [];
+    if (eval(String(Yanfly.Parameters["Physical"]))) {
+        Yanfly.Param.CounterConditions.push("PHYSICAL HIT");
     }
-  }
-};
-
-DataManager.processCounterNotetags2 = function(group) {
-  var noteA1 = /<(?:COUNTER SKILLS):[ ]*(\d+(?:\s*,\s*\d+)*)>/i;
-  var noteA2 = /<(?:COUNTER SKILLS):[ ](\d+)[ ](?:THROUGH|to)[ ](\d+)>/i;
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    var notedata = obj.note.split(/[\r\n]+/);
-
-    obj.counterSkills = [];
-    obj.counterTotal = 0;
-    obj.targetCounterRate = 1;
-    obj.targetCounterFlat = 0;
-    obj.evadeCounter = false;
-    obj.hitCounter = false;
-    var evalMode = 'none';
-    obj.counterTotalEval = '';
-    obj.counterSkillsEval = '';
-    obj.targetCounterRateEval = '';
-
-    for (var i = 0; i < notedata.length; i++) {
-      var line = notedata[i];
-      if (line.match(noteA1)) {
-        var array = JSON.parse('[' + RegExp.$1.match(/\d+/g) + ']');
-        obj.counterSkills = obj.counterSkills.concat(array);
-      } else if (line.match(noteA2)) {
-        var range = Yanfly.Util.getRange(parseInt(RegExp.$1),
-          parseInt(RegExp.$2));
-        obj.counterSkills = obj.counterSkills.concat(range);
-      } else if (line.match(/<(?:COUNTER SKILL):[ ](.*)>/i)) {
-        var name = String(RegExp.$1).toUpperCase();
-        var id = Yanfly.SkillIdRef[name];
-        if (id) obj.counterSkills.push(id);
-      } else if (line.match(/<(?:COUNTER TOTAL):[ ]([\+\-]\d+)>/i)) {
-        obj.counterTotal = parseInt(RegExp.$1);
-      } else if (line.match(/<(?:TARGET COUNTER):[ ](\d+)([%％])>/i)) {
-        obj.targetCounterRate = parseFloat(RegExp.$1) * 0.01;
-      } else if (line.match(/<(?:TARGET COUNTER):[ ]([\+\-]\d+)([%％])>/i)) {
-        obj.targetCounterFlat = parseFloat(RegExp.$1) * 0.01;
-      } else if (line.match(/<(?:EVADE COUNTER|COUNTER EVADE)>/i)) {
-        obj.evadeCounter = true;
-      } else if (line.match(/<(?:HIT COUNTER|COUNTER HIT)>/i)) {
-        obj.hitCounter = true;
-      } else if (line.match(/<CUSTOM COUNTER TOTAL>/i)) {
-        evalMode = 'custom counter total';
-      } else if (line.match(/<\/CUSTOM COUNTER TOTAL>/i)) {
-        evalMode = 'none';
-      } else if (evalMode === 'custom counter total') {
-        obj.counterTotalEval = obj.counterTotalEval + line + '\n';
-      } else if (line.match(/<CUSTOM COUNTER SKILLS>/i)) {
-        evalMode = 'custom counter skills';
-      } else if (line.match(/<\/CUSTOM COUNTER SKILLS>/i)) {
-        evalMode = 'none';
-      } else if (evalMode === 'custom counter skills') {
-        obj.counterSkillsEval = obj.counterSkillsEval + line + '\n';
-      } else if (line.match(/<CUSTOM TARGET COUNTER RATE>/i)) {
-        evalMode = 'custom target counter rate';
-      } else if (line.match(/<\/CUSTOM TARGET COUNTER RATE>/i)) {
-        evalMode = 'none';
-      } else if (evalMode === 'custom target counter rate') {
-        obj.targetCounterRateEval = obj.targetCounterRateEval + line + '\n';
-      }
+    if (eval(String(Yanfly.Parameters["Single Target"]))) {
+        Yanfly.Param.CounterConditions.push("SINGLE TARGET");
     }
-  }
-};
-
-DataManager.processCounterNotetags3 = function(group) {
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    var notedata = obj.note.split(/[\r\n]+/);
-
-    obj.evadeCounter = Yanfly.Param.CounterEvade;
-    obj.counterName = Yanfly.Param.CounterFmt.format(obj.name);
-    obj.counterIcon = Yanfly.Param.CounterIcon || obj.iconIndex;
-    obj.cannotCounter = false;
-    var evalMode = 'none';
-    obj.counterConditions = Yanfly.Param.CounterConditions.slice();
-    obj.counterConditionEval = '';
-
-    for (var i = 0; i < notedata.length; i++) {
-      var line = notedata[i];
-      if (line.match(/<(?:EVADE COUNTER|COUNTER EVADE)>/i)) {
-        obj.evadeCounter = true;
-      } else if (line.match(/<(?:HIT COUNTER|COUNTER HIT)>/i)) {
-        obj.evadeCounter = false;
-      } else if (line.match(/<(?:COUNTER NAME):[ ](.*)>/i)) {
-        obj.counterName = String(RegExp.$1);
-      } else if (line.match(/<(?:COUNTER ICON):[ ](\d+)>/i)) {
-        obj.counterIcon = String(RegExp.$1);
-      } else if (line.match(/<CANNOT COUNTER>/i)) {
-        obj.cannotCounter = true;
-      } else if (line.match(/<(?:COUNTER CONDITION|COUNTER CONDITIONS)>/i)) {
-        evalMode = 'counter condition';
-        obj.counterConditions = [];
-      } else if (line.match(/<\/(?:COUNTER CONDITION|COUNTER CONDITIONS)>/i)) {
-        evalMode = 'none';
-      } else if (evalMode === 'counter condition') {
-        obj.counterConditions.push(line);
-      } else if (line.match(/<CUSTOM COUNTER CONDITION>/i)) {
-        evalMode = 'custom counter condition';
-      } else if (line.match(/<\/CUSTOM COUNTER CONDITION>/i)) {
-        evalMode = 'none';
-      } else if (evalMode === 'custom counter condition') {
-        obj.counterConditionEval = obj.counterConditionEval + line + '\n';
-      }
+    if (eval(String(Yanfly.Parameters["Not Counter"]))) {
+        Yanfly.Param.CounterConditions.push("NOT COUNTER HIT");
     }
-  }
-};
 
-DataManager.processCounterNotetags4 = function(group) {
-  for (var n = 1; n < group.length; n++) {
-    var obj = group[n];
-    var notedata = obj.note.split(/[\r\n]+/);
+    //=============================================================================
+    // DataManager
+    //=============================================================================
 
-    obj.allyCounter = Yanfly.Param.CounterAllyCnt;
-    obj.cannotCounter = false;
-    obj.counterRate = 1;
-    obj.counterMod = 0;
-    var evalMode = 'none';
-    obj.counterRateEval = '';
+    Yanfly.Counter.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    DataManager.isDatabaseLoaded = function () {
+        if (!Yanfly.Counter.DataManager_isDatabaseLoaded.call(this)) return false;
+        if (!Yanfly._loaded_YEP_X_CounterControl) {
+            this.processCounterNotetagsI($dataItems);
+            this.processCounterNotetagsW($dataWeapons);
+            this.processCounterNotetagsA($dataArmors);
+            this.processCounterNotetagsS($dataSkills);
+            this.processCounterNotetagsT($dataStates);
+            this.processCounterNotetagsSys($dataSystem);
+            this.processCounterNotetags1($dataActors);
+            this.processCounterNotetags1($dataEnemies);
+            this.processCounterNotetags2($dataActors);
+            this.processCounterNotetags2($dataClasses);
+            this.processCounterNotetags2($dataEnemies);
+            this.processCounterNotetags2($dataWeapons);
+            this.processCounterNotetags2($dataArmors);
+            this.processCounterNotetags2($dataStates);
+            this.processCounterNotetags3($dataSkills);
+            this.processCounterNotetags4($dataSkills);
+            this.processCounterNotetags4($dataItems);
+            Yanfly._loaded_YEP_X_CounterControl = true;
+        }
+        return true;
+    };
 
-    for (var i = 0; i < notedata.length; i++) {
-      var line = notedata[i];
-      if (line.match(/<ALLY COUNTER>/i)) {
-        obj.allyCounter = true;
-      } else if (line.match(/<ALLY CANNOT COUNTER>/i)) {
-        obj.allyCounter = false;
-      } else if (line.match(/<CANNOT COUNTER>/i)) {
-        obj.cannotCounter = true;
-      } else if (line.match(/<COUNTER RATE:[ ](\d+)([%％])>/i)) {
-        obj.counterRate = parseFloat(RegExp.$1) * 0.01;
-      } else if (line.match(/<COUNTER RATE:[ ]([\+\-]\d+)([%％])>/i)) {
-        obj.counterMod = parseFloat(RegExp.$1) * 0.01;
-      } else if (line.match(/<CUSTOM COUNTER RATE>/i)) {
-        evalMode = 'custom counter rate';
-      } else if (line.match(/<\/CUSTOM COUNTER RATE>/i)) {
-        evalMode = 'none';
-      } else if (evalMode === 'custom counter rate') {
-        obj.counterRateEval = obj.counterRateEval + line + '\n';
-      }
-    }
-  }
-};
+    DataManager.processCounterNotetagsI = function (group) {
+        if (Yanfly.ItemIdRef) return;
+        Yanfly.ItemIdRef = {};
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            if (obj.name.length <= 0) continue;
+            Yanfly.ItemIdRef[obj.name.toUpperCase()] = n;
+        }
+    };
 
-//=============================================================================
-// BattleManager
-//=============================================================================
+    DataManager.processCounterNotetagsW = function (group) {
+        if (Yanfly.WeaponIdRef) return;
+        Yanfly.WeaponIdRef = {};
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            if (obj.name.length <= 0) continue;
+            Yanfly.WeaponIdRef[obj.name.toUpperCase()] = n;
+        }
+    };
 
-Yanfly.Counter.BattleManager_initMembers = BattleManager.initMembers;
-BattleManager.initMembers = function() {
-    Yanfly.Counter.BattleManager_initMembers.call(this);
-    this._counterQueue = [];
-    this._counterSequence = 0;
-    this._counterOriginalSubject = undefined;
-    this._counterOriginalAction = undefined;
-    this._countering = false;
-};
+    DataManager.processCounterNotetagsA = function (group) {
+        if (Yanfly.ArmorIdRef) return;
+        Yanfly.ArmorIdRef = {};
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            if (obj.name.length <= 0) continue;
+            Yanfly.ArmorIdRef[obj.name.toUpperCase()] = n;
+        }
+    };
 
-BattleManager.isCountering = function() {
-    return this._countering;
-};
+    DataManager.processCounterNotetagsS = function (group) {
+        if (Yanfly.SkillIdRef) return;
+        Yanfly.SkillIdRef = {};
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            if (obj.name.length <= 0) continue;
+            Yanfly.SkillIdRef[obj.name.toUpperCase()] = n;
+        }
+    };
 
-Yanfly.Counter.BattleManager_invokeCounter =
-    BattleManager.invokeCounterAttack;
-BattleManager.invokeCounterAttack = function(subject, target) {
-  this._counterQueue = this._counterQueue || [];
-  if (this.isValidCounterAction(target)) this._counterSequence += 1;
-  if (!this.isMaxCounterQueue()) {
-    if (this.isValidCounterAction(target)) target.payCounter();
-  }
-  if (target.canCounter()) {
-    this._counterSkill = this.getCounterSkill(subject, target);
-    this._counterQueue = this._counterQueue || [];
-    if (this._counterSkill === null) {
-      if (this._action.isPhysical() && target.canMove()) {
-        Yanfly.Counter.BattleManager_invokeCounter.call(this, subject, target);
-      } else {
-        this.invokeNormalAction(subject, target);
-      }
-      return;
-    } else if (this.evadeAndCounter(subject, target)) {
-      target.performEvasion();
-      target.forceEvadePopup();
-      this.addCounterQueue(subject, target);
-    } else if (this._counterSkill !== undefined) {
-      this.invokeNormalAction(subject, target);
-      this.addCounterQueue(subject, target);
-    } else {
-      if (this.isValidCounterAction(target)) {
-        target.payCounter(-1);
-        this._counterSequence -= 1;
-      }
-      this.invokeNormalAction(subject, target);
-      return;
-    }
-    this._logWindow.displayActionResults(target, subject);
-    if (subject.isDead()) subject.performCollapse();
-  } else {
-    this.invokeNormalAction(subject, target);
-  }
-};
+    DataManager.processCounterNotetagsT = function (group) {
+        if (Yanfly.StateIdRef) return;
+        Yanfly.StateIdRef = {};
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            if (obj.name.length <= 0) continue;
+            Yanfly.StateIdRef[obj.name.toUpperCase()] = n;
+        }
+    };
 
-BattleManager.getCounterSkill = function(subject, target) {
-    target.makeCounterSkills();
-    var skills = target.counterSkills();
-    var length = skills.length;
-    for (var i = 0; i < length; ++i) {
-      var skill = skills[i];
-      if (this.meetCounterConditions(skill, subject, target)) return skill;
-    }
-    return undefined;
-};
+    DataManager.processCounterNotetagsSys = function (group) {
+        Yanfly.STypeIdRef = {};
+        for (var i = 1; i < group.skillTypes.length; ++i) {
+            var name = group.skillTypes[i].toUpperCase();
+            name = name.replace(/\\I\[(\d+)\]/gi, "");
+            Yanfly.STypeIdRef[name] = i;
+        }
+        Yanfly.ElementIdRef = {};
+        for (var i = 1; i < group.elements.length; ++i) {
+            var name = group.elements[i].toUpperCase();
+            name = name.replace(/\\I\[(\d+)\]/gi, "");
+            Yanfly.ElementIdRef[name] = i;
+        }
+    };
 
-BattleManager.meetCounterConditions = function(skill, subject, target) {
-    if (skill === null) return true;
-    if (!target.canUse(skill)) return false;
-    if (!this.meetCounterConditionsEval(skill, subject, target));
-    var condition = this.getCounterCondition(skill, subject, target);
-    return condition;
-};
+    DataManager.processCounterNotetags1 = function (group) {
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
 
-BattleManager.meetCounterConditionsEval = function(skill, subject, target) {
-    var action = this._action;
-    if (this._action.item().counterConditionEval === '') return true;
-    var condition = true;
-    var a = subject;
-    var user = subject;
-    var attacker = subject;
-    var b = target;
-    var defender = target;
-    var item = skill;
-    var s = $gameSwitches._data;
-    var v = $gameVariables._data;
-    var code = this._action.item().counterConditionEval;
-    try {
-      eval(code);
-    } catch (e) {
-      Yanfly.Util.displayError(e, code, 'COUNTER CONDITIONS EVAL ERROR');
-    }
-    return condition;
-};
+            obj.defaultCounter = Yanfly.Param.CounterDefault;
+            obj.counterTotal = Yanfly.Param.CounterTotal;
 
-BattleManager.getCounterCondition = function(skill, subject, target) {
-    var conditions = skill.counterConditions;
-    var length = conditions.length;
-    for (var i = 0; i < length; ++i) {
-      var line = conditions[i];
-      if (!this.checkCounterLine(line, skill, subject, target)) return false;
-    }
-    return true;
-};
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(/<DEFAULT COUNTER:[ ](\d+)>/i)) {
+                    obj.defaultCounter = parseInt(RegExp.$1);
+                } else if (line.match(/<DEFAULT COUNTER:[ ](.*)>/i)) {
+                    var name = String(RegExp.$1).toUpperCase();
+                    var id = Yanfly.SkillIdRef[name];
+                    if (id) obj.defaultCounter = id;
+                }
+            }
+        }
+    };
 
-BattleManager.checkCounterLine = function(line, skill, subject, target) {
-    // EVAL
-    if (line.match(/EVAL:[ ](.*)/i)) {
-      var value = String(RegExp.$1);
-      return this.checkCounterEval(value, skill, subject, target);
-    // CERTAIN HIT
-    } else if (line.toUpperCase() === 'CERTAIN HIT') {
-      return this.checkCounterHitType(Game_Action.HITTYPE_CERTAIN);
-    // PHYSICAL HIT
-    } else if (line.toUpperCase() === 'PHYSICAL HIT') {
-      return this.checkCounterHitType(Game_Action.HITTYPE_PHYSICAL);
-    // MAGICAL HIT
-    } else if (line.toUpperCase() === 'MAGICAL HIT') {
-      return this.checkCounterHitType(Game_Action.HITTYPE_MAGICAL);
-    // NOT CERTAIN HIT
-    } else if (line.toUpperCase() === 'NOT CERTAIN HIT') {
-      return !this.checkCounterHitType(Game_Action.HITTYPE_CERTAIN);
-    // NOT PHYSICAL HIT
-    } else if (line.toUpperCase() === 'NOT PHYSICAL HIT') {
-      return !this.checkCounterHitType(Game_Action.HITTYPE_PHYSICAL);
-    // NOT MAGICAL HIT
-    } else if (line.toUpperCase() === 'NOT MAGICAL HIT') {
-      return !this.checkCounterHitType(Game_Action.HITTYPE_MAGICAL);
-    // SINGLE TARGET
-    } else if (line.toUpperCase() === 'SINGLE TARGET') {
-      return this.checkCounterSingleTarget();
-    // MULTI TARGET
-    } else if (line.toUpperCase() === 'MULTI TARGET') {
-      return !this.checkCounterSingleTarget();
-    // COUNTER HIT
-    } else if (line.toUpperCase() === 'COUNTER HIT') {
-      return !this.checkCounterCounterHit();
-    // NOT COUNTER HIT
-    } else if (line.toUpperCase() === 'NOT COUNTER HIT') {
-      return !this.checkCounterCounterHit();
-    // RANDOM
-    } else if (line.match(/RANDOM:[ ](\d+)([%％])/i)) {
-      var value = parseFloat(RegExp.$1) * 0.01;
-      return !this.checkCounterRandom(value);
-    // NOT ELEMENT
-    } else if (line.match(/NOT ELEMENT:[ ](.*)/i)) {
-      var value = String(RegExp.$1);
-      return !this.checkCounterElement(value);
-    // ELEMENT
-    } else if (line.match(/ELEMENT:[ ](.*)/i)) {
-      var value = String(RegExp.$1);
-      return this.checkCounterElement(value);
-    // SWITCH ON
-    } else if (line.match(/SWITCH[ ](\d+)[ ]ON/i)) {
-      var value = parseInt(RegExp.$1);
-      return this.checkCounterSwitch(value);
-    // SWITCH OFF
-    } else if (line.match(/SWITCH[ ](\d+)[ ]OFF/i)) {
-      var value = parseInt(RegExp.$1);
-      return !this.checkCounterSwitch(value);
-    // VARIABLE
-    } else if (line.match(/VARIABLE[ ](\d+)[ ](.*)/i)) {
-      var varId = parseInt(RegExp.$1);
-      var eval = String(RegExp.$2);
-      eval = '$gameVariables.value(' + varId + ') ' + eval;
-      return this.checkCounterEval(eval, skill, subject, target);
-    // NOT SKILL
-    } else if (line.match(/NOT SKILL:[ ](.*)/i)) {
-      var value = String(RegExp.$1);
-      return !this.checkCounterSkill(value);
-    // SKILL
-    } else if (line.match(/SKILL:[ ](.*)/i)) {
-      var value = String(RegExp.$1);
-      return this.checkCounterSkill(value);
-    // NOT STYPE
-    } else if (line.match(/NOT STYPE:[ ](.*)/i)) {
-      var value = String(RegExp.$1);
-      return !this.checkCounterStype(value);
-    // STYPE
-    } else if (line.match(/STYPE:[ ](.*)/i)) {
-      var value = String(RegExp.$1);
-      return this.checkCounterStype(value);
-    // NOT ITEM
-    } else if (line.match(/NOT ITEM:[ ](.*)/i)) {
-      var value = String(RegExp.$1);
-      return !this.checkCounterItem(value);
-    // ITEM
-    } else if (line.match(/ITEM:[ ](.*)/i)) {
-      var value = String(RegExp.$1);
-      return this.checkCounterItem(value);
-    // ATTACKER PARAM
-    } else if (line.match(/ATTACKER[ ](.*)[ ](.*)/i)) {
-      var value1 = String(RegExp.$1);
-      var value2 = String(RegExp.$1);
-      return this.checkCounterAttacker(value1, value2, skill, subject, target);
-    // DEFENDER PARAM
-    } else if (line.match(/DEFENDER[ ](.*)[ ](.*)/i)) {
-      var value1 = String(RegExp.$1);
-      var value2 = String(RegExp.$1);
-      return this.checkCounterDefender(value1, value2, skill, subject, target);
-    // ELSE - NOTHING LISTED
-    } else {
-      return true;
-    }
-};
+    DataManager.processCounterNotetags2 = function (group) {
+        var noteA1 = /<(?:COUNTER SKILLS):[ ]*(\d+(?:\s*,\s*\d+)*)>/i;
+        var noteA2 = /<(?:COUNTER SKILLS):[ ](\d+)[ ](?:THROUGH|to)[ ](\d+)>/i;
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
 
-BattleManager.checkCounterEval = function(code, skill, subject, target) {
-    var action = this._action;
-    var a = subject;
-    var user = subject;
-    var attacker = subject;
-    var b = target;
-    var defender = target;
-    var item = skill;
-    var s = $gameSwitches._data;
-    var v = $gameVariables._data;
-    var code = line;
-    try {
-      return eval(code);
-    } catch (e) {
-      Yanfly.Util.displayError(e, code, 'COUNTER CHECK ERROR');
-      return false;
-    }
-};
+            obj.counterSkills = [];
+            obj.counterTotal = 0;
+            obj.targetCounterRate = 1;
+            obj.targetCounterFlat = 0;
+            obj.evadeCounter = false;
+            obj.hitCounter = false;
+            var evalMode = "none";
+            obj.counterTotalEval = "";
+            obj.counterSkillsEval = "";
+            obj.targetCounterRateEval = "";
 
-BattleManager.checkCounterHitType = function(value) {
-    return this._action.item().hitType === value;
-};
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(noteA1)) {
+                    var array = JSON.parse("[" + RegExp.$1.match(/\d+/g) + "]");
+                    obj.counterSkills = obj.counterSkills.concat(array);
+                } else if (line.match(noteA2)) {
+                    var range = Yanfly.Util.getRange(parseInt(RegExp.$1), parseInt(RegExp.$2));
+                    obj.counterSkills = obj.counterSkills.concat(range);
+                } else if (line.match(/<(?:COUNTER SKILL):[ ](.*)>/i)) {
+                    var name = String(RegExp.$1).toUpperCase();
+                    var id = Yanfly.SkillIdRef[name];
+                    if (id) obj.counterSkills.push(id);
+                } else if (line.match(/<(?:COUNTER TOTAL):[ ]([\+\-]\d+)>/i)) {
+                    obj.counterTotal = parseInt(RegExp.$1);
+                } else if (line.match(/<(?:TARGET COUNTER):[ ](\d+)([%％])>/i)) {
+                    obj.targetCounterRate = parseFloat(RegExp.$1) * 0.01;
+                } else if (line.match(/<(?:TARGET COUNTER):[ ]([\+\-]\d+)([%％])>/i)) {
+                    obj.targetCounterFlat = parseFloat(RegExp.$1) * 0.01;
+                } else if (line.match(/<(?:EVADE COUNTER|COUNTER EVADE)>/i)) {
+                    obj.evadeCounter = true;
+                } else if (line.match(/<(?:HIT COUNTER|COUNTER HIT)>/i)) {
+                    obj.hitCounter = true;
+                } else if (line.match(/<CUSTOM COUNTER TOTAL>/i)) {
+                    evalMode = "custom counter total";
+                } else if (line.match(/<\/CUSTOM COUNTER TOTAL>/i)) {
+                    evalMode = "none";
+                } else if (evalMode === "custom counter total") {
+                    obj.counterTotalEval = obj.counterTotalEval + line + "\n";
+                } else if (line.match(/<CUSTOM COUNTER SKILLS>/i)) {
+                    evalMode = "custom counter skills";
+                } else if (line.match(/<\/CUSTOM COUNTER SKILLS>/i)) {
+                    evalMode = "none";
+                } else if (evalMode === "custom counter skills") {
+                    obj.counterSkillsEval = obj.counterSkillsEval + line + "\n";
+                } else if (line.match(/<CUSTOM TARGET COUNTER RATE>/i)) {
+                    evalMode = "custom target counter rate";
+                } else if (line.match(/<\/CUSTOM TARGET COUNTER RATE>/i)) {
+                    evalMode = "none";
+                } else if (evalMode === "custom target counter rate") {
+                    obj.targetCounterRateEval = obj.targetCounterRateEval + line + "\n";
+                }
+            }
+        }
+    };
 
-BattleManager.checkCounterCounterHit = function() {
-    return this._action.isCounter();
-};
+    DataManager.processCounterNotetags3 = function (group) {
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
 
-BattleManager.checkCounterRandom = function(value) {
-    return Math.random() < value;
-};
+            obj.evadeCounter = Yanfly.Param.CounterEvade;
+            obj.counterName = Yanfly.Param.CounterFmt.format(obj.name);
+            obj.counterIcon = Yanfly.Param.CounterIcon || obj.iconIndex;
+            obj.cannotCounter = false;
+            var evalMode = "none";
+            obj.counterConditions = Yanfly.Param.CounterConditions.slice();
+            obj.counterConditionEval = "";
 
-BattleManager.checkCounterSingleTarget = function() {
-    return this._action.isForOne();
-};
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(/<(?:EVADE COUNTER|COUNTER EVADE)>/i)) {
+                    obj.evadeCounter = true;
+                } else if (line.match(/<(?:HIT COUNTER|COUNTER HIT)>/i)) {
+                    obj.evadeCounter = false;
+                } else if (line.match(/<(?:COUNTER NAME):[ ](.*)>/i)) {
+                    obj.counterName = String(RegExp.$1);
+                } else if (line.match(/<(?:COUNTER ICON):[ ](\d+)>/i)) {
+                    obj.counterIcon = String(RegExp.$1);
+                } else if (line.match(/<CANNOT COUNTER>/i)) {
+                    obj.cannotCounter = true;
+                } else if (line.match(/<(?:COUNTER CONDITION|COUNTER CONDITIONS)>/i)) {
+                    evalMode = "counter condition";
+                    obj.counterConditions = [];
+                } else if (line.match(/<\/(?:COUNTER CONDITION|COUNTER CONDITIONS)>/i)) {
+                    evalMode = "none";
+                } else if (evalMode === "counter condition") {
+                    obj.counterConditions.push(line);
+                } else if (line.match(/<CUSTOM COUNTER CONDITION>/i)) {
+                    evalMode = "custom counter condition";
+                } else if (line.match(/<\/CUSTOM COUNTER CONDITION>/i)) {
+                    evalMode = "none";
+                } else if (evalMode === "custom counter condition") {
+                    obj.counterConditionEval = obj.counterConditionEval + line + "\n";
+                }
+            }
+        }
+    };
 
-BattleManager.checkCounterElement = function(value) {
-    if (value.match(/(\d+)/i)) {
-      var elementId = parseInt(RegExp.$1);
-    } else {
-      var elementId = Yanfly.ElementIdRef[value.toUpperCase()];
-      if (!elementId) return true;
-    }
-    var actionElement = this._action.item().damage.elementId;
-    if (actionElement < 0) {
-      return this._subject.attackElements().contains(elementId);
-    } else {
-      return elementId === actionElement;
-    }
-};
+    DataManager.processCounterNotetags4 = function (group) {
+        for (var n = 1; n < group.length; n++) {
+            var obj = group[n];
+            var notedata = obj.note.split(/[\r\n]+/);
 
-BattleManager.checkCounterSwitch = function(value) {
-    return $gameSwitches.value(value);
-};
+            obj.allyCounter = Yanfly.Param.CounterAllyCnt;
+            obj.cannotCounter = false;
+            obj.counterRate = 1;
+            obj.counterMod = 0;
+            var evalMode = "none";
+            obj.counterRateEval = "";
 
-BattleManager.checkCounterSkill = function(value) {
-    if (!this._action.isSkill()) return false;
-    if (value.match(/(\d+)/i)) {
-      var skillId = parseInt(RegExp.$1);
-    } else {
-      var skillId = Yanfly.SkillIdRef[value.toUpperCase()];
-    }
-    var skill = $dataSkills[skillId];
-    return this._action.item() === skill;
-};
+            for (var i = 0; i < notedata.length; i++) {
+                var line = notedata[i];
+                if (line.match(/<ALLY COUNTER>/i)) {
+                    obj.allyCounter = true;
+                } else if (line.match(/<ALLY CANNOT COUNTER>/i)) {
+                    obj.allyCounter = false;
+                } else if (line.match(/<CANNOT COUNTER>/i)) {
+                    obj.cannotCounter = true;
+                } else if (line.match(/<COUNTER RATE:[ ](\d+)([%％])>/i)) {
+                    obj.counterRate = parseFloat(RegExp.$1) * 0.01;
+                } else if (line.match(/<COUNTER RATE:[ ]([\+\-]\d+)([%％])>/i)) {
+                    obj.counterMod = parseFloat(RegExp.$1) * 0.01;
+                } else if (line.match(/<CUSTOM COUNTER RATE>/i)) {
+                    evalMode = "custom counter rate";
+                } else if (line.match(/<\/CUSTOM COUNTER RATE>/i)) {
+                    evalMode = "none";
+                } else if (evalMode === "custom counter rate") {
+                    obj.counterRateEval = obj.counterRateEval + line + "\n";
+                }
+            }
+        }
+    };
 
-BattleManager.checkCounterStype = function(value) {
-    if (!this._action.isSkill()) return false;
-    if (value.match(/(\d+)/i)) {
-      var stypeId = parseInt(RegExp.$1);
-    } else {
-      var stypeId = Yanfly.STypeIdRef[value.toUpperCase()];
-    }
-    var skill = this._action.item();
-    return skill.stypeId === stypeId;
-};
+    //=============================================================================
+    // BattleManager
+    //=============================================================================
 
-BattleManager.checkCounterItem = function(value) {
-    if (!this._action.isItem()) return false;
-    if (value.match(/(\d+)/i)) {
-      var itemId = parseInt(RegExp.$1);
-    } else {
-      var itemId = Yanfly.SkillIdRef[value.toUpperCase()];
-    }
-    var skill = $dataSkills[skillId];
-    return this._action.item() === skill;
-};
+    Yanfly.Counter.BattleManager_initMembers = BattleManager.initMembers;
+    BattleManager.initMembers = function () {
+        Yanfly.Counter.BattleManager_initMembers.call(this);
+        this._counterQueue = [];
+        this._counterSequence = 0;
+        this._counterOriginalSubject = undefined;
+        this._counterOriginalAction = undefined;
+        this._countering = false;
+    };
 
-BattleManager.checkCounterAttacker = function(v1, v2, skill, subject, target) {
-    var eval = 'subject.';
-    if (['LEVEL', 'LV', 'LVL'].contains(v1.toUpperCase())) {
-      eval += 'level';
-    } else if (['MAX HP', 'MAXHP', 'MHP'].contains(v1.toUpperCase())) {
-      eval += 'mhp';
-    } else if (['HP', 'CURRENT HP'].contains(v1.toUpperCase())) {
-      eval += 'hp';
-    } else if (['MAX MP', 'MAXMP', 'MMP'].contains(v1.toUpperCase())) {
-      eval += 'mmp';
-    } else if (['MP', 'CURRENT MP'].contains(v1.toUpperCase())) {
-      eval += 'mp';
-    } else if (['ATK', 'STR'].contains(v1.toUpperCase())) {
-      eval += 'atk';
-    } else if (['DEF'].contains(v1.toUpperCase())) {
-      eval += 'def';
-    } else if (['MAT', 'INT', 'SPI'].contains(v1.toUpperCase())) {
-      eval += 'mat';
-    } else if (['MDF', 'RES'].contains(v1.toUpperCase())) {
-      eval += 'mdf';
-    } else if (['AGI', 'SPD'].contains(v1.toUpperCase())) {
-      eval += 'agi';
-    } else if (['LUK'].contains(v1.toUpperCase())) {
-      eval += 'luk';
-    } else {
-      return false;
-    }
-    eval += ' ' + v2;
-    return this.checkCounterEval(eval, skill, subject, target);
-};
+    BattleManager.isCountering = function () {
+        return this._countering;
+    };
 
-BattleManager.checkCounterDefender = function(v1, v2, skill, subject, target) {
-    var eval = 'target.';
-    if (['LEVEL', 'LV', 'LVL'].contains(v1.toUpperCase())) {
-      eval += 'level';
-    } else if (['MAX HP', 'MAXHP', 'MHP'].contains(v1.toUpperCase())) {
-      eval += 'mhp';
-    } else if (['HP', 'CURRENT HP'].contains(v1.toUpperCase())) {
-      eval += 'hp';
-    } else if (['MAX MP', 'MAXMP', 'MMP'].contains(v1.toUpperCase())) {
-      eval += 'mmp';
-    } else if (['MP', 'CURRENT MP'].contains(v1.toUpperCase())) {
-      eval += 'mp';
-    } else if (['ATK', 'STR'].contains(v1.toUpperCase())) {
-      eval += 'atk';
-    } else if (['DEF'].contains(v1.toUpperCase())) {
-      eval += 'def';
-    } else if (['MAT', 'INT', 'SPI'].contains(v1.toUpperCase())) {
-      eval += 'mat';
-    } else if (['MDF', 'RES'].contains(v1.toUpperCase())) {
-      eval += 'mdf';
-    } else if (['AGI', 'SPD'].contains(v1.toUpperCase())) {
-      eval += 'agi';
-    } else if (['LUK'].contains(v1.toUpperCase())) {
-      eval += 'luk';
-    } else {
-      return false;
-    }
-    eval += ' ' + v2;
-    return this.checkCounterEval(eval, skill, subject, target);
-};
+    Yanfly.Counter.BattleManager_invokeCounter = BattleManager.invokeCounterAttack;
+    BattleManager.invokeCounterAttack = function (subject, target) {
+        this._counterQueue = this._counterQueue || [];
+        if (this.isValidCounterAction(target)) this._counterSequence += 1;
+        if (!this.isMaxCounterQueue()) {
+            if (this.isValidCounterAction(target)) target.payCounter();
+        }
+        if (target.canCounter()) {
+            this._counterSkill = this.getCounterSkill(subject, target);
+            this._counterQueue = this._counterQueue || [];
+            if (this._counterSkill === null) {
+                if (this._action.isPhysical() && target.canMove()) {
+                    Yanfly.Counter.BattleManager_invokeCounter.call(this, subject, target);
+                } else {
+                    this.invokeNormalAction(subject, target);
+                }
+                return;
+            } else if (this.evadeAndCounter(subject, target)) {
+                target.performEvasion();
+                target.forceEvadePopup();
+                this.addCounterQueue(subject, target);
+            } else if (this._counterSkill !== undefined) {
+                this.invokeNormalAction(subject, target);
+                this.addCounterQueue(subject, target);
+            } else {
+                if (this.isValidCounterAction(target)) {
+                    target.payCounter(-1);
+                    this._counterSequence -= 1;
+                }
+                this.invokeNormalAction(subject, target);
+                return;
+            }
+            this._logWindow.displayActionResults(target, subject);
+            if (subject.isDead()) subject.performCollapse();
+        } else {
+            this.invokeNormalAction(subject, target);
+        }
+    };
 
-BattleManager.evadeAndCounter = function(subject, target) {
-    if (this._counterSkill === undefined) return false;
-    if (this._counterSkill === null) return false;
-    if (target.forceHitCounter()) return false;
-    if (target.forceEvadeCounter()) return true;
-    return this._counterSkill.evadeCounter;
-};
+    BattleManager.getCounterSkill = function (subject, target) {
+        target.makeCounterSkills();
+        var skills = target.counterSkills();
+        var length = skills.length;
+        for (var i = 0; i < length; ++i) {
+            var skill = skills[i];
+            if (this.meetCounterConditions(skill, subject, target)) return skill;
+        }
+        return undefined;
+    };
 
-BattleManager.isValidCounterAction = function(target) {
-    if (this._counterQueue.length <= 0) return true;
-    return this._counterQueue[0].subject() !== target;
-};
+    BattleManager.meetCounterConditions = function (skill, subject, target) {
+        if (skill === null) return true;
+        if (!target.canUse(skill)) return false;
+        if (!this.meetCounterConditionsEval(skill, subject, target));
+        var condition = this.getCounterCondition(skill, subject, target);
+        return condition;
+    };
 
-BattleManager.addCounterQueue = function(subject, target) {
-    if (!target.canCounter()) return;
-    if (!this.isValidCounterAction(target)) return;
-    var action = new Game_Action(target);
-    action.setSkill(this._counterSkill.id);
-    action.setCounter();
-    if (action.isForOpponent()) {
-      action.setTarget(subject.index());
-    } else {
-      action.setTarget(target.index());
-    }
-    this._counterQueue = this._counterQueue || [];
-    this._counterQueue.push(action);
-    this._counterOriginalSubject = this._counterOriginalSubject || subject;
-    this._counterOriginalAction = this._counterOriginalAction || this._action;
-};
+    BattleManager.meetCounterConditionsEval = function (skill, subject, target) {
+        var action = this._action;
+        if (this._action.item().counterConditionEval === "") return true;
+        var condition = true;
+        var a = subject;
+        var user = subject;
+        var attacker = subject;
+        var b = target;
+        var defender = target;
+        var item = skill;
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var code = this._action.item().counterConditionEval;
+        try {
+            eval(code);
+        } catch (e) {
+            Yanfly.Util.displayError(e, code, "COUNTER CONDITIONS EVAL ERROR");
+        }
+        return condition;
+    };
 
-Yanfly.Counter.BattleManager_createFinishActions =
-    BattleManager.createFinishActions;
-BattleManager.createFinishActions = function() {
-    Yanfly.Counter.BattleManager_createFinishActions.call(this);
-    this._actionList.push(['START COUNTER PHASE']);
-};
+    BattleManager.getCounterCondition = function (skill, subject, target) {
+        var conditions = skill.counterConditions;
+        var length = conditions.length;
+        for (var i = 0; i < length; ++i) {
+            var line = conditions[i];
+            if (!this.checkCounterLine(line, skill, subject, target)) return false;
+        }
+        return true;
+    };
 
-Yanfly.Counter.BattleManager_processActionSequence =
-    BattleManager.processActionSequence;
-BattleManager.processActionSequence = function(actionName, actionArgs) {
-    // START COUNTER PHASE
-    if (actionName === 'START COUNTER PHASE') {
-      return this.actionStartCounterPhase();
-    }
-    return Yanfly.Counter.BattleManager_processActionSequence.call(this,
-      actionName, actionArgs);
-};
+    BattleManager.checkCounterLine = function (line, skill, subject, target) {
+        // EVAL
+        if (line.match(/EVAL:[ ](.*)/i)) {
+            var value = String(RegExp.$1);
+            return this.checkCounterEval(value, skill, subject, target);
+            // CERTAIN HIT
+        } else if (line.toUpperCase() === "CERTAIN HIT") {
+            return this.checkCounterHitType(Game_Action.HITTYPE_CERTAIN);
+            // PHYSICAL HIT
+        } else if (line.toUpperCase() === "PHYSICAL HIT") {
+            return this.checkCounterHitType(Game_Action.HITTYPE_PHYSICAL);
+            // MAGICAL HIT
+        } else if (line.toUpperCase() === "MAGICAL HIT") {
+            return this.checkCounterHitType(Game_Action.HITTYPE_MAGICAL);
+            // NOT CERTAIN HIT
+        } else if (line.toUpperCase() === "NOT CERTAIN HIT") {
+            return !this.checkCounterHitType(Game_Action.HITTYPE_CERTAIN);
+            // NOT PHYSICAL HIT
+        } else if (line.toUpperCase() === "NOT PHYSICAL HIT") {
+            return !this.checkCounterHitType(Game_Action.HITTYPE_PHYSICAL);
+            // NOT MAGICAL HIT
+        } else if (line.toUpperCase() === "NOT MAGICAL HIT") {
+            return !this.checkCounterHitType(Game_Action.HITTYPE_MAGICAL);
+            // SINGLE TARGET
+        } else if (line.toUpperCase() === "SINGLE TARGET") {
+            return this.checkCounterSingleTarget();
+            // MULTI TARGET
+        } else if (line.toUpperCase() === "MULTI TARGET") {
+            return !this.checkCounterSingleTarget();
+            // COUNTER HIT
+        } else if (line.toUpperCase() === "COUNTER HIT") {
+            return !this.checkCounterCounterHit();
+            // NOT COUNTER HIT
+        } else if (line.toUpperCase() === "NOT COUNTER HIT") {
+            return !this.checkCounterCounterHit();
+            // RANDOM
+        } else if (line.match(/RANDOM:[ ](\d+)([%％])/i)) {
+            var value = parseFloat(RegExp.$1) * 0.01;
+            return !this.checkCounterRandom(value);
+            // NOT ELEMENT
+        } else if (line.match(/NOT ELEMENT:[ ](.*)/i)) {
+            var value = String(RegExp.$1);
+            return !this.checkCounterElement(value);
+            // ELEMENT
+        } else if (line.match(/ELEMENT:[ ](.*)/i)) {
+            var value = String(RegExp.$1);
+            return this.checkCounterElement(value);
+            // SWITCH ON
+        } else if (line.match(/SWITCH[ ](\d+)[ ]ON/i)) {
+            var value = parseInt(RegExp.$1);
+            return this.checkCounterSwitch(value);
+            // SWITCH OFF
+        } else if (line.match(/SWITCH[ ](\d+)[ ]OFF/i)) {
+            var value = parseInt(RegExp.$1);
+            return !this.checkCounterSwitch(value);
+            // VARIABLE
+        } else if (line.match(/VARIABLE[ ](\d+)[ ](.*)/i)) {
+            var varId = parseInt(RegExp.$1);
+            var eval = String(RegExp.$2);
+            eval = "$gameVariables.value(" + varId + ") " + eval;
+            return this.checkCounterEval(eval, skill, subject, target);
+            // NOT SKILL
+        } else if (line.match(/NOT SKILL:[ ](.*)/i)) {
+            var value = String(RegExp.$1);
+            return !this.checkCounterSkill(value);
+            // SKILL
+        } else if (line.match(/SKILL:[ ](.*)/i)) {
+            var value = String(RegExp.$1);
+            return this.checkCounterSkill(value);
+            // NOT STYPE
+        } else if (line.match(/NOT STYPE:[ ](.*)/i)) {
+            var value = String(RegExp.$1);
+            return !this.checkCounterStype(value);
+            // STYPE
+        } else if (line.match(/STYPE:[ ](.*)/i)) {
+            var value = String(RegExp.$1);
+            return this.checkCounterStype(value);
+            // NOT ITEM
+        } else if (line.match(/NOT ITEM:[ ](.*)/i)) {
+            var value = String(RegExp.$1);
+            return !this.checkCounterItem(value);
+            // ITEM
+        } else if (line.match(/ITEM:[ ](.*)/i)) {
+            var value = String(RegExp.$1);
+            return this.checkCounterItem(value);
+            // ATTACKER PARAM
+        } else if (line.match(/ATTACKER[ ](.*)[ ](.*)/i)) {
+            var value1 = String(RegExp.$1);
+            var value2 = String(RegExp.$1);
+            return this.checkCounterAttacker(value1, value2, skill, subject, target);
+            // DEFENDER PARAM
+        } else if (line.match(/DEFENDER[ ](.*)[ ](.*)/i)) {
+            var value1 = String(RegExp.$1);
+            var value2 = String(RegExp.$1);
+            return this.checkCounterDefender(value1, value2, skill, subject, target);
+            // ELSE - NOTHING LISTED
+        } else {
+            return true;
+        }
+    };
 
-BattleManager.isMaxCounterQueue = function() {
-    return this._counterSequence > Yanfly.Param.CounterMaxQueue;
-};
+    BattleManager.checkCounterEval = function (code, skill, subject, target) {
+        var action = this._action;
+        var a = subject;
+        var user = subject;
+        var attacker = subject;
+        var b = target;
+        var defender = target;
+        var item = skill;
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var code = line;
+        try {
+            return eval(code);
+        } catch (e) {
+            Yanfly.Util.displayError(e, code, "COUNTER CHECK ERROR");
+            return false;
+        }
+    };
 
-BattleManager.actionStartCounterPhase = function() {
-    this._counterQueue = this._counterQueue || [];
-    var action = this._counterQueue.shift();
-    if (this.isMaxCounterQueue() || !action) {
-      this.actionEndCounterPhase();
-    } else if (action && action.subject().isDead()) {
-      this.actionStartCounterPhase();
-    } else {
-      this.actionPerformCounterPhase(action);
-    }
-    this._counterQueue = this._counterQueue || [];
-};
+    BattleManager.checkCounterHitType = function (value) {
+        return this._action.item().hitType === value;
+    };
 
-BattleManager.actionEndCounterPhase = function() {
-  this._countering = false;
-  if (this._counterOriginalSubject) {
-    this._subject = this._counterOriginalSubject;
-    this._action = this._counterOriginalAction;
-    if (this.isSetCounterOriginal()) {
-      this._subject.setCounterAction(this._action);
-    }
-  }
-  this._counterOriginalSubject = undefined;
-  this._counterOriginalAction = undefined;
-  this._counterSequence = 0;
-  this._counterQueue = [];
-};
+    BattleManager.checkCounterCounterHit = function () {
+        return this._action.isCounter();
+    };
 
-BattleManager.isSetCounterOriginal = function() {
-    if (this.isDTB()) return false;
-    return true;
-};
+    BattleManager.checkCounterRandom = function (value) {
+        return Math.random() < value;
+    };
 
-BattleManager.actionPerformCounterPhase = function(action) {
-    this._countering = true;
-    this._subject.removeCounterAction();
-    this._subject = action.subject();
-    this._action = action;
-    var subject = this._subject;
-    var targets = action.makeTargets();
-    this.setTargets(targets);
-    this._allTargets = targets.slice();
-    this._individualTargets = targets.slice();
-    this._phase = 'phaseChange';
-    this._phaseSteps = ['setup', 'whole', 'target', 'follow', 'finish'];
-    this._returnPhase = '';
-    this._actionList = [];
-    subject.useItem(this._action.item());
-    this._action.applyGlobal();
-    this._logWindow.startAction(this._subject, this._action, this._targets);
-};
+    BattleManager.checkCounterSingleTarget = function () {
+        return this._action.isForOne();
+    };
 
-//=============================================================================
-// Game_BattlerBase
-//=============================================================================
+    BattleManager.checkCounterElement = function (value) {
+        if (value.match(/(\d+)/i)) {
+            var elementId = parseInt(RegExp.$1);
+        } else {
+            var elementId = Yanfly.ElementIdRef[value.toUpperCase()];
+            if (!elementId) return true;
+        }
+        var actionElement = this._action.item().damage.elementId;
+        if (actionElement < 0) {
+            return this._subject.attackElements().contains(elementId);
+        } else {
+            return elementId === actionElement;
+        }
+    };
 
-Yanfly.Counter.Game_BattlerBase_updateStateActionStart =
-    Game_BattlerBase.prototype.updateStateActionStart;
-Game_BattlerBase.prototype.updateStateActionStart = function() {
-    if (BattleManager.isCountering()) return;
-    Yanfly.Counter.Game_BattlerBase_updateStateActionStart.call(this);
-};
+    BattleManager.checkCounterSwitch = function (value) {
+        return $gameSwitches.value(value);
+    };
 
-//=============================================================================
-// Game_Battler
-//=============================================================================
+    BattleManager.checkCounterSkill = function (value) {
+        if (!this._action.isSkill()) return false;
+        if (value.match(/(\d+)/i)) {
+            var skillId = parseInt(RegExp.$1);
+        } else {
+            var skillId = Yanfly.SkillIdRef[value.toUpperCase()];
+        }
+        var skill = $dataSkills[skillId];
+        return this._action.item() === skill;
+    };
 
-Yanfly.Counter.Game_Battler_refresh = Game_Battler.prototype.refresh;
-Game_Battler.prototype.refresh = function() {
-    this._counterTotalCache = undefined;
-    Yanfly.Counter.Game_Battler_refresh.call(this);
-};
+    BattleManager.checkCounterStype = function (value) {
+        if (!this._action.isSkill()) return false;
+        if (value.match(/(\d+)/i)) {
+            var stypeId = parseInt(RegExp.$1);
+        } else {
+            var stypeId = Yanfly.STypeIdRef[value.toUpperCase()];
+        }
+        var skill = this._action.item();
+        return skill.stypeId === stypeId;
+    };
 
-Game_Battler.prototype.counterSkills = function() {
-    if (this._counterSkills === undefined || this._counterSkills === []) {
-      return [];
-    }
-    var array = [];
-    var length = this._counterSkills.length;
-    for (var i = 0; i < length; ++i) {
-      var skillId = this._counterSkills[i];
-      var skill = $dataSkills[skillId];
-      array.push(skill);
-    }
-    return array;
-};
+    BattleManager.checkCounterItem = function (value) {
+        if (!this._action.isItem()) return false;
+        if (value.match(/(\d+)/i)) {
+            var itemId = parseInt(RegExp.$1);
+        } else {
+            var itemId = Yanfly.SkillIdRef[value.toUpperCase()];
+        }
+        var skill = $dataSkills[skillId];
+        return this._action.item() === skill;
+    };
 
-Game_Battler.prototype.makeCounterSkills = function() {
-    this._counterSkills = [];
-    var length = this.states().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.states()[i];
-      if (!obj) continue;
-      if (obj.counterSkills) {
+    BattleManager.checkCounterAttacker = function (v1, v2, skill, subject, target) {
+        var eval = "subject.";
+        if (["LEVEL", "LV", "LVL"].contains(v1.toUpperCase())) {
+            eval += "level";
+        } else if (["MAX HP", "MAXHP", "MHP"].contains(v1.toUpperCase())) {
+            eval += "mhp";
+        } else if (["HP", "CURRENT HP"].contains(v1.toUpperCase())) {
+            eval += "hp";
+        } else if (["MAX MP", "MAXMP", "MMP"].contains(v1.toUpperCase())) {
+            eval += "mmp";
+        } else if (["MP", "CURRENT MP"].contains(v1.toUpperCase())) {
+            eval += "mp";
+        } else if (["ATK", "STR"].contains(v1.toUpperCase())) {
+            eval += "atk";
+        } else if (["DEF"].contains(v1.toUpperCase())) {
+            eval += "def";
+        } else if (["MAT", "INT", "SPI"].contains(v1.toUpperCase())) {
+            eval += "mat";
+        } else if (["MDF", "RES"].contains(v1.toUpperCase())) {
+            eval += "mdf";
+        } else if (["AGI", "SPD"].contains(v1.toUpperCase())) {
+            eval += "agi";
+        } else if (["LUK"].contains(v1.toUpperCase())) {
+            eval += "luk";
+        } else {
+            return false;
+        }
+        eval += " " + v2;
+        return this.checkCounterEval(eval, skill, subject, target);
+    };
+
+    BattleManager.checkCounterDefender = function (v1, v2, skill, subject, target) {
+        var eval = "target.";
+        if (["LEVEL", "LV", "LVL"].contains(v1.toUpperCase())) {
+            eval += "level";
+        } else if (["MAX HP", "MAXHP", "MHP"].contains(v1.toUpperCase())) {
+            eval += "mhp";
+        } else if (["HP", "CURRENT HP"].contains(v1.toUpperCase())) {
+            eval += "hp";
+        } else if (["MAX MP", "MAXMP", "MMP"].contains(v1.toUpperCase())) {
+            eval += "mmp";
+        } else if (["MP", "CURRENT MP"].contains(v1.toUpperCase())) {
+            eval += "mp";
+        } else if (["ATK", "STR"].contains(v1.toUpperCase())) {
+            eval += "atk";
+        } else if (["DEF"].contains(v1.toUpperCase())) {
+            eval += "def";
+        } else if (["MAT", "INT", "SPI"].contains(v1.toUpperCase())) {
+            eval += "mat";
+        } else if (["MDF", "RES"].contains(v1.toUpperCase())) {
+            eval += "mdf";
+        } else if (["AGI", "SPD"].contains(v1.toUpperCase())) {
+            eval += "agi";
+        } else if (["LUK"].contains(v1.toUpperCase())) {
+            eval += "luk";
+        } else {
+            return false;
+        }
+        eval += " " + v2;
+        return this.checkCounterEval(eval, skill, subject, target);
+    };
+
+    BattleManager.evadeAndCounter = function (subject, target) {
+        if (this._counterSkill === undefined) return false;
+        if (this._counterSkill === null) return false;
+        if (target.forceHitCounter()) return false;
+        if (target.forceEvadeCounter()) return true;
+        return this._counterSkill.evadeCounter;
+    };
+
+    BattleManager.isValidCounterAction = function (target) {
+        if (this._counterQueue.length <= 0) return true;
+        return this._counterQueue[0].subject() !== target;
+    };
+
+    BattleManager.addCounterQueue = function (subject, target) {
+        if (!target.canCounter()) return;
+        if (!this.isValidCounterAction(target)) return;
+        var action = new Game_Action(target);
+        action.setSkill(this._counterSkill.id);
+        action.setCounter();
+        if (action.isForOpponent()) {
+            action.setTarget(subject.index());
+        } else {
+            action.setTarget(target.index());
+        }
+        this._counterQueue = this._counterQueue || [];
+        this._counterQueue.push(action);
+        this._counterOriginalSubject = this._counterOriginalSubject || subject;
+        this._counterOriginalAction = this._counterOriginalAction || this._action;
+    };
+
+    Yanfly.Counter.BattleManager_createFinishActions = BattleManager.createFinishActions;
+    BattleManager.createFinishActions = function () {
+        Yanfly.Counter.BattleManager_createFinishActions.call(this);
+        this._actionList.push(["START COUNTER PHASE"]);
+    };
+
+    Yanfly.Counter.BattleManager_processActionSequence = BattleManager.processActionSequence;
+    BattleManager.processActionSequence = function (actionName, actionArgs) {
+        // START COUNTER PHASE
+        if (actionName === "START COUNTER PHASE") {
+            return this.actionStartCounterPhase();
+        }
+        return Yanfly.Counter.BattleManager_processActionSequence.call(this, actionName, actionArgs);
+    };
+
+    BattleManager.isMaxCounterQueue = function () {
+        return this._counterSequence > Yanfly.Param.CounterMaxQueue;
+    };
+
+    BattleManager.actionStartCounterPhase = function () {
+        this._counterQueue = this._counterQueue || [];
+        var action = this._counterQueue.shift();
+        if (this.isMaxCounterQueue() || !action) {
+            this.actionEndCounterPhase();
+        } else if (action && action.subject().isDead()) {
+            this.actionStartCounterPhase();
+        } else {
+            this.actionPerformCounterPhase(action);
+        }
+        this._counterQueue = this._counterQueue || [];
+    };
+
+    BattleManager.actionEndCounterPhase = function () {
+        this._countering = false;
+        if (this._counterOriginalSubject) {
+            this._subject = this._counterOriginalSubject;
+            this._action = this._counterOriginalAction;
+            if (this.isSetCounterOriginal()) {
+                this._subject.setCounterAction(this._action);
+            }
+        }
+        this._counterOriginalSubject = undefined;
+        this._counterOriginalAction = undefined;
+        this._counterSequence = 0;
+        this._counterQueue = [];
+    };
+
+    BattleManager.isSetCounterOriginal = function () {
+        if (this.isDTB()) return false;
+        return true;
+    };
+
+    BattleManager.actionPerformCounterPhase = function (action) {
+        this._countering = true;
+        this._subject.removeCounterAction();
+        this._subject = action.subject();
+        this._action = action;
+        var subject = this._subject;
+        var targets = action.makeTargets();
+        this.setTargets(targets);
+        this._allTargets = targets.slice();
+        this._individualTargets = targets.slice();
+        this._phase = "phaseChange";
+        this._phaseSteps = ["setup", "whole", "target", "follow", "finish"];
+        this._returnPhase = "";
+        this._actionList = [];
+        subject.useItem(this._action.item());
+        this._action.applyGlobal();
+        this._logWindow.startAction(this._subject, this._action, this._targets);
+    };
+
+    //=============================================================================
+    // Game_BattlerBase
+    //=============================================================================
+
+    Yanfly.Counter.Game_BattlerBase_updateStateActionStart = Game_BattlerBase.prototype.updateStateActionStart;
+    Game_BattlerBase.prototype.updateStateActionStart = function () {
+        if (BattleManager.isCountering()) return;
+        Yanfly.Counter.Game_BattlerBase_updateStateActionStart.call(this);
+    };
+
+    //=============================================================================
+    // Game_Battler
+    //=============================================================================
+
+    Yanfly.Counter.Game_Battler_refresh = Game_Battler.prototype.refresh;
+    Game_Battler.prototype.refresh = function () {
+        this._counterTotalCache = undefined;
+        Yanfly.Counter.Game_Battler_refresh.call(this);
+    };
+
+    Game_Battler.prototype.counterSkills = function () {
+        if (this._counterSkills === undefined || this._counterSkills === []) {
+            return [];
+        }
+        var array = [];
+        var length = this._counterSkills.length;
+        for (var i = 0; i < length; ++i) {
+            var skillId = this._counterSkills[i];
+            var skill = $dataSkills[skillId];
+            array.push(skill);
+        }
+        return array;
+    };
+
+    Game_Battler.prototype.makeCounterSkills = function () {
+        this._counterSkills = [];
+        var length = this.states().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.states()[i];
+            if (!obj) continue;
+            if (obj.counterSkills) {
+                Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
+            }
+            this.extendCounterSkillsEval(obj);
+        }
+    };
+
+    Game_Battler.prototype.extendCounterSkillsEval = function (obj) {
+        if (!obj) return;
+        if (!obj.counterSkillsEval) return;
+        if (obj.counterSkillsEval === "") return;
+        var skills = [];
+        var a = this;
+        var user = this;
+        var subject = this;
+        var b = this;
+        var target = this;
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var code = obj.counterSkillsEval;
+        try {
+            eval(code);
+        } catch (e) {
+            Yanfly.Util.displayError(e, code, "COUNTER SKILLS ERROR");
+        }
         Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
-      }
-      this.extendCounterSkillsEval(obj);
-    }
-};
+    };
 
-Game_Battler.prototype.extendCounterSkillsEval = function(obj) {
-    if (!obj) return;
-    if (!obj.counterSkillsEval) return;
-    if (obj.counterSkillsEval === '') return;
-    var skills = [];
-    var a = this;
-    var user = this;
-    var subject = this;
-    var b = this;
-    var target = this;
-    var s = $gameSwitches._data;
-    var v = $gameVariables._data;
-    var code = obj.counterSkillsEval;
-    try {
-      eval(code);
-    } catch (e) {
-      Yanfly.Util.displayError(e, code, 'COUNTER SKILLS ERROR');
-    }
-    Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
-};
+    Yanfly.Counter.Game_Battler_onBattleStart = Game_Battler.prototype.onBattleStart;
+    Game_Battler.prototype.onBattleStart = function () {
+        Yanfly.Counter.Game_Battler_onBattleStart.call(this);
+        this._counters = 0;
+    };
 
-Yanfly.Counter.Game_Battler_onBattleStart =
-    Game_Battler.prototype.onBattleStart;
-Game_Battler.prototype.onBattleStart = function() {
-    Yanfly.Counter.Game_Battler_onBattleStart.call(this);
-    this._counters = 0;
-};
+    Yanfly.Counter.Game_Battler_onTurnStart = Game_Battler.prototype.onTurnStart;
+    Game_Battler.prototype.onTurnStart = function () {
+        Yanfly.Counter.Game_Battler_onTurnStart.call(this);
+        this._counters = 0;
+    };
 
-Yanfly.Counter.Game_Battler_onTurnStart = Game_Battler.prototype.onTurnStart;
-Game_Battler.prototype.onTurnStart = function() {
-    Yanfly.Counter.Game_Battler_onTurnStart.call(this);
-    this._counters = 0;
-};
+    Game_Battler.prototype.counterTotal = function () {
+        var value = Yanfly.Param.CounterTotal;
+        var length = this.states().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.states()[i];
+            if (!obj) continue;
+            if (obj.counterTotal) value += obj.counterTotal;
+            value += this.getCounterTotalEval(obj);
+        }
+        return value;
+    };
 
-Game_Battler.prototype.counterTotal = function() {
-    var value = Yanfly.Param.CounterTotal;
-    var length = this.states().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.states()[i];
-      if (!obj) continue;
-      if (obj.counterTotal) value += obj.counterTotal;
-      value += this.getCounterTotalEval(obj);
-    }
-    return value;
-};
+    Game_Battler.prototype.getCounterTotalEval = function (obj) {
+        if (!obj) return 0;
+        if (!obj.counterTotalEval) return 0;
+        if (obj.counterTotalEval === "") return 0;
+        var value = 0;
+        var a = this;
+        var user = this;
+        var subject = this;
+        var b = this;
+        var target = this;
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var code = obj.counterTotalEval;
+        try {
+            eval(code);
+        } catch (e) {
+            Yanfly.Util.displayError(e, code, "COUNTER TOTAL ERROR");
+        }
+        return value;
+    };
 
-Game_Battler.prototype.getCounterTotalEval = function(obj) {
-    if (!obj) return 0;
-    if (!obj.counterTotalEval) return 0;
-    if (obj.counterTotalEval === '') return 0;
-    var value = 0;
-    var a = this;
-    var user = this;
-    var subject = this;
-    var b = this;
-    var target = this;
-    var s = $gameSwitches._data;
-    var v = $gameVariables._data;
-    var code = obj.counterTotalEval;
-    try {
-      eval(code);
-    } catch (e) {
-      Yanfly.Util.displayError(e, code, 'COUNTER TOTAL ERROR');
-    }
-    return value;
-};
+    Game_Battler.prototype.payCounter = function (value) {
+        value = value || 1;
+        this._counters += value;
+    };
 
-Game_Battler.prototype.payCounter = function(value) {
-    value = value || 1;
-    this._counters += value;
-};
+    Game_Battler.prototype.canCounter = function () {
+        if (!this.canMove()) return false;
+        return this.counterTotal() >= this._counters;
+    };
 
-Game_Battler.prototype.canCounter = function() {
-    if (!this.canMove()) return false;
-    return this.counterTotal() >= this._counters;
-};
+    Game_Battler.prototype.targetCounterRate = function () {
+        var rate = 1;
+        var length = this.states().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.states()[i];
+            if (!obj) continue;
+            rate *= obj.targetCounterRate;
+        }
+        return rate;
+    };
 
-Game_Battler.prototype.targetCounterRate = function() {
-    var rate = 1;
-    var length = this.states().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.states()[i];
-      if (!obj) continue;
-      rate *= obj.targetCounterRate;
-    }
-    return rate;
-};
+    Game_Battler.prototype.targetCounterFlat = function () {
+        var value = 0;
+        var length = this.states().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.states()[i];
+            if (!obj) continue;
+            value += obj.targetCounterFlat;
+        }
+        return value;
+    };
 
-Game_Battler.prototype.targetCounterFlat = function() {
-    var value = 0;
-    var length = this.states().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.states()[i];
-      if (!obj) continue;
-      value += obj.targetCounterFlat;
-    }
-    return value;
-};
+    Game_Battler.prototype.targetCounterRateEval = function (rate, target, item) {
+        var length = this.states().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.states()[i];
+            rate = this.getTargetCntRateEval(obj, rate, target, item);
+        }
+        return rate;
+    };
 
-Game_Battler.prototype.targetCounterRateEval = function(rate, target, item) {
-    var length = this.states().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.states()[i];
-      rate = this.getTargetCntRateEval(obj, rate, target, item);
-    }
-    return rate;
-};
+    Game_Battler.prototype.getTargetCntRateEval = function (obj, rate, trg, item) {
+        if (!obj) return rate;
+        if (!obj.targetCounterRateEval) return rate;
+        if (obj.targetCounterRateEval === "") return rate;
+        var skill = item;
+        var a = this;
+        var user = this;
+        var subject = this;
+        var b = trg;
+        var target = trg;
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var code = obj.targetCounterRateEval;
+        try {
+            eval(code);
+        } catch (e) {
+            Yanfly.Util.displayError(e, code, "TARGET COUNTER RATE ERROR");
+        }
+        return rate;
+    };
 
-Game_Battler.prototype.getTargetCntRateEval = function(obj, rate, trg, item) {
-    if (!obj) return rate;
-    if (!obj.targetCounterRateEval) return rate;
-    if (obj.targetCounterRateEval === '') return rate;
-    var skill = item;
-    var a = this;
-    var user = this;
-    var subject = this;
-    var b = trg;
-    var target = trg;
-    var s = $gameSwitches._data;
-    var v = $gameVariables._data;
-    var code = obj.targetCounterRateEval;
-    try {
-      eval(code);
-    } catch (e) {
-      Yanfly.Util.displayError(e, code, 'TARGET COUNTER RATE ERROR');
-    }
-    return rate;
-};
+    Game_Battler.prototype.forceEvadeCounter = function () {
+        var length = this.states().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.states()[i];
+            if (!obj) continue;
+            if (obj.evadeCounter) return true;
+        }
+        return false;
+    };
 
-Game_Battler.prototype.forceEvadeCounter = function() {
-    var length = this.states().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.states()[i];
-      if (!obj) continue;
-      if (obj.evadeCounter) return true;
-    }
-    return false;
-};
+    Game_Battler.prototype.forceHitCounter = function () {
+        var length = this.states().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.states()[i];
+            if (!obj) continue;
+            if (obj.hitCounter) return true;
+        }
+        return false;
+    };
 
-Game_Battler.prototype.forceHitCounter = function() {
-    var length = this.states().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.states()[i];
-      if (!obj) continue;
-      if (obj.hitCounter) return true;
-    }
-    return false;
-};
+    Game_Battler.prototype.forceEvadePopup = function () {
+        this._result = new Game_ActionResult();
+        this._result.evaded = true;
+        this.startDamagePopup();
+        this.clearResult();
+    };
 
-Game_Battler.prototype.forceEvadePopup = function() {
-    this._result = new Game_ActionResult();
-    this._result.evaded = true;
-    this.startDamagePopup();
-    this.clearResult();
-};
+    Game_Battler.prototype.setCounterAction = function (action) {
+        if (!this._originalPreCounterActions) {
+            this._originalPreCounterActions = JsonEx.makeDeepCopy(this._actions);
+        }
+        action.setCounter();
+        this.setAction(0, action);
+    };
 
-Game_Battler.prototype.setCounterAction = function(action) {
-    if (!this._originalPreCounterActions) {
-      this._originalPreCounterActions = JsonEx.makeDeepCopy(this._actions);
-    }
-    action.setCounter();
-    this.setAction(0, action);
-};
+    Game_Battler.prototype.removeCounterAction = function () {
+        if (this._originalPreCounterActions) {
+            this._actions = JsonEx.makeDeepCopy(this._originalPreCounterActions);
+        }
+        this._originalPreCounterActions = undefined;
+    };
 
-Game_Battler.prototype.removeCounterAction = function() {
-    if (this._originalPreCounterActions) {
-      this._actions = JsonEx.makeDeepCopy(this._originalPreCounterActions);
-    }
-    this._originalPreCounterActions = undefined;
-};
+    //=============================================================================
+    // Game_Actor
+    //=============================================================================
 
-//=============================================================================
-// Game_Actor
-//=============================================================================
+    Game_Actor.prototype.makeCounterSkills = function () {
+        Game_Battler.prototype.makeCounterSkills.call(this);
+        var length = this.equips().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.equips()[i];
+            if (!obj) continue;
+            if (obj.counterSkills) {
+                Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
+            }
+            this.extendCounterSkillsEval(obj);
+        }
+        if (this.currentClass().counterSkills) {
+            obj = this.currentClass();
+            Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
+            this.extendCounterSkillsEval(obj);
+        }
+        if (this.actor().counterSkills) {
+            obj = this.actor();
+            Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
+            this.extendCounterSkillsEval(obj);
+        }
+        if (this._counterSkills.length <= 0) {
+            this._counterSkills.push(obj.defaultCounter);
+        }
+    };
 
-Game_Actor.prototype.makeCounterSkills = function() {
-    Game_Battler.prototype.makeCounterSkills.call(this);
-    var length = this.equips().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.equips()[i];
-      if (!obj) continue;
-      if (obj.counterSkills) {
-        Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
-      }
-      this.extendCounterSkillsEval(obj);
-    }
-    if (this.currentClass().counterSkills) {
-      obj = this.currentClass();
-      Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
-      this.extendCounterSkillsEval(obj);
-    }
-    if (this.actor().counterSkills) {
-      obj = this.actor();
-      Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
-      this.extendCounterSkillsEval(obj);
-    }
-    if (this._counterSkills.length <= 0) {
-      this._counterSkills.push(obj.defaultCounter);
-    }
-};
+    Game_Actor.prototype.counterTotal = function () {
+        if (this._counterTotalCache !== undefined) return this._counterTotalCache;
+        var value = Game_Battler.prototype.counterTotal.call(this);
+        var length = this.equips().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.equips()[i];
+            if (!obj) continue;
+            if (obj.counterTotal) value += obj.counterTotal;
+            value += this.getCounterTotalEval(obj);
+        }
+        value += this.currentClass().counterTotal;
+        value += this.getCounterTotalEval(this.currentClass());
+        value += this.actor().counterTotal;
+        value += this.getCounterTotalEval(this.actor());
+        this._counterTotalCache = value;
+        return this._counterTotalCache;
+    };
 
-Game_Actor.prototype.counterTotal = function() {
-    if (this._counterTotalCache !== undefined) return this._counterTotalCache;
-    var value = Game_Battler.prototype.counterTotal.call(this);
-    var length = this.equips().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.equips()[i];
-      if (!obj) continue;
-      if (obj.counterTotal) value += obj.counterTotal;
-      value += this.getCounterTotalEval(obj);
-    }
-    value += this.currentClass().counterTotal;
-    value += this.getCounterTotalEval(this.currentClass());
-    value += this.actor().counterTotal;
-    value += this.getCounterTotalEval(this.actor());
-    this._counterTotalCache = value;
-    return this._counterTotalCache;
-};
+    Game_Actor.prototype.targetCounterRate = function () {
+        var rate = Game_Battler.prototype.targetCounterRate.call(this);
+        var length = this.equips().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.equips()[i];
+            if (!obj) continue;
+            rate *= obj.targetCounterRate;
+        }
+        rate *= this.currentClass().targetCounterRate;
+        rate *= this.actor().targetCounterRate;
+        return rate;
+    };
 
-Game_Actor.prototype.targetCounterRate = function() {
-    var rate = Game_Battler.prototype.targetCounterRate.call(this);
-    var length = this.equips().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.equips()[i];
-      if (!obj) continue;
-      rate *= obj.targetCounterRate;
-    }
-    rate *= this.currentClass().targetCounterRate;
-    rate *= this.actor().targetCounterRate;
-    return rate;
-};
+    Game_Actor.prototype.targetCounterFlat = function () {
+        var value = Game_Battler.prototype.targetCounterFlat.call(this);
+        var length = this.equips().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.equips()[i];
+            if (!obj) continue;
+            value += obj.targetCounterFlat;
+        }
+        value += this.currentClass().targetCounterFlat;
+        value += this.actor().targetCounterFlat;
+        return value;
+    };
 
-Game_Actor.prototype.targetCounterFlat = function() {
-    var value = Game_Battler.prototype.targetCounterFlat.call(this);
-    var length = this.equips().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.equips()[i];
-      if (!obj) continue;
-      value += obj.targetCounterFlat;
-    }
-    value += this.currentClass().targetCounterFlat;
-    value += this.actor().targetCounterFlat;
-    return value;
-};
+    Game_Actor.prototype.targetCounterRateEval = function (rate, target, item) {
+        var rate = Game_Battler.prototype.targetCounterRateEval.call(this, rate, target, item);
+        var length = this.equips().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.equips()[i];
+            rate = this.getTargetCntRateEval(obj, rate, target, item);
+        }
+        rate = this.getTargetCntRateEval(this.currentClass(), rate, target, item);
+        rate = this.getTargetCntRateEval(this.actor(), rate, target, item);
+        return rate;
+    };
 
-Game_Actor.prototype.targetCounterRateEval = function(rate, target, item) {
-    var rate = Game_Battler.prototype.targetCounterRateEval.call(this, rate,
-      target, item);
-    var length = this.equips().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.equips()[i];
-      rate = this.getTargetCntRateEval(obj, rate, target, item);
-    }
-    rate = this.getTargetCntRateEval(this.currentClass(), rate, target, item);
-    rate = this.getTargetCntRateEval(this.actor(), rate, target, item);
-    return rate;
-};
+    Game_Actor.prototype.forceEvadeCounter = function () {
+        if (Game_Battler.prototype.forceEvadeCounter.call(this)) return true;
+        if (this.actor().evadeCounter) return true;
+        if (this.currentClass().evadeCounter) return true;
+        var length = this.equips().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.equips()[i];
+            if (!obj) continue;
+            if (obj.evadeCounter) return true;
+        }
+        return false;
+    };
 
-Game_Actor.prototype.forceEvadeCounter = function() {
-    if (Game_Battler.prototype.forceEvadeCounter.call(this)) return true;
-    if (this.actor().evadeCounter) return true;
-    if (this.currentClass().evadeCounter) return true;
-    var length = this.equips().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.equips()[i];
-      if (!obj) continue;
-      if (obj.evadeCounter) return true;
-    }
-    return false;
-};
+    Game_Actor.prototype.forceHitCounter = function () {
+        if (Game_Battler.prototype.forceHitCounter.call(this)) return true;
+        if (this.actor().hitCounter) return true;
+        if (this.currentClass().hitCounter) return true;
+        var length = this.equips().length;
+        for (var i = 0; i < length; ++i) {
+            var obj = this.equips()[i];
+            if (!obj) continue;
+            if (obj.hitCounter) return true;
+        }
+        return false;
+    };
 
-Game_Actor.prototype.forceHitCounter = function() {
-    if (Game_Battler.prototype.forceHitCounter.call(this)) return true;
-    if (this.actor().hitCounter) return true;
-    if (this.currentClass().hitCounter) return true;
-    var length = this.equips().length;
-    for (var i = 0; i < length; ++i) {
-      var obj = this.equips()[i];
-      if (!obj) continue;
-      if (obj.hitCounter) return true;
-    }
-    return false;
-};
+    //=============================================================================
+    // Game_Enemy
+    //=============================================================================
 
-//=============================================================================
-// Game_Enemy
-//=============================================================================
+    Game_Enemy.prototype.makeCounterSkills = function () {
+        Game_Battler.prototype.makeCounterSkills.call(this);
+        if (this.enemy().counterSkills) {
+            obj = this.enemy();
+            Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
+            this.extendCounterSkillsEval(obj);
+        }
+        if (this._counterSkills.length <= 0) {
+            this._counterSkills.push(obj.defaultCounter);
+        }
+    };
 
-Game_Enemy.prototype.makeCounterSkills = function() {
-    Game_Battler.prototype.makeCounterSkills.call(this);
-    if (this.enemy().counterSkills) {
-      obj = this.enemy();
-      Yanfly.Util.extend(this._counterSkills, obj.counterSkills);
-      this.extendCounterSkillsEval(obj);
-    }
-    if (this._counterSkills.length <= 0) {
-      this._counterSkills.push(obj.defaultCounter);
-    }
-};
+    Game_Enemy.prototype.counterTotal = function () {
+        if (this._counterTotalCache !== undefined) return this._counterTotalCache;
+        var value = Game_Battler.prototype.counterTotal.call(this);
+        value += this.enemy().counterTotal;
+        value += this.getCounterTotalEval(this.enemy());
+        this._counterTotalCache = value;
+        return this._counterTotalCache;
+    };
 
-Game_Enemy.prototype.counterTotal = function() {
-    if (this._counterTotalCache !== undefined) return this._counterTotalCache;
-    var value = Game_Battler.prototype.counterTotal.call(this);
-    value += this.enemy().counterTotal;
-    value += this.getCounterTotalEval(this.enemy());
-    this._counterTotalCache = value;
-    return this._counterTotalCache;
-};
+    Game_Enemy.prototype.targetCounterRate = function () {
+        var rate = Game_Battler.prototype.targetCounterRate.call(this);
+        rate *= this.enemy().targetCounterRate;
+        return rate;
+    };
 
-Game_Enemy.prototype.targetCounterRate = function() {
-    var rate = Game_Battler.prototype.targetCounterRate.call(this);
-    rate *= this.enemy().targetCounterRate;
-    return rate;
-};
+    Game_Enemy.prototype.targetCounterFlat = function () {
+        var value = Game_Battler.prototype.targetCounterFlat.call(this);
+        value += this.enemy().targetCounterFlat;
+        return value;
+    };
 
-Game_Enemy.prototype.targetCounterFlat = function() {
-    var value = Game_Battler.prototype.targetCounterFlat.call(this);
-    value += this.enemy().targetCounterFlat;
-    return value;
-};
+    Game_Enemy.prototype.targetCounterRateEval = function (rate, target, item) {
+        var rate = Game_Battler.prototype.targetCounterRateEval.call(this, rate, target, item);
+        rate = this.getTargetCntRateEval(this.enemy(), rate, target, item);
+        return rate;
+    };
 
-Game_Enemy.prototype.targetCounterRateEval = function(rate, target, item) {
-    var rate = Game_Battler.prototype.targetCounterRateEval.call(this, rate,
-      target, item);
-    rate = this.getTargetCntRateEval(this.enemy(), rate, target, item);
-    return rate;
-};
+    Game_Enemy.prototype.forceEvadeCounter = function () {
+        if (Game_Battler.prototype.forceEvadeCounter.call(this)) return true;
+        if (this.enemy().evadeCounter) return true;
+        return false;
+    };
 
-Game_Enemy.prototype.forceEvadeCounter = function() {
-    if (Game_Battler.prototype.forceEvadeCounter.call(this)) return true;
-    if (this.enemy().evadeCounter) return true;
-    return false;
-};
+    Game_Enemy.prototype.forceHitCounter = function () {
+        if (Game_Battler.prototype.forceHitCounter.call(this)) return true;
+        if (this.enemy().hitCounter) return true;
+        return false;
+    };
 
-Game_Enemy.prototype.forceHitCounter = function() {
-    if (Game_Battler.prototype.forceHitCounter.call(this)) return true;
-    if (this.enemy().hitCounter) return true;
-    return false;
-};
+    //=============================================================================
+    // Game_Action
+    //=============================================================================
 
-//=============================================================================
-// Game_Action
-//=============================================================================
+    Game_Action.prototype.itemCnt = function (target) {
+        if (this.item().cannotCounter) return 0;
+        if (!this.item().allyCounter) {
+            if (target.isActor() === this.subject().isActor()) return 0;
+        }
+        if (!target.canMove()) return 0;
+        if (!target.canCounter()) return 0;
+        var rate = target.cnt;
+        rate *= this.subject().targetCounterRate();
+        rate *= this.item().counterRate;
+        rate += this.subject().targetCounterFlat();
+        rate += this.item().counterMod;
+        rate = this.subject().targetCounterRateEval(rate, target, this.item());
+        rate = this.customCounterRateEval(rate, target);
+        return rate;
+    };
 
-Game_Action.prototype.itemCnt = function(target) {
-    if (this.item().cannotCounter) return 0;
-    if (!this.item().allyCounter) {
-      if (target.isActor() === this.subject().isActor()) return 0;
-    }
-    if (!target.canMove()) return 0;
-    if (!target.canCounter()) return 0;
-    var rate = target.cnt;
-    rate *= this.subject().targetCounterRate();
-    rate *= this.item().counterRate;
-    rate += this.subject().targetCounterFlat();
-    rate += this.item().counterMod;
-    rate = this.subject().targetCounterRateEval(rate, target, this.item());
-    rate = this.customCounterRateEval(rate, target);
-    return rate;
-};
+    Game_Action.prototype.customCounterRateEval = function (rate, target) {
+        if (this.item().counterRateEval === "") return rate;
+        var item = this.item();
+        var skill = this.item();
+        var a = this.subject();
+        var user = this.subject();
+        var subject = this.subject();
+        var b = target;
+        var s = $gameSwitches._data;
+        var v = $gameVariables._data;
+        var code = this.item().counterRateEval;
+        try {
+            eval(code);
+        } catch (e) {
+            Yanfly.Util.displayError(e, code, "COUNTER RATE ERROR");
+        }
+        return rate;
+    };
 
-Game_Action.prototype.customCounterRateEval = function(rate, target) {
-    if (this.item().counterRateEval === '') return rate;
-    var item = this.item();
-    var skill = this.item();
-    var a = this.subject();
-    var user = this.subject();
-    var subject = this.subject();
-    var b = target;
-    var s = $gameSwitches._data;
-    var v = $gameVariables._data;
-    var code = this.item().counterRateEval;
-    try {
-      eval(code);
-    } catch (e) {
-      Yanfly.Util.displayError(e, code, 'COUNTER RATE ERROR');
-    }
-    return rate;
-};
+    if (Imported.YEP_X_BattleSysCTB) {
+        Yanfly.Counter.Game_Action_rebalanceCTBSpeed = Game_Action.prototype.rebalanceCTBSpeed;
+        Game_Action.prototype.rebalanceCTBSpeed = function (target) {
+            if (BattleManager.isCountering()) return;
+            Yanfly.Counter.Game_Action_rebalanceCTBSpeed.call(this, target);
+        };
+    } // Imported.YEP_X_BattleSysCTB
 
-if (Imported.YEP_X_BattleSysCTB) {
+    Yanfly.Counter.Game_Action_clear = Game_Action.prototype.clear;
+    Game_Action.prototype.clear = function () {
+        Yanfly.Counter.Game_Action_clear.call(this);
+        this._isCounter = false;
+        this._isForceMiss = false;
+    };
 
-Yanfly.Counter.Game_Action_rebalanceCTBSpeed =
-    Game_Action.prototype.rebalanceCTBSpeed;
-Game_Action.prototype.rebalanceCTBSpeed = function(target) {
-    if (BattleManager.isCountering()) return;
-    Yanfly.Counter.Game_Action_rebalanceCTBSpeed.call(this, target);
-};
+    Game_Action.prototype.setCounter = function () {
+        this._isCounter = true;
+    };
 
-}; // Imported.YEP_X_BattleSysCTB
+    Game_Action.prototype.isCounter = function () {
+        return this._isCounter;
+    };
 
-Yanfly.Counter.Game_Action_clear = Game_Action.prototype.clear;
-Game_Action.prototype.clear = function() {
-    Yanfly.Counter.Game_Action_clear.call(this);
-    this._isCounter = false;
-    this._isForceMiss = false;
-};
+    //=============================================================================
+    // Window_BattleLog
+    //=============================================================================
 
-Game_Action.prototype.setCounter = function() {
-    this._isCounter = true;
-};
+    Yanfly.Counter.Window_BattleLog_displayIcon = Window_BattleLog.prototype.displayIcon;
+    Window_BattleLog.prototype.displayIcon = function (item) {
+        if (BattleManager.isCountering()) return item.counterIcon;
+        return Yanfly.Counter.Window_BattleLog_displayIcon.call(this, item);
+    };
 
-Game_Action.prototype.isCounter = function() {
-    return this._isCounter;
-};
+    Yanfly.Counter.Window_BattleLog_displayText = Window_BattleLog.prototype.displayText;
+    Window_BattleLog.prototype.displayText = function (item) {
+        if (BattleManager.isCountering()) return item.counterName;
+        return Yanfly.Counter.Window_BattleLog_displayText.call(this, item);
+    };
 
-//=============================================================================
-// Window_BattleLog
-//=============================================================================
+    //=============================================================================
+    // Utilities
+    //=============================================================================
 
-Yanfly.Counter.Window_BattleLog_displayIcon =
-    Window_BattleLog.prototype.displayIcon;
-Window_BattleLog.prototype.displayIcon = function(item) {
-    if (BattleManager.isCountering()) return item.counterIcon;
-    return Yanfly.Counter.Window_BattleLog_displayIcon.call(this, item);
-};
+    Yanfly.Util = Yanfly.Util || {};
 
-Yanfly.Counter.Window_BattleLog_displayText =
-    Window_BattleLog.prototype.displayText;
-Window_BattleLog.prototype.displayText = function(item) {
-    if (BattleManager.isCountering()) return item.counterName;
-    return Yanfly.Counter.Window_BattleLog_displayText.call(this, item);
-};
+    Yanfly.Util.extend = function (mainArray, otherArray) {
+        otherArray.forEach(function (i) {
+            mainArray.push(i);
+        }, this);
+    };
 
-//=============================================================================
-// Utilities
-//=============================================================================
+    Yanfly.Util.displayError = function (e, code, message) {
+        console.log(message);
+        console.log(code || "NON-EXISTENT");
+        console.error(e);
+        if (Utils.isNwjs() && Utils.isOptionValid("test")) {
+            if (!require("nw.gui").Window.get().isDevToolsOpen()) {
+                require("nw.gui").Window.get().showDevTools();
+            }
+        }
+    };
 
-Yanfly.Util = Yanfly.Util || {};
-
-Yanfly.Util.extend = function (mainArray, otherArray) {
-    otherArray.forEach(function(i) {
-      mainArray.push(i)
-    }, this);
+    //=============================================================================
+    // End of File
+    //=============================================================================
 }
-
-Yanfly.Util.displayError = function(e, code, message) {
-  console.log(message);
-  console.log(code || 'NON-EXISTENT');
-  console.error(e);
-  if (Utils.isNwjs() && Utils.isOptionValid('test')) {
-    if (!require('nw.gui').Window.get().isDevToolsOpen()) {
-      require('nw.gui').Window.get().showDevTools();
-    }
-  }
-};
-
-//=============================================================================
-// End of File
-//=============================================================================
-};

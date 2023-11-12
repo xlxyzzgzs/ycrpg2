@@ -9,9 +9,9 @@ Imported.SF_Core = true;
 var SF_Plugins = SF_Plugins || {};
 //=============================================================================
 /*:
-    * @plugindesc core lib for salted fish plugins
-    * @author Salted Fish
-    */
+ * @plugindesc core lib for salted fish plugins
+ * @author Salted Fish
+ */
 //=============================================================================
 
 (function () {
@@ -61,77 +61,77 @@ var SF_Plugins = SF_Plugins || {};
         this.event = [];
         this.ext = null;
         this.user = null;
-    }
+    };
 
     Pointer.prototype.set = function (x, y) {
         this.x = x;
         this.y = y;
-    }
+    };
 
     Pointer.prototype.setEvents = function (events) {
         this.event = events;
-    }
+    };
 
     Pointer.prototype.addEvent = function (event) {
         this.event.push(event);
-    }
+    };
 
     Pointer.prototype.clearEvent = function () {
         this.event = [];
-    }
+    };
 
     Pointer.prototype.getEvents = function () {
         return this.event;
-    }
+    };
 
     Pointer.prototype.setExt = function (ext) {
         this.ext = ext;
-    }
+    };
 
     Pointer.prototype.getExt = function () {
         return this.ext;
-    }
+    };
 
     Pointer.prototype.setUser = function (user) {
         this.user = user;
-    }
+    };
 
     Pointer.prototype.getUser = function () {
         return this.user;
-    }
+    };
 
     Pointer.prototype.removeUser = function () {
         this.user = null;
-    }
+    };
 
     Pointer.prototype.isEmpty = function () {
         return this.event.length === 0;
-    }
+    };
 
     Pointer.prototype.clear = function () {
         this.event = [];
         this.ext = null;
-    }
+    };
 
     Pointer.prototype.isDown = function () {
-        return this.event.indexOf('pointer-down') >= 0;
-    }
+        return this.event.indexOf("pointer-down") >= 0;
+    };
 
     Pointer.prototype.isUp = function () {
-        return this.event.indexOf('pointer-up') >= 0;
-    }
+        return this.event.indexOf("pointer-up") >= 0;
+    };
 
     Pointer.prototype.isMove = function () {
-        return this.event.indexOf('pointer-move') >= 0;
-    }
+        return this.event.indexOf("pointer-move") >= 0;
+    };
 
     Pointer.prototype.isCancel = function () {
-        return this.event.indexOf('pointer-cancel') >= 0;
-    }
+        return this.event.indexOf("pointer-cancel") >= 0;
+    };
 
     Pointer.prototype.isCanUsed = function (user) {
         return this.user === user || this.user === null;
-    }
+    };
 
     //=============================================================================
     // TouchInput
@@ -151,7 +151,7 @@ var SF_Plugins = SF_Plugins || {};
         this._events.event = null;
         this._events._pointer = {};
         this._events._losedPointer = [];
-    }
+    };
 
     SF_Core.TouchInput_update = TouchInput.update;
     TouchInput.update = function () {
@@ -188,19 +188,18 @@ var SF_Plugins = SF_Plugins || {};
         for (var i in this._events._pointer) {
             var pointer = this._events._pointer[i];
             if (pointer.isCancel() || pointer.isUp()) {
-                SF_Core.Utils.error('pointer cancel or up');
+                SF_Core.Utils.error("pointer cancel or up");
             }
             var p = this._pointer[i];
             if (p) {
                 p.set(pointer.x, pointer.y);
                 p.setEvents(pointer.getEvents());
                 p.setExt(pointer.getExt());
-
             } else {
                 this._pointer[i] = pointer;
             }
         }
-    }
+    };
 
     SF_Core.TouchInput_onMouseDown = TouchInput._onMouseDown;
     TouchInput._onMouseDown = function (event) {
@@ -211,8 +210,8 @@ var SF_Plugins = SF_Plugins || {};
         var x = Graphics.pageToCanvasX(event.pageX);
         var y = Graphics.pageToCanvasY(event.pageY);
         this._events._mouse.set(x, y);
-        this._events._mouse.addEvent('pointer-down');
-    }
+        this._events._mouse.addEvent("pointer-down");
+    };
 
     SF_Core.TouchInput__onMouseMove = TouchInput._onMouseMove;
     TouchInput._onMouseMove = function (event) {
@@ -223,8 +222,8 @@ var SF_Plugins = SF_Plugins || {};
         var x = Graphics.pageToCanvasX(event.pageX);
         var y = Graphics.pageToCanvasY(event.pageY);
         this._events._mouse.set(x, y);
-        this._events._mouse.addEvent('pointer-move');
-    }
+        this._events._mouse.addEvent("pointer-move");
+    };
 
     SF_Core.TouchInput__onMouseUp = TouchInput._onMouseUp;
     TouchInput._onMouseUp = function (event) {
@@ -235,29 +234,29 @@ var SF_Plugins = SF_Plugins || {};
         var x = Graphics.pageToCanvasX(event.pageX);
         var y = Graphics.pageToCanvasY(event.pageY);
         this._events._mouse.set(x, y);
-        this._events._mouse.addEvent('pointer-up');
-    }
+        this._events._mouse.addEvent("pointer-up");
+    };
 
     SF_Core.TouchInput__onMouseWheel = TouchInput._onMouseWheel;
     TouchInput._onMouseWheel = function (event) {
         SF_Core.TouchInput__onMouseWheel.call(this, event);
 
         this._events.event = event;
-    }
+    };
 
     SF_Core.TouchInput__onTouchStart = TouchInput._onTouchStart;
     TouchInput._onTouchStart = function (event) {
         SF_Core.TouchInput__onTouchStart.call(this, event);
         this._events.event = event;
         this._pointerFromTouch(event, "pointer-down");
-    }
+    };
 
     SF_Core.TouchInput__onTouchMove = TouchInput._onTouchMove;
     TouchInput._onTouchMove = function (event) {
         SF_Core.TouchInput__onTouchMove.call(this, event);
         this._events.event = event;
         this._pointerFromTouch(event, "pointer-move");
-    }
+    };
 
     SF_Core.TouchInput__onTouchEnd = TouchInput._onTouchEnd;
     TouchInput._onTouchEnd = function (event) {
@@ -265,14 +264,14 @@ var SF_Plugins = SF_Plugins || {};
         //console.log(event.changedTouches);
         this._events.event = event;
         this._pointerFromTouch(event, "pointer-up");
-    }
+    };
 
     SF_Core.TouchInput__onTouchCancel = TouchInput._onTouchCancel;
     TouchInput._onTouchCancel = function (event) {
         SF_Core.TouchInput__onTouchCancel.call(this, event);
         this._events.event = event;
         this._pointerFromTouch(event, "pointer-cancel");
-    }
+    };
 
     TouchInput._pointerFromTouch = function (event, type) {
         for (var i = 0; i < event.changedTouches.length; i++) {
@@ -297,9 +296,8 @@ var SF_Plugins = SF_Plugins || {};
                     this._events._losedPointer.push(pointer);
                     break;
             }
-
         }
-    }
+    };
 
     TouchInput.getPointers = function (user) {
         var result = [];
@@ -319,7 +317,7 @@ var SF_Plugins = SF_Plugins || {};
             }
         }
         return result;
-    }
+    };
 
     TouchInput.removeUsers = function () {
         for (var i in this._pointer) {
@@ -331,7 +329,7 @@ var SF_Plugins = SF_Plugins || {};
             pointer.removeUser();
         }
         this._mouse.removeUser();
-    }
+    };
 
     //=============================================================================
     // PIXI.Container
@@ -352,14 +350,14 @@ var SF_Plugins = SF_Plugins || {};
         }
 
         return lastUsePointer || inFramePointer || pointers[0] || null;
-    }
+    };
 
     PIXI.Container.prototype.releasePointer = function () {
         var pointer = this.getPointer();
         if (pointer) {
             pointer.removeUser();
         }
-    }
+    };
 
     //=============================================================================
     // SF_Utils
@@ -382,15 +380,15 @@ var SF_Plugins = SF_Plugins || {};
 
     SF_Core.Utils.isPC = function () {
         return !!Utils.isNwjs();
-    }
+    };
 
     SF_Core.Utils.isAndroid = function () {
         return !!window.FileUtils && !SF_Core.Utils.isPC();
-    }
+    };
 
     SF_Core.Utils.isWeb = function () {
         return !SF_Core.Utils.isPC() && !SF_Core.Utils.isAndroid();
-    }
+    };
 
     //=============================================================================
     // CallBack Scope Transport
@@ -403,42 +401,48 @@ var SF_Plugins = SF_Plugins || {};
 
     CallBack.initialize = function () {
         this.clear();
-    }
+    };
 
     // Return closureIndex
     CallBack.getNew = function () {
         var closureIndex = this._closureIndex++;
         return closureIndex;
-    }
+    };
 
     CallBack.setByClosureIndex = function (closureIndex, closureFunction) {
         this._closureFunction[closureIndex] = closureFunction;
-    }
+    };
 
     CallBack.unregister = function (closureIndex) {
         delete this._closureFunction[closureIndex];
-    }
+    };
 
     CallBack.callByClosureIndex = function (closureIndex) {
         if (this._closureFunction[closureIndex]) {
             this._closureFunction[closureIndex]();
         }
-    }
+    };
 
     CallBack.convertToString = function (closureIndex) {
         return "CallBack.callByClosureIndex(" + closureIndex + ")";
-    }
+    };
 
     CallBack.clear = function () {
         this._closureFunction = {};
         this._closureIndex = 0;
-    }
+    };
 
     CallBack.registerOneTime = function (closureFunction) {
         var closureIndex = this.getNew();
-        this.setByClosureIndex(closureIndex, (function () { closureFunction(); this.unregister(closureIndex); }).bind(this));
+        this.setByClosureIndex(
+            closureIndex,
+            function () {
+                closureFunction();
+                this.unregister(closureIndex);
+            }.bind(this)
+        );
         return this.convertToString(closureIndex);
-    }
+    };
 
     CallBack.registerOneTimeList = function (closureFunctionList) {
         var indexList = [];
@@ -449,21 +453,27 @@ var SF_Plugins = SF_Plugins || {};
             indexList.push(index);
         }
 
-        var removeAllFunc = (function () {
+        var removeAllFunc = function () {
             for (var i = 0; i < indexList.length; i++) {
                 this.unregister(indexList[i]);
             }
-        }).bind(this);
+        }.bind(this);
 
         for (var i = 0; i < indexList.length; i++) {
-            this.setByClosureIndex(indexList[i], (function (i) {
-                return (function () { closureFunctionList[i](); removeAllFunc(); });
-            })(i).bind(this));
+            this.setByClosureIndex(
+                indexList[i],
+                (function (i) {
+                    return function () {
+                        closureFunctionList[i]();
+                        removeAllFunc();
+                    };
+                })(i).bind(this)
+            );
             result.push(this.convertToString(indexList[i]));
         }
 
         return result;
-    }
+    };
 
     //=============================================================================
     // FileUtils
@@ -473,13 +483,13 @@ var SF_Plugins = SF_Plugins || {};
         var FileUtils = window.FileUtils || {};
         window.FileUtils = FileUtils;
 
-        var fs = require('fs');
-        var path = require('path');
-        var crypto = require('crypto');
+        var fs = require("fs");
+        var path = require("path");
+        var crypto = require("crypto");
 
         FileUtils.evaluateJavascript = function (script) {
-            (new Function(script)).call(window);
-        }
+            new Function(script).call(window);
+        };
 
         FileUtils.canExecute = function (fileName) {
             try {
@@ -488,7 +498,7 @@ var SF_Plugins = SF_Plugins || {};
             } catch (e) {
                 return false;
             }
-        }
+        };
 
         FileUtils.canRead = function (fileName) {
             try {
@@ -497,7 +507,7 @@ var SF_Plugins = SF_Plugins || {};
             } catch (e) {
                 return false;
             }
-        }
+        };
 
         FileUtils.canWrite = function (fileName) {
             try {
@@ -506,7 +516,7 @@ var SF_Plugins = SF_Plugins || {};
             } catch (e) {
                 return false;
             }
-        }
+        };
 
         FileUtils.createNewFile = function (fileName) {
             try {
@@ -515,7 +525,7 @@ var SF_Plugins = SF_Plugins || {};
             } catch (e) {
                 return false;
             }
-        }
+        };
 
         FileUtils.delete = function (fileName) {
             try {
@@ -524,7 +534,7 @@ var SF_Plugins = SF_Plugins || {};
             } catch (e) {
                 return false;
             }
-        }
+        };
 
         FileUtils.exists = function (fileName) {
             try {
@@ -533,51 +543,51 @@ var SF_Plugins = SF_Plugins || {};
             } catch (e) {
                 return false;
             }
-        }
+        };
 
         FileUtils.getAbsolutePath = function (fileName) {
             return path.resolve(fileName);
-        }
+        };
 
         FileUtils.getCanonicalPath = function (fileName) {
             return path.resolve(fileName);
-        }
+        };
 
         FileUtils.getName = function (fileName) {
             return path.basename(fileName);
-        }
+        };
 
         FileUtils.getParent = function (fileName) {
             return path.dirname(fileName);
-        }
+        };
 
         FileUtils.getPath = function (fileName) {
             return path.resolve(fileName);
-        }
+        };
 
         FileUtils.isAbsolute = function (fileName) {
             return path.isAbsolute(fileName);
-        }
+        };
 
         FileUtils.isDirectory = function (fileName) {
             return fs.statSync(fileName).isDirectory();
-        }
+        };
 
         FileUtils.isFile = function (fileName) {
             return fs.statSync(fileName).isFile();
-        }
+        };
 
         FileUtils.lastModified = function (fileName) {
             return fs.statSync(fileName).mtime.getTime();
-        }
+        };
 
         FileUtils.length = function (fileName) {
             return fs.statSync(fileName).size;
-        }
+        };
 
         FileUtils.list = function (dirName) {
             return fs.readdirSync(dirName);
-        }
+        };
 
         FileUtils.mkdir = function (fileName) {
             try {
@@ -586,7 +596,7 @@ var SF_Plugins = SF_Plugins || {};
             } catch (e) {
                 return false;
             }
-        }
+        };
 
         FileUtils.mkdirs = function (fileName) {
             try {
@@ -595,7 +605,7 @@ var SF_Plugins = SF_Plugins || {};
             } catch (e) {
                 return false;
             }
-        }
+        };
 
         FileUtils.reanmeTo = function (srcName, dstName) {
             try {
@@ -604,33 +614,32 @@ var SF_Plugins = SF_Plugins || {};
             } catch (e) {
                 return false;
             }
-        }
+        };
 
         FileUtils.toString = function (fileName) {
             return path.resolve(fileName);
-        }
+        };
 
         FileUtils.readTextFile = function (fileName) {
-            return fs.readFileSync(fileName, 'utf-8');
-        }
+            return fs.readFileSync(fileName, "utf-8");
+        };
 
         FileUtils.writeTextFile = function (fileName, text) {
-            return fs.writeFileSync(fileName, text, 'utf-8');
-        }
+            return fs.writeFileSync(fileName, text, "utf-8");
+        };
 
         FileUtils.getFileHashHex = function (fileName, algorithm) {
-            var hash = crypto.createHash(algorithm || 'SHA512');
+            var hash = crypto.createHash(algorithm || "SHA512");
             var data = fs.readFileSync(fileName);
             hash.update(data);
-            return hash.digest('hex');
-        }
+            return hash.digest("hex");
+        };
     }
 
     if (SF_Core.Utils.isAndroid()) {
         var FileUtils_List = FileUtils.list;
         FileUtils.list = function (name) {
             return JsonEx.parse(FileUtils_List.call(this, arguments));
-        }
+        };
     }
-
 })();

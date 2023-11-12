@@ -72,40 +72,38 @@
  *   <book:no>                # 図鑑に載せない場合
  */
 
-(function() {
+(function () {
+    var parameters = PluginManager.parameters("ItemBook");
+    var unknownData = String(parameters["Unknown Data"] || "??????");
+    var priceText = String(parameters["Price Text"] || "Price");
+    var equipText = String(parameters["Equip Text"] || "Equip");
+    var typeText = String(parameters["Type Text"] || "Type");
 
-    var parameters = PluginManager.parameters('ItemBook');
-    var unknownData = String(parameters['Unknown Data'] || '??????');
-    var priceText = String(parameters['Price Text'] || 'Price');
-    var equipText = String(parameters['Equip Text'] || 'Equip');
-    var typeText = String(parameters['Type Text'] || 'Type');
-
-    var _Game_Interpreter_pluginCommand =
-            Game_Interpreter.prototype.pluginCommand;
-    Game_Interpreter.prototype.pluginCommand = function(command, args) {
+    var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+    Game_Interpreter.prototype.pluginCommand = function (command, args) {
         _Game_Interpreter_pluginCommand.call(this, command, args);
-        if (command === 'ItemBook') {
+        if (command === "ItemBook") {
             switch (args[0]) {
-            case 'open':
-                SceneManager.push(Scene_ItemBook);
-                break;
-            case 'add':
-                $gameSystem.addToItemBook(args[1], Number(args[2]));
-                break;
-            case 'remove':
-                $gameSystem.removeFromItemBook(args[1], Number(args[2]));
-                break;
-            case 'complete':
-                $gameSystem.completeItemBook();
-                break;
-            case 'clear':
-                $gameSystem.clearItemBook();
-                break;
+                case "open":
+                    SceneManager.push(Scene_ItemBook);
+                    break;
+                case "add":
+                    $gameSystem.addToItemBook(args[1], Number(args[2]));
+                    break;
+                case "remove":
+                    $gameSystem.removeFromItemBook(args[1], Number(args[2]));
+                    break;
+                case "complete":
+                    $gameSystem.completeItemBook();
+                    break;
+                case "clear":
+                    $gameSystem.clearItemBook();
+                    break;
             }
         }
     };
 
-    Game_System.prototype.addToItemBook = function(type, dataId) {
+    Game_System.prototype.addToItemBook = function (type, dataId) {
         if (!this._ItemBookFlags) {
             this.clearItemBook();
         }
@@ -115,7 +113,7 @@
         }
     };
 
-    Game_System.prototype.removeFromItemBook = function(type, dataId) {
+    Game_System.prototype.removeFromItemBook = function (type, dataId) {
         if (this._ItemBookFlags) {
             var typeIndex = this.itemBookTypeToIndex(type);
             if (typeIndex >= 0) {
@@ -124,20 +122,20 @@
         }
     };
 
-    Game_System.prototype.itemBookTypeToIndex = function(type) {
+    Game_System.prototype.itemBookTypeToIndex = function (type) {
         switch (type) {
-        case 'item':
-            return 0;
-        case 'weapon':
-            return 1;
-        case 'armor':
-            return 2;
-        default:
-            return -1;
+            case "item":
+                return 0;
+            case "weapon":
+                return 1;
+            case "armor":
+                return 2;
+            default:
+                return -1;
         }
     };
 
-    Game_System.prototype.completeItemBook = function() {
+    Game_System.prototype.completeItemBook = function () {
         var i;
         this.clearItemBook();
         for (i = 1; i < $dataItems.length; i++) {
@@ -151,11 +149,11 @@
         }
     };
 
-    Game_System.prototype.clearItemBook = function() {
+    Game_System.prototype.clearItemBook = function () {
         this._ItemBookFlags = [[], [], []];
     };
 
-    Game_System.prototype.isInItemBook = function(item) {
+    Game_System.prototype.isInItemBook = function (item) {
         if (this._ItemBookFlags && item) {
             var typeIndex = -1;
             if (DataManager.isItem(item)) {
@@ -176,16 +174,16 @@
     };
 
     var _Game_Party_gainItem = Game_Party.prototype.gainItem;
-    Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
+    Game_Party.prototype.gainItem = function (item, amount, includeEquip) {
         _Game_Party_gainItem.call(this, item, amount, includeEquip);
         if (item && amount > 0) {
             var type;
             if (DataManager.isItem(item)) {
-                type = 'item';
+                type = "item";
             } else if (DataManager.isWeapon(item)) {
-                type = 'weapon';
+                type = "weapon";
             } else if (DataManager.isArmor(item)) {
-                type = 'armor';
+                type = "armor";
             }
             $gameSystem.addToItemBook(type, item.id);
         }
@@ -198,14 +196,14 @@
     Scene_ItemBook.prototype = Object.create(Scene_MenuBase.prototype);
     Scene_ItemBook.prototype.constructor = Scene_ItemBook;
 
-    Scene_ItemBook.prototype.initialize = function() {
+    Scene_ItemBook.prototype.initialize = function () {
         Scene_MenuBase.prototype.initialize.call(this);
     };
 
-    Scene_ItemBook.prototype.create = function() {
+    Scene_ItemBook.prototype.create = function () {
         Scene_MenuBase.prototype.create.call(this);
         this._indexWindow = new Window_ItemBookIndex(0, 0);
-        this._indexWindow.setHandler('cancel', this.popScene.bind(this));
+        this._indexWindow.setHandler("cancel", this.popScene.bind(this));
         var wy = this._indexWindow.height;
         var ww = Graphics.boxWidth;
         var wh = Graphics.boxHeight - wy;
@@ -223,9 +221,9 @@
     Window_ItemBookIndex.prototype.constructor = Window_ItemBookIndex;
 
     Window_ItemBookIndex.lastTopRow = 0;
-    Window_ItemBookIndex.lastIndex  = 0;
+    Window_ItemBookIndex.lastIndex = 0;
 
-    Window_ItemBookIndex.prototype.initialize = function(x, y) {
+    Window_ItemBookIndex.prototype.initialize = function (x, y) {
         var width = Graphics.boxWidth;
         var height = this.fittingHeight(6);
         Window_Selectable.prototype.initialize.call(this, x, y, width, height);
@@ -235,49 +233,49 @@
         this.activate();
     };
 
-    Window_ItemBookIndex.prototype.maxCols = function() {
+    Window_ItemBookIndex.prototype.maxCols = function () {
         return 3;
     };
 
-    Window_ItemBookIndex.prototype.maxItems = function() {
+    Window_ItemBookIndex.prototype.maxItems = function () {
         return this._list ? this._list.length : 0;
     };
 
-    Window_ItemBookIndex.prototype.setStatusWindow = function(statusWindow) {
+    Window_ItemBookIndex.prototype.setStatusWindow = function (statusWindow) {
         this._statusWindow = statusWindow;
         this.updateStatus();
     };
 
-    Window_ItemBookIndex.prototype.update = function() {
+    Window_ItemBookIndex.prototype.update = function () {
         Window_Selectable.prototype.update.call(this);
         this.updateStatus();
     };
 
-    Window_ItemBookIndex.prototype.updateStatus = function() {
+    Window_ItemBookIndex.prototype.updateStatus = function () {
         if (this._statusWindow) {
             var item = this._list[this.index()];
             this._statusWindow.setItem(item);
         }
     };
 
-    Window_ItemBookIndex.prototype.refresh = function() {
+    Window_ItemBookIndex.prototype.refresh = function () {
         var i, item;
         this._list = [];
         for (i = 1; i < $dataItems.length; i++) {
             item = $dataItems[i];
-            if (item.name && item.itypeId === 1 && item.meta.book !== 'no') {
+            if (item.name && item.itypeId === 1 && item.meta.book !== "no") {
                 this._list.push(item);
             }
         }
         for (i = 1; i < $dataWeapons.length; i++) {
             item = $dataWeapons[i];
-            if (item.name && item.meta.book !== 'no') {
+            if (item.name && item.meta.book !== "no") {
                 this._list.push(item);
             }
         }
         for (i = 1; i < $dataArmors.length; i++) {
             item = $dataArmors[i];
-            if (item.name && item.meta.book !== 'no') {
+            if (item.name && item.meta.book !== "no") {
                 this._list.push(item);
             }
         }
@@ -285,7 +283,7 @@
         this.drawAllItems();
     };
 
-    Window_ItemBookIndex.prototype.drawItem = function(index) {
+    Window_ItemBookIndex.prototype.drawItem = function (index) {
         var item = this._list[index];
         var rect = this.itemRect(index);
         var width = rect.width - this.textPadding();
@@ -297,7 +295,7 @@
         }
     };
 
-    Window_ItemBookIndex.prototype.processCancel = function() {
+    Window_ItemBookIndex.prototype.processCancel = function () {
         Window_Selectable.prototype.processCancel.call(this);
         Window_ItemBookIndex.lastTopRow = this.topRow();
         Window_ItemBookIndex.lastIndex = this.index();
@@ -310,18 +308,18 @@
     Window_ItemBookStatus.prototype = Object.create(Window_Base.prototype);
     Window_ItemBookStatus.prototype.constructor = Window_ItemBookStatus;
 
-    Window_ItemBookStatus.prototype.initialize = function(x, y, width, height) {
+    Window_ItemBookStatus.prototype.initialize = function (x, y, width, height) {
         Window_Base.prototype.initialize.call(this, x, y, width, height);
     };
 
-    Window_ItemBookStatus.prototype.setItem = function(item) {
+    Window_ItemBookStatus.prototype.setItem = function (item) {
         if (this._item !== item) {
             this._item = item;
             this.refresh();
         }
     };
 
-    Window_ItemBookStatus.prototype.refresh = function() {
+    Window_ItemBookStatus.prototype.refresh = function () {
         var item = this._item;
         var x = 0;
         var y = 0;
@@ -338,11 +336,11 @@
         x = this.textPadding();
         y = lineHeight + this.textPadding();
 
-        var price = item.price > 0 ? item.price : '-';
+        var price = item.price > 0 ? item.price : "-";
         this.changeTextColor(this.systemColor());
         this.drawText(priceText, x, y, 120);
         this.resetTextColor();
-        this.drawText(price, x + 120, y, 120, 'right');
+        this.drawText(price, x + 120, y, 120, "right");
         y += lineHeight;
 
         if (DataManager.isWeapon(item) || DataManager.isArmor(item)) {
@@ -350,7 +348,7 @@
             this.changeTextColor(this.systemColor());
             this.drawText(equipText, x, y, 120);
             this.resetTextColor();
-            this.drawText(etype, x + 120, y, 120, 'right');
+            this.drawText(etype, x + 120, y, 120, "right");
             y += lineHeight;
 
             var type;
@@ -362,7 +360,7 @@
             this.changeTextColor(this.systemColor());
             this.drawText(typeText, x, y, 120);
             this.resetTextColor();
-            this.drawText(type, x + 120, y, 120, 'right');
+            this.drawText(type, x + 120, y, 120, "right");
 
             x = this.textPadding() + 300;
             y = lineHeight + this.textPadding();
@@ -370,7 +368,7 @@
                 this.changeTextColor(this.systemColor());
                 this.drawText(TextManager.param(i), x, y, 160);
                 this.resetTextColor();
-                this.drawText(item.params[i], x + 160, y, 60, 'right');
+                this.drawText(item.params[i], x + 160, y, 60, "right");
                 y += lineHeight;
             }
         }
@@ -379,5 +377,4 @@
         y = this.textPadding() * 2 + lineHeight * 7;
         this.drawTextEx(item.description, x, y);
     };
-
 })();

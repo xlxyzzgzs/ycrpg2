@@ -86,21 +86,20 @@ const ATBConfig = {};
 const ATBAlias = {};
 
 {
-    "use strict";
+    ("use strict");
 
     const param = PluginManager.parameters("ATB");
-    ATBConfig.waitCommandSelection = (param["waitCommandSelection"] === "true" ? true : false);
-    ATBConfig.waitSelectSkillOrItem = (param["waitSelectSkillOrItem"] === "true" ? true : false);
-    ATBConfig.waitAnimation = (param["waitAnimation"] === "true" ? true : false);
-    ATBConfig.drawEnemyUnderGauge = (param["drawEnemyUnderGauge"] === "true" ? true : false);
+    ATBConfig.waitCommandSelection = param["waitCommandSelection"] === "true" ? true : false;
+    ATBConfig.waitSelectSkillOrItem = param["waitSelectSkillOrItem"] === "true" ? true : false;
+    ATBConfig.waitAnimation = param["waitAnimation"] === "true" ? true : false;
+    ATBConfig.drawEnemyUnderGauge = param["drawEnemyUnderGauge"] === "true" ? true : false;
     ATBConfig.baseGaugeSpeed = parseInt(param["baseGaugeSpeed"]);
     ATBConfig.maxActionCount = parseInt(param["maxActionCount"]);
     ATBConfig.baseSkillWaitGaugeSpeed = parseInt(param["baseSkillWaitGaugeSpeed"]);
     ATBConfig.fastForward = parseInt(param["fastForward"]);
-    ATBConfig.enableChangeSelectActor = (param["enableChangeSelectActor"] === "true" ? true : false);
-    ATBConfig.enableYEP_BattleEngineCore = (param["enableYEP_BattleEngineCore"] === "true" ? true : false);
+    ATBConfig.enableChangeSelectActor = param["enableChangeSelectActor"] === "true" ? true : false;
+    ATBConfig.enableYEP_BattleEngineCore = param["enableYEP_BattleEngineCore"] === "true" ? true : false;
     ATBConfig.drawUnderGauge = false;
-
 
     class ATBTimer {
         constructor(maxValue) {
@@ -136,7 +135,6 @@ const ATBAlias = {};
             this._value = 0;
         }
     }
-
 
     class ATBGauge {
         static get PURPOSE_TIME() {
@@ -244,7 +242,6 @@ const ATBAlias = {};
         }
     }
 
-
     class ActorGauge extends ATBGauge {
         constructor(battler) {
             super(battler);
@@ -252,29 +249,28 @@ const ATBAlias = {};
             this._commandSelected = false;
             if (ATBConfig.drawUnderGauge) BattleManager.spriteset().createGaugeLine(battler);
         }
-    
+
         setCommandSelecting(commandSelecting) {
             this._commandSelecting = commandSelecting;
         }
-        
+
         isCommandSelecting() {
             return this._commandSelecting;
         }
-    
+
         setCommandSelected(commandSelected) {
             this._commandSelected = commandSelected;
         }
-        
+
         isCommandSelected() {
             return this._commandSelected;
         }
-    
+
         commandSelectCancel() {
             this._commandSelecting = false;
             this._commandSelected = false;
         }
     }
-
 
     class EnemyGauge extends ATBGauge {
         constructor(battler) {
@@ -282,7 +278,6 @@ const ATBAlias = {};
             if (ATBConfig.drawEnemyUnderGauge) BattleManager.spriteset().createGaugeLine(battler);
         }
     }
-
 
     class GainHpTimer extends ATBTimer {
         constructor(maxValue, gainValue, battler, stateId) {
@@ -308,7 +303,6 @@ const ATBAlias = {};
             }
         }
     }
-
 
     class ATBManager {
         static get GAUGE_MAX() {
@@ -397,7 +391,7 @@ const ATBAlias = {};
                 if (members.indexOf(battler) === -1) {
                     let i = this._holdAllBattleMembers.indexOf(battler);
                     this._holdAllBattleMembers.splice(i, 1);
-                    i = this._gauges.indexOf(battler.gauge())
+                    i = this._gauges.indexOf(battler.gauge());
                     this._gauges.splice(i, 1);
                 }
             }
@@ -450,7 +444,7 @@ const ATBAlias = {};
         startSkillWait(battler) {
             battler.gauge().clear();
             const action = battler.currentAction();
-            let skillWaitSpeed = (battler.speed() + action.item().speed);
+            let skillWaitSpeed = battler.speed() + action.item().speed;
             if (battler.currentAction().isAttack()) skillWaitSpeed += battler.attackSpeed();
             this.resetGaugeSpeed(battler, skillWaitSpeed * ATBConfig.baseSkillWaitGaugeSpeed, null);
             battler.gauge().purpose = ATBGauge.PURPOSE_SKILL_WAIT;
@@ -476,11 +470,13 @@ const ATBAlias = {};
         getNextHighPrioritySubject() {
             for (let i = 0; i < this._canActionMembers.length; i++) {
                 let subject = this._canActionMembers[i];
-                if (subject instanceof Game_Actor && subject.gauge().isCommandSelected()
-                    || subject instanceof Game_Enemy
-                    || !subject.canInput()) {
-                        this._canActionMembers.splice(i, 1);
-                        return subject;
+                if (
+                    (subject instanceof Game_Actor && subject.gauge().isCommandSelected()) ||
+                    subject instanceof Game_Enemy ||
+                    !subject.canInput()
+                ) {
+                    this._canActionMembers.splice(i, 1);
+                    return subject;
                 }
             }
             return null;
@@ -499,22 +495,28 @@ const ATBAlias = {};
                     if (lambda(array[i])) return array[i];
                 }
                 return null;
-            }
+            };
 
             const currentActorIdx = this._canActionMembers.indexOf(currentActor);
             if (currentActorIdx === -1) return null;
-            let nextActors = this._canActionMembers.filter(member => member instanceof Game_Actor);
+            let nextActors = this._canActionMembers.filter((member) => member instanceof Game_Actor);
             if (reverse) {
-                nextActors = nextActors.sort((a, b) => $gameParty.members().indexOf(b) - $gameParty.members().indexOf(a));
+                nextActors = nextActors.sort(
+                    (a, b) => $gameParty.members().indexOf(b) - $gameParty.members().indexOf(a)
+                );
             } else {
-                nextActors = nextActors.sort((a, b) => $gameParty.members().indexOf(a) - $gameParty.members().indexOf(b));
+                nextActors = nextActors.sort(
+                    (a, b) => $gameParty.members().indexOf(a) - $gameParty.members().indexOf(b)
+                );
             }
             const nextActor = cycleFild(nextActors, nextActors.indexOf(currentActor) + 1, (actor) => {
                 if (actor === currentActor) return false;
-                if (!actor.gauge().isCommandSelected()
-                    && actor.canInput()
-                    && actor.gauge().purpose === ATBGauge.PURPOSE_TIME) {
-                        return true;
+                if (
+                    !actor.gauge().isCommandSelected() &&
+                    actor.canInput() &&
+                    actor.gauge().purpose === ATBGauge.PURPOSE_TIME
+                ) {
+                    return true;
                 }
                 return false;
             });
@@ -578,7 +580,7 @@ const ATBAlias = {};
         applyReduceGaugeState(battler, state) {
             let matchData;
             if (state._reduceGauge === undefined) {
-                if (matchData = state.note.match(/<\s*ReduceGauge\s+value=(\d+)\s*>/)) {
+                if ((matchData = state.note.match(/<\s*ReduceGauge\s+value=(\d+)\s*>/))) {
                     state._reduceGauge = parseInt(matchData[1]);
                 } else {
                     state._reduceGauge = null;
@@ -593,15 +595,17 @@ const ATBAlias = {};
         applyIntervalGainHp(battler, state) {
             let matchData;
             if (state._intervalGainHp === undefined) {
-                if (matchData = state.note.match(/<\s*IntervalGainHp\s+gainValue=(\-?\d+)\s+duration=(\d+)\s*>/)) {
+                if ((matchData = state.note.match(/<\s*IntervalGainHp\s+gainValue=(\-?\d+)\s+duration=(\d+)\s*>/))) {
                     state._intervalGainHp = [parseInt(matchData[1]), parseInt(matchData[2])];
                 } else {
                     state._intervalGainHp = null;
-                    state._intervalGainHp
+                    state._intervalGainHp;
                 }
             }
             if (state._intervalGainHp) {
-                this._timers.push(new GainHpTimer(state._intervalGainHp[1], state._intervalGainHp[0], battler, state.id));
+                this._timers.push(
+                    new GainHpTimer(state._intervalGainHp[1], state._intervalGainHp[0], battler, state.id)
+                );
             }
         }
 
@@ -659,10 +663,9 @@ const ATBAlias = {};
         }
     }
 
-
     /* class Game_BattlerBase */
     ATBAlias._Game_BattlerBase_clearStates = Game_BattlerBase.prototype.clearStates;
-    Game_BattlerBase.prototype.clearStates = function() {
+    Game_BattlerBase.prototype.clearStates = function () {
         if (SceneManager._scene instanceof Scene_Battle) {
             for (let stateId of this._states) {
                 BattleManager.eraseStateApply(this, stateId);
@@ -672,7 +675,7 @@ const ATBAlias = {};
     };
 
     ATBAlias._Game_BattlerBase_addNewState = Game_BattlerBase.prototype.addNewState;
-    Game_BattlerBase.prototype.addNewState = function(stateId) {
+    Game_BattlerBase.prototype.addNewState = function (stateId) {
         ATBAlias._Game_BattlerBase_addNewState.call(this, stateId);
         if (SceneManager._scene instanceof Scene_Battle) {
             BattleManager.addStateApply(this, stateId);
@@ -680,7 +683,7 @@ const ATBAlias = {};
     };
 
     ATBAlias._Game_BattlerBase_eraseState = Game_BattlerBase.prototype.eraseState;
-    Game_BattlerBase.prototype.eraseState = function(stateId) {
+    Game_BattlerBase.prototype.eraseState = function (stateId) {
         ATBAlias._Game_BattlerBase_eraseState.call(this, stateId);
         if (SceneManager._scene instanceof Scene_Battle) {
             BattleManager.eraseStateApply(this, stateId);
@@ -689,7 +692,7 @@ const ATBAlias = {};
 
     // timing 1: 行動終了時
     // timing 2: ターン終了時
-    Game_BattlerBase.prototype.updateStateTurns = function(timing = 2) {
+    Game_BattlerBase.prototype.updateStateTurns = function (timing = 2) {
         for (let stateId of this._states) {
             if (this._stateTurns[stateId] > 0) {
                 let state = $dataStates[stateId];
@@ -698,59 +701,56 @@ const ATBAlias = {};
         }
     };
 
-
     /* class Game_Battler */
     ATBAlias._Game_Battler_initMembers = Game_Battler.prototype.initMembers;
-    Game_Battler.prototype.initMembers = function() {
+    Game_Battler.prototype.initMembers = function () {
         ATBAlias._Game_Battler_initMembers.call(this);
         this._gauge = null;
     };
 
-    Game_Battler.prototype.getSprite = function() {
+    Game_Battler.prototype.getSprite = function () {
         for (let sprite of BattleManager._spriteset.battlerSprites()) {
             if (sprite._battler === this) return sprite;
         }
         return null;
     };
 
-    Game_Battler.prototype.setGauge = function(gauge) {
-        return this._gauge = gauge;
+    Game_Battler.prototype.setGauge = function (gauge) {
+        return (this._gauge = gauge);
     };
 
-    Game_Battler.prototype.gauge = function() {
+    Game_Battler.prototype.gauge = function () {
         return this._gauge;
     };
 
     // 行動終了時のステート解除判定後にステート経過ターンを更新する
     ATBAlias._Game_Battler_onAllActionsEnd = Game_Battler.prototype.onAllActionsEnd;
-    Game_Battler.prototype.onAllActionsEnd = function() {
+    Game_Battler.prototype.onAllActionsEnd = function () {
         ATBAlias._Game_Battler_onAllActionsEnd.call(this);
         this.updateStateTurns(1);
     };
 
     // 行動完了時にdoneさせない
-    Game_Battler.prototype.performActionEnd = function() {
+    Game_Battler.prototype.performActionEnd = function () {
         this.setActionState("undecided");
     };
 
     // speedの生成にactionを用いない
-    Game_Battler.prototype.makeSpeed = function() {
+    Game_Battler.prototype.makeSpeed = function () {
         this._speed = this.agi + Math.randomInt(Math.floor(5 + this.agi / 4));
         this._speed += this.attackSpeed();
     };
 
-
     /* class Game_Actor */
     ATBAlias._Game_BattlerBase_die = Game_BattlerBase.prototype.die;
-    Game_Actor.prototype.die = function() {
+    Game_Actor.prototype.die = function () {
         this.gauge().commandSelectCancel();
         BattleManager._atbManager.endAction(this);
         ATBAlias._Game_BattlerBase_die.call(this);
     };
 
-
     /* class Game_Item */
-    Game_Item.prototype.isSkillWait = function() {
+    Game_Item.prototype.isSkillWait = function () {
         const skill = this.object();
         if (!skill) return null;
         if (skill._skillWait === undefined) {
@@ -763,16 +763,14 @@ const ATBAlias = {};
         return skill._skillWait;
     };
 
-
     /* class Game_Action */
-    Game_Action.prototype.isSkillWait = function() {
+    Game_Action.prototype.isSkillWait = function () {
         return this._item.isSkillWait();
     };
 
-
     /* singleton class BattleManager */
     ATBAlias._BattleManager_initMembers = BattleManager.initMembers;
-    BattleManager.initMembers = function() {
+    BattleManager.initMembers = function () {
         ATBAlias._BattleManager_initMembers.call(this);
         this._turnStarted = false;
         this._beforeActionFinish = false;
@@ -780,20 +778,20 @@ const ATBAlias = {};
         this._atbManager = new ATBManager();
     };
 
-    BattleManager.spriteset = function() {
+    BattleManager.spriteset = function () {
         return this._spriteset;
-    }
+    };
 
-    BattleManager.startInputPhase = function() {
+    BattleManager.startInputPhase = function () {
         this._phase = "input";
     };
 
-    BattleManager.setActor = function(actor) {
+    BattleManager.setActor = function (actor) {
         this._actorIndex = $gameParty.members().indexOf(actor);
     };
 
     ATBAlias._BattleManager_startBattle = BattleManager.startBattle;
-    BattleManager.startBattle = function() {
+    BattleManager.startBattle = function () {
         ATBAlias._BattleManager_startBattle.call(this);
         this._atbManager.startBattle();
         if (this._surprise) {
@@ -804,12 +802,12 @@ const ATBAlias = {};
     };
 
     // startInput時は、すぐにターンを開始する
-    BattleManager.startInput = function() {
+    BattleManager.startInput = function () {
         this.startTurn();
     };
 
     ATBAlias._BattleManager_startTurn = BattleManager.startTurn;
-    BattleManager.startTurn = function() {
+    BattleManager.startTurn = function () {
         if (this._turnStarted) {
             this._phase = "turn";
             this._logWindow.startTurn();
@@ -833,7 +831,7 @@ const ATBAlias = {};
         }
     };
 
-    BattleManager.updateTurn = function() {
+    BattleManager.updateTurn = function () {
         // CTBの場合は、BattleManager.updateTurn内でゲージを更新する
         if (ATBConfig.waitCommandSelection) {
             this._atbManager.updateGauge();
@@ -860,10 +858,9 @@ const ATBAlias = {};
     };
 
     // clearActorを無効化する
-    BattleManager.clearActor = function() {
-    };
+    BattleManager.clearActor = function () {};
 
-    BattleManager.beforeAction = function(action) {
+    BattleManager.beforeAction = function (action) {
         const gauge = this._subject.gauge();
         if (gauge.purpose === ATBGauge.PURPOSE_SKILL_WAIT) {
             if (this._subject instanceof Game_Actor) gauge.setCommandSelected(true);
@@ -883,14 +880,14 @@ const ATBAlias = {};
         }
     };
 
-    BattleManager.afterAction = function() {
+    BattleManager.afterAction = function () {
         this._atbManager.toActive("turn");
         if (this._subject instanceof Game_Actor && this._subject.gauge().purpose === ATBGauge.PURPOSE_TIME) {
             this._subject.gauge().setCommandSelected(false);
         }
     };
 
-    BattleManager.processTurn = function() {
+    BattleManager.processTurn = function () {
         if (ATBConfig.enableYEP_BattleEngineCore) this._processTurn = true;
         const subject = this._subject;
         const action = subject.currentAction();
@@ -925,7 +922,7 @@ const ATBAlias = {};
     };
 
     ATBAlias._BattleManager_startAction = BattleManager.startAction;
-    BattleManager.startAction = function() {
+    BattleManager.startAction = function () {
         if (this._subject instanceof Game_Actor) {
             if (this._subject.gauge().isCommandSelected()) {
                 if (ATBConfig.waitAnimation) this._atbManager.toWait("turn");
@@ -940,53 +937,49 @@ const ATBAlias = {};
     };
 
     ATBAlias._BattleManager_endAction = BattleManager.endAction;
-    BattleManager.endAction = function() {
+    BattleManager.endAction = function () {
         ATBAlias._BattleManager_endAction.call(this);
         this._atbManager.endAction(this._subject);
     };
 
     ATBAlias._BattleManager_endTurn = BattleManager.endTurn;
-    BattleManager.endTurn = function() {
+    BattleManager.endTurn = function () {
         if (ATBConfig.enableYEP_BattleEngineCore) {
-
             if (this.isTurnBased() && this._enteredEndPhase) {
-              this._phase = "turnEnd";
-              this._preemptive = false;
-              this._surprise = false;
-              return;
+                this._phase = "turnEnd";
+                this._preemptive = false;
+                this._surprise = false;
+                return;
             }
             this._enteredEndPhase = true;
             Yanfly.BEC.BattleManager_endTurn.call(this);
             BattleManager.refreshAllMembers();
             this.actor().gauge().commandSelectCancel();
             this._turnStarted = false;
-
         } else {
-
             ATBAlias._BattleManager_endTurn.call(this);
             this._turnStarted = false;
-
         }
     };
 
-    BattleManager.selectNextCommand = function() {
+    BattleManager.selectNextCommand = function () {
         this.actor().gauge().setCommandSelected(true);
         this.actor().gauge().setCommandSelecting(false);
         this.toActiveSelectSkillOrItem();
         this.startTurnReserve();
     };
 
-    BattleManager.getNextSubject = function() {
+    BattleManager.getNextSubject = function () {
         if (this._subject && this._subject.gauge().isActionEnd()) {
             return null;
         }
         return this._atbManager.getNextSubject();
     };
 
-    BattleManager.processEscape = function() {
+    BattleManager.processEscape = function () {
         $gameParty.performEscape();
         SoundManager.playEscape();
-        const success = this._preemptive ? true : (Math.random() < this._escapeRatio);
+        const success = this._preemptive ? true : Math.random() < this._escapeRatio;
         if (success) {
             this.displayEscapeSuccessMessage();
             this._escaped = true;
@@ -1006,76 +999,72 @@ const ATBAlias = {};
     };
 
     ATBAlias._BattleManager_isInputting = BattleManager.isInputting;
-    BattleManager.isInputting = function() {
+    BattleManager.isInputting = function () {
         return ATBAlias._BattleManager_isInputting.call(this) && !this._turnStartReserve;
     };
 
-    BattleManager.update = function() {
+    BattleManager.update = function () {
         if (ATBConfig.enableChangeSelectActor) this.updateChangeSelectActor();
         if (ATBConfig.enableYEP_BattleEngineCore) {
-
             if (!this.isBusy() && !this.updateEvent()) {
                 switch (this._phase) {
-                case "start":
-                    this.startInput();
-                    break;
-                case "input":
-                case "turn":
-                    this.startTurnAwait();
-                    this.updateTurn();
-                    break;
-                case "action":
-                    this.updateAction();
-                    break;
-                case "phaseChange":
-                    this.updatePhase();
-                    break;
-                case "actionList":
-                    this.updateActionList()
-                    break;
-                case "actionTargetList":
-                    this.updateActionTargetList()
-                    break;
-                case "turnEnd":
-                    this.updateTurnEnd();
-                    break;
-                case "battleEnd":
-                    this.updateBattleEnd();
-                    break;
+                    case "start":
+                        this.startInput();
+                        break;
+                    case "input":
+                    case "turn":
+                        this.startTurnAwait();
+                        this.updateTurn();
+                        break;
+                    case "action":
+                        this.updateAction();
+                        break;
+                    case "phaseChange":
+                        this.updatePhase();
+                        break;
+                    case "actionList":
+                        this.updateActionList();
+                        break;
+                    case "actionTargetList":
+                        this.updateActionTargetList();
+                        break;
+                    case "turnEnd":
+                        this.updateTurnEnd();
+                        break;
+                    case "battleEnd":
+                        this.updateBattleEnd();
+                        break;
                 }
             }
-
         } else {
-
             if (!this.isBusy() && !this.updateEvent()) {
                 switch (this._phase) {
-                case "start":
-                    this.startInput();
-                    break;
-                // ATBの場合は、input phaseの間でもターン更新を行う
-                case "input":
-                case "turn":
-                    this.startTurnAwait();
-                    this.updateTurn();
-                    break;
-                case "action":
-                    this.updateAction();
-                    break;
-                case "turnEnd":
-                    this.updateTurnEnd();
-                    break;
-                case "battleEnd":
-                    this.updateBattleEnd();
-                    break;
+                    case "start":
+                        this.startInput();
+                        break;
+                    // ATBの場合は、input phaseの間でもターン更新を行う
+                    case "input":
+                    case "turn":
+                        this.startTurnAwait();
+                        this.updateTurn();
+                        break;
+                    case "action":
+                        this.updateAction();
+                        break;
+                    case "turnEnd":
+                        this.updateTurnEnd();
+                        break;
+                    case "battleEnd":
+                        this.updateBattleEnd();
+                        break;
                 }
             }
-
         }
         // バトルイベントを実行する場合、アクターコマンド選択中を解除する
         if ($gameTroop.isEventRunning()) this.actor().gauge().setCommandSelecting(false);
     };
 
-    BattleManager.updateChangeSelectActor = function() {
+    BattleManager.updateChangeSelectActor = function () {
         if (!this._subject) return;
         const actorCommandWindow = SceneManager._scene._actorCommandWindow;
         if (actorCommandWindow.active) {
@@ -1087,22 +1076,24 @@ const ATBAlias = {};
         }
     };
 
-    BattleManager.changeSelectActor = function(reverse = false) {
+    BattleManager.changeSelectActor = function (reverse = false) {
         const scene = SceneManager._scene;
         const currentActor = this.actor();
         if (!currentActor) return;
         let nextActor = null;
-        if (this._subject instanceof Game_Actor
-            && this._subject === currentActor
-            && this._subject.canInput()
-            && this._subject.gauge().purpose === ATBGauge.PURPOSE_TIME
-            && !this._subject.gauge().isActionEnd()) {
-                this._atbManager.addNextSubject(this._subject);
-                nextActor = this._atbManager.changeNextActor(currentActor, reverse);
-                this._subject = this._atbManager.getNextSubject();
-                if (!nextActor) return;
-                currentActor.gauge().commandSelectCancel();
-                this.setActor(nextActor);
+        if (
+            this._subject instanceof Game_Actor &&
+            this._subject === currentActor &&
+            this._subject.canInput() &&
+            this._subject.gauge().purpose === ATBGauge.PURPOSE_TIME &&
+            !this._subject.gauge().isActionEnd()
+        ) {
+            this._atbManager.addNextSubject(this._subject);
+            nextActor = this._atbManager.changeNextActor(currentActor, reverse);
+            this._subject = this._atbManager.getNextSubject();
+            if (!nextActor) return;
+            currentActor.gauge().commandSelectCancel();
+            this.setActor(nextActor);
         } else {
             nextActor = this._atbManager.changeNextActor(currentActor, reverse);
             if (!nextActor) return;
@@ -1114,7 +1105,7 @@ const ATBAlias = {};
     };
 
     // アクターコマンドの選択が完了してからターンを開始するようにする
-    BattleManager.startTurnReserve = function() {
+    BattleManager.startTurnReserve = function () {
         if (this._subject && !this._subject.gauge().isActionEnd()) {
             this._turnStartReserve = true;
             SceneManager._scene.changeInputWindow();
@@ -1124,7 +1115,7 @@ const ATBAlias = {};
         }
     };
 
-    BattleManager.startTurnAwait = function() {
+    BattleManager.startTurnAwait = function () {
         if (this._phase === "battleEnd") return;
         if (this._subject && this._subject.gauge().isActionEnd) {
             if (this._turnStartReserve) {
@@ -1134,47 +1125,45 @@ const ATBAlias = {};
         }
     };
 
-    BattleManager.updateGauge = function() {
+    BattleManager.updateGauge = function () {
         this._atbManager.updateGauge();
     };
 
-    BattleManager.startPause = function() {
+    BattleManager.startPause = function () {
         this._atbManager.toWait("pause");
     };
 
-    BattleManager.endPause = function() {
+    BattleManager.endPause = function () {
         this._atbManager.toActive("pause");
     };
 
-    BattleManager.toActiveSelectSkillOrItem = function() {
+    BattleManager.toActiveSelectSkillOrItem = function () {
         this._atbManager.toActive("selectSkillOrItem");
     };
 
-    BattleManager.toWaitSelectSkillOrItem = function() {
+    BattleManager.toWaitSelectSkillOrItem = function () {
         this._atbManager.toWait("selectSkillOrItem");
     };
 
-    BattleManager.addStateApply = function(battler, stateId) {
+    BattleManager.addStateApply = function (battler, stateId) {
         this._atbManager.addStateApply(battler, stateId);
     };
 
-    BattleManager.eraseStateApply = function(battler, stateId) {
+    BattleManager.eraseStateApply = function (battler, stateId) {
         this._atbManager.eraseStateApply(battler, stateId);
     };
 
-
     /* class Scene_Battle */
     ATBAlias._Scene_Battle_update = Scene_Battle.prototype.update;
-    Scene_Battle.prototype.update = function() {
+    Scene_Battle.prototype.update = function () {
         ATBAlias._Scene_Battle_update.call(this);
         this.updateActorCommandWindow();
     };
 
-    Scene_Battle.prototype.updateBattleProcess = function() {
+    Scene_Battle.prototype.updateBattleProcess = function () {
         // CTBの場合は、BattleManager.updateTurn内でゲージを更新する
         if (!ATBConfig.waitCommandSelection) {
             if (ATBConfig.enableYEP_BattleEngineCore) {
-
                 switch (BattleManager._phase) {
                     case "input":
                     case "turn":
@@ -1184,20 +1173,16 @@ const ATBAlias = {};
                     case "actionTargetList":
                         BattleManager.updateGauge();
                 }
-
             } else {
-
                 switch (BattleManager._phase) {
                     case "input":
                     case "turn":
                     case "action":
                         BattleManager.updateGauge();
                 }
-
             }
         }
-        if (!this.isAnyInputWindowActive() || BattleManager.isAborting() ||
-                BattleManager.isBattleEnd()) {
+        if (!this.isAnyInputWindowActive() || BattleManager.isAborting() || BattleManager.isBattleEnd()) {
             BattleManager.update();
             if (!BattleManager.actor() || !BattleManager.actor().gauge().isCommandSelected()) {
                 this.changeInputWindow();
@@ -1205,7 +1190,7 @@ const ATBAlias = {};
         }
     };
 
-    Scene_Battle.prototype.updateActorCommandWindow = function() {
+    Scene_Battle.prototype.updateActorCommandWindow = function () {
         if (BattleManager.actor() && !BattleManager.actor().gauge().isCommandSelecting()) {
             this._actorCommandWindow.close();
             this._skillWindow.hide();
@@ -1216,20 +1201,20 @@ const ATBAlias = {};
     };
 
     // ターンを再開する
-    Scene_Battle.prototype.commandFight = function() {
+    Scene_Battle.prototype.commandFight = function () {
         BattleManager.endPause();
         BattleManager.actor().gauge().setCommandSelecting(false);
         this.changeInputWindow();
     };
 
     // キャンセルでパーティウィンドウに戻す
-    Scene_Battle.prototype.selectPreviousCommand = function() {
+    Scene_Battle.prototype.selectPreviousCommand = function () {
         this.startPartyCommandSelection();
     };
 
     // パーティコマンド選択時はポーズする
     ATBAlias._Scene_Battle_startPartyCommandSelection = Scene_Battle.prototype.startPartyCommandSelection;
-    Scene_Battle.prototype.startPartyCommandSelection = function() {
+    Scene_Battle.prototype.startPartyCommandSelection = function () {
         BattleManager.startPause();
         if (ATBConfig.enableYEP_BattleEngineCore) {
             Yanfly.BEC.Scene_Battle_startPartyCommandSelection.call(this);
@@ -1239,26 +1224,22 @@ const ATBAlias = {};
     };
 
     ATBAlias._Scene_Battle_startActorCommandSelection = Scene_Battle.prototype.startActorCommandSelection;
-    Scene_Battle.prototype.startActorCommandSelection = function() {
+    Scene_Battle.prototype.startActorCommandSelection = function () {
         if (ATBConfig.enableYEP_BattleEngineCore) {
-
             if (!BattleManager.actor().gauge().isCommandSelecting()) {
                 Yanfly.BEC.Scene_Battle_startActorCommandSelection.call(this);
                 this._statusWindow.refresh();
                 BattleManager.actor().gauge().setCommandSelecting(true);
             }
-
         } else {
-
             if (!BattleManager.actor().gauge().isCommandSelecting()) {
                 ATBAlias._Scene_Battle_startActorCommandSelection.call(this);
                 BattleManager.actor().gauge().setCommandSelecting(true);
             }
-
         }
     };
 
-    Scene_Battle.prototype.changeInputWindow = function() {
+    Scene_Battle.prototype.changeInputWindow = function () {
         if (BattleManager.isInputting()) {
             if (BattleManager.actor()) {
                 this.startActorCommandSelection();
@@ -1275,7 +1256,7 @@ const ATBAlias = {};
 
     // ATB時は、ステータスウィンドウを移動しないようにする
     ATBAlias._Scene_Battle_updateWindowPositions = Scene_Battle.prototype.updateWindowPositions;
-    Scene_Battle.prototype.updateWindowPositions = function() {
+    Scene_Battle.prototype.updateWindowPositions = function () {
         statusX = this._partyCommandWindow.width;
         if (this._statusWindow.x < statusX) {
             this._statusWindow.x += 16;
@@ -1293,15 +1274,15 @@ const ATBAlias = {};
 
     // ATB時は、パーティコマンドが開いているとき以外は時間を進める
     ATBAlias._Scene_Battle_isAnyInputWindowActive = Scene_Battle.prototype.isAnyInputWindowActive;
-    Scene_Battle.prototype.isAnyInputWindowActive = function() {
+    Scene_Battle.prototype.isAnyInputWindowActive = function () {
         if (ATBConfig.waitCommandSelection) {
             return ATBAlias._Scene_Battle_isAnyInputWindowActive.call(this);
         }
         return this._partyCommandWindow.active;
     };
 
-    ATBAlias._Scene_Battle_commandSkill =  Scene_Battle.prototype.commandSkill;
-    Scene_Battle.prototype.commandSkill = function() {
+    ATBAlias._Scene_Battle_commandSkill = Scene_Battle.prototype.commandSkill;
+    Scene_Battle.prototype.commandSkill = function () {
         if (!ATBConfig.waitCommandSelection && ATBConfig.waitSelectSkillOrItem) {
             BattleManager.toWaitSelectSkillOrItem();
         }
@@ -1309,7 +1290,7 @@ const ATBAlias = {};
     };
 
     ATBAlias._Scene_Battle_commandItem = Scene_Battle.prototype.commandItem;
-    Scene_Battle.prototype.commandItem = function() {
+    Scene_Battle.prototype.commandItem = function () {
         if (!ATBConfig.waitCommandSelection && ATBConfig.waitSelectSkillOrItem) {
             BattleManager.toWaitSelectSkillOrItem();
         }
@@ -1317,7 +1298,7 @@ const ATBAlias = {};
     };
 
     ATBAlias._Scene_Battle_onSkillCancel = Scene_Battle.prototype.onSkillCancel;
-    Scene_Battle.prototype.onSkillCancel = function() {
+    Scene_Battle.prototype.onSkillCancel = function () {
         if (!ATBConfig.waitCommandSelection && ATBConfig.waitSelectSkillOrItem) {
             BattleManager.toActiveSelectSkillOrItem();
         }
@@ -1325,17 +1306,16 @@ const ATBAlias = {};
     };
 
     ATBAlias._Scene_Battle_onItemCancel = Scene_Battle.prototype.onItemCancel;
-    Scene_Battle.prototype.onItemCancel = function() {
+    Scene_Battle.prototype.onItemCancel = function () {
         if (!ATBConfig.waitCommandSelection && ATBConfig.waitSelectSkillOrItem) {
             BattleManager.toActiveSelectSkillOrItem();
         }
         ATBAlias._Scene_Battle_onItemCancel.call(this);
     };
 
-
     /* class Window_BattleStatus */
     ATBAlias._Window_BattleStatus_drawGaugeAreaWithTp = Window_BattleStatus.prototype.drawGaugeAreaWithTp;
-    Window_BattleStatus.prototype.drawGaugeAreaWithTp = function(rect, actor) {
+    Window_BattleStatus.prototype.drawGaugeAreaWithTp = function (rect, actor) {
         if (ATBConfig.drawUnderGauge) {
             ATBAlias._Window_BattleStatus_drawGaugeAreaWithTp.call(this, rect, actor);
         } else {
@@ -1347,7 +1327,7 @@ const ATBAlias = {};
     };
 
     ATBAlias._Window_BattleStatus_drawGaugeAreaWithoutTp = Window_BattleStatus.prototype.drawGaugeAreaWithoutTp;
-    Window_BattleStatus.prototype.drawGaugeAreaWithoutTp = function(rect, actor) {
+    Window_BattleStatus.prototype.drawGaugeAreaWithoutTp = function (rect, actor) {
         if (ATBConfig.drawUnderGauge) {
             ATBAlias._Window_BattleStatus_drawGaugeAreaWithoutTp.call(this, rect, actor);
         } else {
@@ -1356,7 +1336,7 @@ const ATBAlias = {};
         }
     };
 
-    Window_BattleStatus.prototype.drawActorCt = function(actor, x, y, width) {
+    Window_BattleStatus.prototype.drawActorCt = function (actor, x, y, width) {
         width = width || 96;
         const gauge = actor.gauge();
         let color1, color2;
@@ -1375,10 +1355,13 @@ const ATBAlias = {};
         this.changeTextColor(this.normalColor());
     };
 
-
     class Sprite_GaugeLine extends Sprite {
-        get GAUGE_WIDTH() { return 50 };
-        get GAUGE_HEIGHT() { return 5 };
+        get GAUGE_WIDTH() {
+            return 50;
+        }
+        get GAUGE_HEIGHT() {
+            return 5;
+        }
 
         initialize(battler) {
             const bitmap = new Bitmap(this.GAUGE_WIDTH, this.GAUGE_HEIGHT);
@@ -1420,12 +1403,10 @@ const ATBAlias = {};
         }
     }
 
-
     /* class Spriteset_Battle */
-    Spriteset_Battle.prototype.createGaugeLine = function(battler) {
+    Spriteset_Battle.prototype.createGaugeLine = function (battler) {
         this._baseSprite.addChild(new Sprite_GaugeLine(battler));
     };
-
 
     // クラス名のエイリアス
     ATBAlias.ATBTimer = ATBTimer;
@@ -1434,5 +1415,4 @@ const ATBAlias = {};
     ATBAlias.EnemyGauge = EnemyGauge;
     ATBAlias.ATBManager = ATBManager;
     ATBAlias.Sprite_GaugeLine = Sprite_GaugeLine;
-
-};
+}

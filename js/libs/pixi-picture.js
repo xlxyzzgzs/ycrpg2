@@ -1,8 +1,12 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends =
+    (this && this.__extends) ||
+    function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() {
+            this.constructor = d;
+        }
+        d.prototype = b === null ? Object.create(b) : ((__.prototype = b.prototype), new __());
+    };
 var PIXI;
 (function (PIXI) {
     var extras;
@@ -12,30 +16,34 @@ var PIXI;
                 vertUniforms: "",
                 vertCode: "vTextureCoord = aTextureCoord;",
                 fragUniforms: "uniform vec4 uTextureClamp;",
-                fragCode: "vec2 textureCoord = clamp(vTextureCoord, uTextureClamp.xy, uTextureClamp.zw);"
+                fragCode: "vec2 textureCoord = clamp(vTextureCoord, uTextureClamp.xy, uTextureClamp.zw);",
             },
             {
                 vertUniforms: "uniform mat3 uTransform;",
                 vertCode: "vTextureCoord = (uTransform * vec3(aTextureCoord, 1.0)).xy;",
                 fragUniforms: "",
-                fragCode: "vec2 textureCoord = vTextureCoord;"
+                fragCode: "vec2 textureCoord = vTextureCoord;",
             },
             {
                 vertUniforms: "uniform mat3 uTransform;",
                 vertCode: "vTextureCoord = (uTransform * vec3(aTextureCoord, 1.0)).xy;",
                 fragUniforms: "uniform mat3 uMapCoord;\nuniform vec4 uClampFrame;\nuniform vec2 uClampOffset;",
-                fragCode: "vec2 textureCoord = mod(vTextureCoord - uClampOffset, vec2(1.0, 1.0)) + uClampOffset;" +
+                fragCode:
+                    "vec2 textureCoord = mod(vTextureCoord - uClampOffset, vec2(1.0, 1.0)) + uClampOffset;" +
                     "\ntextureCoord = (uMapCoord * vec3(textureCoord, 1.0)).xy;" +
-                    "\ntextureCoord = clamp(textureCoord, uClampFrame.xy, uClampFrame.zw);"
-            }
+                    "\ntextureCoord = clamp(textureCoord, uClampFrame.xy, uClampFrame.zw);",
+            },
         ];
         var PictureShader = (function (_super) {
             __extends(PictureShader, _super);
             function PictureShader(gl, vert, frag, tilingMode) {
                 var lib = shaderLib[tilingMode];
-                _super.call(this, gl, vert.replace(/%SPRITE_UNIFORMS%/gi, lib.vertUniforms)
-                    .replace(/%SPRITE_CODE%/gi, lib.vertCode), frag.replace(/%SPRITE_UNIFORMS%/gi, lib.fragUniforms)
-                    .replace(/%SPRITE_CODE%/gi, lib.fragCode));
+                _super.call(
+                    this,
+                    gl,
+                    vert.replace(/%SPRITE_UNIFORMS%/gi, lib.vertUniforms).replace(/%SPRITE_CODE%/gi, lib.vertCode),
+                    frag.replace(/%SPRITE_UNIFORMS%/gi, lib.fragUniforms).replace(/%SPRITE_CODE%/gi, lib.fragCode)
+                );
                 this.bind();
                 this.tilingMode = tilingMode;
                 this.tempQuad = new PIXI.Quad(gl);
@@ -43,77 +51,92 @@ var PIXI;
                 this.uniforms.uColor = new Float32Array([1, 1, 1, 1]);
                 this.uniforms.uSampler = [0, 1];
             }
-            PictureShader.blendVert = "\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aColor;\n\nuniform mat3 projectionMatrix;\nuniform mat3 mapMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec2 vMapCoord;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n    %SPRITE_CODE%\n    vMapCoord = (mapMatrix * vec3(aVertexPosition, 1.0)).xy;\n}\n";
+            PictureShader.blendVert =
+                "\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aColor;\n\nuniform mat3 projectionMatrix;\nuniform mat3 mapMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec2 vMapCoord;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n    %SPRITE_CODE%\n    vMapCoord = (mapMatrix * vec3(aVertexPosition, 1.0)).xy;\n}\n";
             return PictureShader;
-        }(PIXI.Shader));
+        })(PIXI.Shader);
         extras.PictureShader = PictureShader;
-    })(extras = PIXI.extras || (PIXI.extras = {}));
+    })((extras = PIXI.extras || (PIXI.extras = {})));
 })(PIXI || (PIXI = {}));
 var PIXI;
 (function (PIXI) {
     var extras;
     (function (extras) {
-        var overlayFrag = "\nvarying vec2 vTextureCoord;\nvarying vec2 vMapCoord;\nvarying vec4 vColor;\n\nuniform sampler2D uSampler[2];\nuniform vec4 uColor;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    %SPRITE_CODE%\n    vec4 source = texture2D(uSampler[0], textureCoord) * uColor;\n    vec4 target = texture2D(uSampler[1], vMapCoord);\n\n    //reverse hardlight\n    if (source.a == 0.0) {\n        gl_FragColor = vec4(0, 0, 0, 0);\n        return;\n    }\n    //yeah, premultiplied\n    vec3 Cb = source.rgb/source.a, Cs;\n    if (target.a > 0.0) {\n        Cs = target.rgb / target.a;\n    }\n    vec3 multiply = Cb * Cs * 2.0;\n    vec3 Cs2 = Cs * 2.0 - 1.0;\n    vec3 screen = Cb + Cs2 - Cb * Cs2;\n    vec3 B;\n    if (Cb.r <= 0.5) {\n        B.r = multiply.r;\n    } else {\n        B.r = screen.r;\n    }\n    if (Cb.g <= 0.5) {\n        B.g = multiply.g;\n    } else {\n        B.g = screen.g;\n    }\n    if (Cb.b <= 0.5) {\n        B.b = multiply.b;\n    } else {\n        B.b = screen.b;\n    }\n    vec4 res;\n    res.xyz = (1.0 - source.a) * Cs + source.a * B;\n    res.a = source.a + target.a * (1.0-source.a);\n    gl_FragColor = vec4(res.xyz * res.a, res.a);\n}\n";
+        var overlayFrag =
+            "\nvarying vec2 vTextureCoord;\nvarying vec2 vMapCoord;\nvarying vec4 vColor;\n\nuniform sampler2D uSampler[2];\nuniform vec4 uColor;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    %SPRITE_CODE%\n    vec4 source = texture2D(uSampler[0], textureCoord) * uColor;\n    vec4 target = texture2D(uSampler[1], vMapCoord);\n\n    //reverse hardlight\n    if (source.a == 0.0) {\n        gl_FragColor = vec4(0, 0, 0, 0);\n        return;\n    }\n    //yeah, premultiplied\n    vec3 Cb = source.rgb/source.a, Cs;\n    if (target.a > 0.0) {\n        Cs = target.rgb / target.a;\n    }\n    vec3 multiply = Cb * Cs * 2.0;\n    vec3 Cs2 = Cs * 2.0 - 1.0;\n    vec3 screen = Cb + Cs2 - Cb * Cs2;\n    vec3 B;\n    if (Cb.r <= 0.5) {\n        B.r = multiply.r;\n    } else {\n        B.r = screen.r;\n    }\n    if (Cb.g <= 0.5) {\n        B.g = multiply.g;\n    } else {\n        B.g = screen.g;\n    }\n    if (Cb.b <= 0.5) {\n        B.b = multiply.b;\n    } else {\n        B.b = screen.b;\n    }\n    vec4 res;\n    res.xyz = (1.0 - source.a) * Cs + source.a * B;\n    res.a = source.a + target.a * (1.0-source.a);\n    gl_FragColor = vec4(res.xyz * res.a, res.a);\n}\n";
         var HardLightShader = (function (_super) {
             __extends(HardLightShader, _super);
             function HardLightShader(gl, tilingMode) {
                 _super.call(this, gl, extras.PictureShader.blendVert, overlayFrag, tilingMode);
             }
             return HardLightShader;
-        }(extras.PictureShader));
+        })(extras.PictureShader);
         extras.HardLightShader = HardLightShader;
-    })(extras = PIXI.extras || (PIXI.extras = {}));
+    })((extras = PIXI.extras || (PIXI.extras = {})));
 })(PIXI || (PIXI = {}));
 var PIXI;
 (function (PIXI) {
     var extras;
     (function (extras) {
         function mapFilterBlendModesToPixi(gl, array) {
-            if (array === void 0) { array = []; }
-            array[PIXI.BLEND_MODES.OVERLAY] = [new extras.OverlayShader(gl, 0), new extras.OverlayShader(gl, 1), new extras.OverlayShader(gl, 2)];
-            array[PIXI.BLEND_MODES.HARD_LIGHT] = [new extras.HardLightShader(gl, 0), new extras.HardLightShader(gl, 1), new extras.HardLightShader(gl, 2)];
+            if (array === void 0) {
+                array = [];
+            }
+            array[PIXI.BLEND_MODES.OVERLAY] = [
+                new extras.OverlayShader(gl, 0),
+                new extras.OverlayShader(gl, 1),
+                new extras.OverlayShader(gl, 2),
+            ];
+            array[PIXI.BLEND_MODES.HARD_LIGHT] = [
+                new extras.HardLightShader(gl, 0),
+                new extras.HardLightShader(gl, 1),
+                new extras.HardLightShader(gl, 2),
+            ];
             return array;
         }
         extras.mapFilterBlendModesToPixi = mapFilterBlendModesToPixi;
-    })(extras = PIXI.extras || (PIXI.extras = {}));
+    })((extras = PIXI.extras || (PIXI.extras = {})));
 })(PIXI || (PIXI = {}));
 var PIXI;
 (function (PIXI) {
     var extras;
     (function (extras) {
-        var normalFrag = "\nvarying vec2 vTextureCoord;\nvarying vec4 vColor;\n\nuniform sampler2D uSampler[2];\nuniform vec4 uColor;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    %SPRITE_CODE%\n\n    vec4 sample = texture2D(uSampler[0], textureCoord);\n    gl_FragColor = sample * uColor;\n}\n";
-        var normalVert = "\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aColor;\n\nuniform mat3 projectionMatrix;\n\nvarying vec2 vTextureCoord;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n    %SPRITE_CODE%\n}\n";
+        var normalFrag =
+            "\nvarying vec2 vTextureCoord;\nvarying vec4 vColor;\n\nuniform sampler2D uSampler[2];\nuniform vec4 uColor;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    %SPRITE_CODE%\n\n    vec4 sample = texture2D(uSampler[0], textureCoord);\n    gl_FragColor = sample * uColor;\n}\n";
+        var normalVert =
+            "\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aColor;\n\nuniform mat3 projectionMatrix;\n\nvarying vec2 vTextureCoord;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n    %SPRITE_CODE%\n}\n";
         var NormalShader = (function (_super) {
             __extends(NormalShader, _super);
             function NormalShader(gl, tilingMode) {
                 _super.call(this, gl, normalVert, normalFrag, tilingMode);
             }
             return NormalShader;
-        }(extras.PictureShader));
+        })(extras.PictureShader);
         extras.NormalShader = NormalShader;
-    })(extras = PIXI.extras || (PIXI.extras = {}));
+    })((extras = PIXI.extras || (PIXI.extras = {})));
 })(PIXI || (PIXI = {}));
 var PIXI;
 (function (PIXI) {
     var extras;
     (function (extras) {
-        var overlayFrag = "\nvarying vec2 vTextureCoord;\nvarying vec2 vMapCoord;\nvarying vec4 vColor;\n\nuniform sampler2D uSampler[2];\nuniform vec4 uColor;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    %SPRITE_CODE%\n    vec4 source = texture2D(uSampler[0], textureCoord) * uColor;\n    vec4 target = texture2D(uSampler[1], vMapCoord);\n\n    //reverse hardlight\n    if (source.a == 0.0) {\n        gl_FragColor = vec4(0, 0, 0, 0);\n        return;\n    }\n    //yeah, premultiplied\n    vec3 Cb = source.rgb/source.a, Cs;\n    if (target.a > 0.0) {\n        Cs = target.rgb / target.a;\n    }\n    vec3 multiply = Cb * Cs * 2.0;\n    vec3 Cb2 = Cb * 2.0 - 1.0;\n    vec3 screen = Cb2 + Cs - Cb2 * Cs;\n    vec3 B;\n    if (Cs.r <= 0.5) {\n        B.r = multiply.r;\n    } else {\n        B.r = screen.r;\n    }\n    if (Cs.g <= 0.5) {\n        B.g = multiply.g;\n    } else {\n        B.g = screen.g;\n    }\n    if (Cs.b <= 0.5) {\n        B.b = multiply.b;\n    } else {\n        B.b = screen.b;\n    }\n    vec4 res;\n    res.xyz = (1.0 - source.a) * Cs + source.a * B;\n    res.a = source.a + target.a * (1.0-source.a);\n    gl_FragColor = vec4(res.xyz * res.a, res.a);\n}\n";
+        var overlayFrag =
+            "\nvarying vec2 vTextureCoord;\nvarying vec2 vMapCoord;\nvarying vec4 vColor;\n\nuniform sampler2D uSampler[2];\nuniform vec4 uColor;\n%SPRITE_UNIFORMS%\n\nvoid main(void)\n{\n    %SPRITE_CODE%\n    vec4 source = texture2D(uSampler[0], textureCoord) * uColor;\n    vec4 target = texture2D(uSampler[1], vMapCoord);\n\n    //reverse hardlight\n    if (source.a == 0.0) {\n        gl_FragColor = vec4(0, 0, 0, 0);\n        return;\n    }\n    //yeah, premultiplied\n    vec3 Cb = source.rgb/source.a, Cs;\n    if (target.a > 0.0) {\n        Cs = target.rgb / target.a;\n    }\n    vec3 multiply = Cb * Cs * 2.0;\n    vec3 Cb2 = Cb * 2.0 - 1.0;\n    vec3 screen = Cb2 + Cs - Cb2 * Cs;\n    vec3 B;\n    if (Cs.r <= 0.5) {\n        B.r = multiply.r;\n    } else {\n        B.r = screen.r;\n    }\n    if (Cs.g <= 0.5) {\n        B.g = multiply.g;\n    } else {\n        B.g = screen.g;\n    }\n    if (Cs.b <= 0.5) {\n        B.b = multiply.b;\n    } else {\n        B.b = screen.b;\n    }\n    vec4 res;\n    res.xyz = (1.0 - source.a) * Cs + source.a * B;\n    res.a = source.a + target.a * (1.0-source.a);\n    gl_FragColor = vec4(res.xyz * res.a, res.a);\n}\n";
         var OverlayShader = (function (_super) {
             __extends(OverlayShader, _super);
             function OverlayShader(gl, tilingMode) {
                 _super.call(this, gl, extras.PictureShader.blendVert, overlayFrag, tilingMode);
             }
             return OverlayShader;
-        }(extras.PictureShader));
+        })(extras.PictureShader);
         extras.OverlayShader = OverlayShader;
-    })(extras = PIXI.extras || (PIXI.extras = {}));
+    })((extras = PIXI.extras || (PIXI.extras = {})));
 })(PIXI || (PIXI = {}));
 var PIXI;
 (function (PIXI) {
     var extras;
     (function (extras) {
         function nextPow2(v) {
-            v += (v === 0) ? 1 : 0;
+            v += v === 0 ? 1 : 0;
             --v;
             v |= v >>> 1;
             v |= v >>> 2;
@@ -130,7 +153,11 @@ var PIXI;
             PictureRenderer.prototype.onContextChange = function () {
                 var gl = this.renderer.gl;
                 this.drawModes = extras.mapFilterBlendModesToPixi(gl);
-                this.normalShader = [new extras.NormalShader(gl, 0), new extras.NormalShader(gl, 1), new extras.NormalShader(gl, 2)];
+                this.normalShader = [
+                    new extras.NormalShader(gl, 0),
+                    new extras.NormalShader(gl, 1),
+                    new extras.NormalShader(gl, 2),
+                ];
                 this._tempClamp = new Float32Array(4);
                 this._tempColor = new Float32Array(4);
                 this._tempRect = new PIXI.Rectangle();
@@ -141,13 +168,10 @@ var PIXI;
                 this._bigBuf = new Uint8Array(1 << 20);
                 this._renderTexture = new PIXI.BaseRenderTexture(1024, 1024);
             };
-            PictureRenderer.prototype.start = function () {
-            };
-            PictureRenderer.prototype.flush = function () {
-            };
+            PictureRenderer.prototype.start = function () {};
+            PictureRenderer.prototype.flush = function () {};
             PictureRenderer.prototype._getRenderTexture = function (minWidth, minHeight) {
-                if (this._renderTexture.width < minWidth ||
-                    this._renderTexture.height < minHeight) {
+                if (this._renderTexture.width < minWidth || this._renderTexture.height < minHeight) {
                     minHeight = nextPow2(minWidth);
                     minHeight = nextPow2(minHeight);
                     this._renderTexture.resize(minWidth, minHeight);
@@ -174,8 +198,7 @@ var PIXI;
                 var blendShader = this.drawModes[sprite.blendMode];
                 if (blendShader) {
                     this._renderBlend(sprite, blendShader[tilingMode]);
-                }
-                else {
+                } else {
                     this._renderNormal(sprite, this.normalShader[tilingMode]);
                 }
             };
@@ -200,7 +223,8 @@ var PIXI;
                 screen.width = fr.width;
                 screen.height = fr.height;
                 var bounds = this._tempRect2;
-                var fbw = fr.width * resolution, fbh = fr.height * resolution;
+                var fbw = fr.width * resolution,
+                    fbh = fr.height * resolution;
                 bounds.x = (spriteBounds.x + matrix.tx / matrix.a) * resolution + fbw / 2;
                 bounds.y = (spriteBounds.y + matrix.ty / matrix.d) * resolution + fbh / 2;
                 bounds.width = spriteBounds.width * resolution;
@@ -227,9 +251,18 @@ var PIXI;
                 if (renderer.renderingToScreen && renderTarget.root) {
                     var buf = this._getBuf(pixelsWidth * pixelsHeight * 4);
                     gl.readPixels(x_1, y_1, pixelsWidth, pixelsHeight, gl.RGBA, gl.UNSIGNED_BYTE, this._bigBuf);
-                    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, pixelsWidth, pixelsHeight, gl.RGBA, gl.UNSIGNED_BYTE, this._bigBuf);
-                }
-                else {
+                    gl.texSubImage2D(
+                        gl.TEXTURE_2D,
+                        0,
+                        0,
+                        0,
+                        pixelsWidth,
+                        pixelsHeight,
+                        gl.RGBA,
+                        gl.UNSIGNED_BYTE,
+                        this._bigBuf
+                    );
+                } else {
                     gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, x_1, y_1, pixelsWidth, pixelsHeight);
                 }
                 renderer.bindShader(shader);
@@ -239,17 +272,17 @@ var PIXI;
                     mapMatrix.a = bounds.width / rt.width / spriteBounds.width;
                     if (flipX) {
                         mapMatrix.a = -mapMatrix.a;
-                        mapMatrix.tx = (bounds.x - x_1) / rt.width - (spriteBounds.x + spriteBounds.width) * mapMatrix.a;
-                    }
-                    else {
+                        mapMatrix.tx =
+                            (bounds.x - x_1) / rt.width - (spriteBounds.x + spriteBounds.width) * mapMatrix.a;
+                    } else {
                         mapMatrix.tx = (bounds.x - x_1) / rt.width - spriteBounds.x * mapMatrix.a;
                     }
                     mapMatrix.d = bounds.height / rt.height / spriteBounds.height;
                     if (flipY) {
                         mapMatrix.d = -mapMatrix.d;
-                        mapMatrix.ty = (bounds.y - y_1) / rt.height - (spriteBounds.y + spriteBounds.height) * mapMatrix.d;
-                    }
-                    else {
+                        mapMatrix.ty =
+                            (bounds.y - y_1) / rt.height - (spriteBounds.y + spriteBounds.height) * mapMatrix.d;
+                    } else {
                         mapMatrix.ty = (bounds.y - y_1) / rt.height - spriteBounds.y * mapMatrix.d;
                     }
                     shader.uniforms.mapMatrix = mapMatrix.toArray(true);
@@ -260,8 +293,7 @@ var PIXI;
                 var renderer = this.renderer;
                 if (shader.tilingMode > 0) {
                     this._renderWithShader(sprite, shader.tilingMode === 1, shader);
-                }
-                else {
+                } else {
                     this._renderSprite(sprite, shader);
                 }
             };
@@ -285,14 +317,14 @@ var PIXI;
                 var d = wt.d;
                 var tx = wt.tx;
                 var ty = wt.ty;
-                vertices[0] = (a * w1) + (c * h1) + tx;
-                vertices[1] = (d * h1) + (b * w1) + ty;
-                vertices[2] = (a * w0) + (c * h1) + tx;
-                vertices[3] = (d * h1) + (b * w0) + ty;
-                vertices[4] = (a * w0) + (c * h0) + tx;
-                vertices[5] = (d * h0) + (b * w0) + ty;
-                vertices[6] = (a * w1) + (c * h0) + tx;
-                vertices[7] = (d * h0) + (b * w1) + ty;
+                vertices[0] = a * w1 + c * h1 + tx;
+                vertices[1] = d * h1 + b * w1 + ty;
+                vertices[2] = a * w0 + c * h1 + tx;
+                vertices[3] = d * h1 + b * w0 + ty;
+                vertices[4] = a * w0 + c * h0 + tx;
+                vertices[5] = d * h0 + b * w0 + ty;
+                vertices[6] = a * w1 + c * h0 + tx;
+                vertices[7] = d * h0 + b * w1 + ty;
                 vertices = quad.uvs;
                 vertices[0] = vertices[6] = -ts.anchor.x;
                 vertices[1] = vertices[3] = -ts.anchor.y;
@@ -310,12 +342,11 @@ var PIXI;
                 var W = _width;
                 var H = _height;
                 var tempMat = this._tempMatrix2;
-                tempMat.set(lt.a * w / W, lt.b * w / H, lt.c * h / W, lt.d * h / H, lt.tx / W, lt.ty / H);
+                tempMat.set((lt.a * w) / W, (lt.b * w) / H, (lt.c * h) / W, (lt.d * h) / H, lt.tx / W, lt.ty / H);
                 tempMat.invert();
                 if (isSimple) {
                     tempMat.append(mapCoord);
-                }
-                else {
+                } else {
                     shader.uniforms.uMapCoord = mapCoord.toArray(true);
                     shader.uniforms.uClampFrame = uClampFrame;
                     shader.uniforms.uClampOffset = uClampOffset;
@@ -375,25 +406,25 @@ var PIXI;
                 var renderer = this.renderer;
                 var tex = ts._texture;
                 var baseTex = tex.baseTexture;
-                var isSimple = baseTex.isPowerOfTwo && tex.frame.width === baseTex.width && tex.frame.height === baseTex.height;
+                var isSimple =
+                    baseTex.isPowerOfTwo && tex.frame.width === baseTex.width && tex.frame.height === baseTex.height;
                 if (isSimple) {
                     if (!baseTex._glTextures[renderer.CONTEXT_UID]) {
                         if (baseTex.wrapMode === PIXI.WRAP_MODES.CLAMP) {
                             baseTex.wrapMode = PIXI.WRAP_MODES.REPEAT;
                         }
-                    }
-                    else {
+                    } else {
                         isSimple = baseTex.wrapMode !== PIXI.WRAP_MODES.CLAMP;
                     }
                 }
                 return isSimple;
             };
             return PictureRenderer;
-        }(PIXI.ObjectRenderer));
+        })(PIXI.ObjectRenderer);
         extras.PictureRenderer = PictureRenderer;
-        PIXI.WebGLRenderer.registerPlugin('picture', PictureRenderer);
-        PIXI.CanvasRenderer.registerPlugin('picture', PIXI.CanvasSpriteRenderer);
-    })(extras = PIXI.extras || (PIXI.extras = {}));
+        PIXI.WebGLRenderer.registerPlugin("picture", PictureRenderer);
+        PIXI.CanvasRenderer.registerPlugin("picture", PIXI.CanvasSpriteRenderer);
+    })((extras = PIXI.extras || (PIXI.extras = {})));
 })(PIXI || (PIXI = {}));
 var PIXI;
 (function (PIXI) {
@@ -403,12 +434,12 @@ var PIXI;
             __extends(PictureSprite, _super);
             function PictureSprite(texture) {
                 _super.call(this, texture);
-                this.pluginName = 'picture';
+                this.pluginName = "picture";
             }
             return PictureSprite;
-        }(PIXI.Sprite));
+        })(PIXI.Sprite);
         extras.PictureSprite = PictureSprite;
-    })(extras = PIXI.extras || (PIXI.extras = {}));
+    })((extras = PIXI.extras || (PIXI.extras = {})));
 })(PIXI || (PIXI = {}));
 var PIXI;
 (function (PIXI) {
@@ -418,11 +449,11 @@ var PIXI;
             __extends(PictureTilingSprite, _super);
             function PictureTilingSprite(texture) {
                 _super.call(this, texture);
-                this.pluginName = 'picture';
+                this.pluginName = "picture";
             }
             return PictureTilingSprite;
-        }(extras.TilingSprite));
+        })(extras.TilingSprite);
         extras.PictureTilingSprite = PictureTilingSprite;
-    })(extras = PIXI.extras || (PIXI.extras = {}));
+    })((extras = PIXI.extras || (PIXI.extras = {})));
 })(PIXI || (PIXI = {}));
 //# sourceMappingURL=pixi-picture.js.map
