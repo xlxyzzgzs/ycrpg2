@@ -4734,7 +4734,7 @@ Window_Help.prototype.drawBattler = function (battler) {
     var text = battler.name();
     var wx = 0;
     var wy = (this.contents.height - this.lineHeight()) / 2;
-    this.drawText(text, wx, wy, this.contents.width, "center");
+    this.drawTextEx(text, wx, wy);
 };
 
 Window_Help.prototype.drawSpecialSelectionText = function (action) {
@@ -5210,7 +5210,7 @@ Window_EnemyVisualSelect.prototype.refresh = function () {
     this.contents.fontSize = Yanfly.Param.BECEnemyFontSize;
     var text = this._battler.name();
     var wy = this.contents.height - this.lineHeight();
-    this.drawText(text, 0, wy, this.contents.width, "center");
+    this.drawTextEx(text, 0, wy);
 };
 
 //=============================================================================

@@ -2134,7 +2134,7 @@ if (Imported.YEP_BattleEngineCore) {
         var text = battler.name();
         var wx = 0;
         var wy = 0;
-        this.drawText(text, wx, wy, this.contents.width, "center");
+        this.drawTextEx(text, wx, wy);
         wy += this.lineHeight();
         var ww = icons.length * Window_Base._iconWidth;
         ww = Math.min(ww, this.contents.width);
