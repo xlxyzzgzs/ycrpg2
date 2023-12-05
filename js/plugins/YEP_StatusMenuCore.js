@@ -358,6 +358,13 @@ Yanfly.Status = Yanfly.Status || {};
  * @default 经验获取率
  *
  * @help
+ *
+ *
+ * 魔改作者: 流逝的岁月
+ * 魔改版本: v1.00
+ *
+ * 魔改内容: 隐藏状态窗口,信息窗口的绘制内容   使下方信息向上调整
+ *
  * ============================================================================
  * Introduction
  * ============================================================================
@@ -438,6 +445,11 @@ Yanfly.Status = Yanfly.Status || {};
 
 Yanfly.Parameters = PluginManager.parameters("YEP_StatusMenuCore");
 Yanfly.Param = Yanfly.Param || {};
+
+
+var Zzy = Zzy || {};
+Zzy.CSMC = Zzy.CSMC || {};
+
 
 Yanfly.Param.StatusCmdOrder = String(Yanfly.Parameters["Command Order"]);
 Yanfly.Param.StatusCmdWidth = Number(Yanfly.Parameters["Command Window Width"]);
@@ -707,26 +719,45 @@ Window_StatusInfo.prototype.drawGeneral = function () {
     var dh = this.lineHeight();
     var text;
     this.changeTextColor(this.systemColor());
-    this.drawText(Yanfly.Param.StatusParamText, dx, dy, dw, "center");
+	
+	
+	// --魔改--
+	
+    //this.drawText(Yanfly.Param.StatusParamText, dx, dy, dw, "center");
     dx += this.contents.width / 2;
-    this.drawText(Yanfly.Param.StatusExpText, dx, dy, dw, "center");
+	
+	
+	// --魔改--
+    //this.drawText(Yanfly.Param.StatusExpText, dx, dy, dw, "center");
+	
+
     this.drawGeneralParam(dx, dy, dw, dh);
     this.drawGeneralExp(dx, dy, dw, dh);
 };
+
+
+
 
 Window_StatusInfo.prototype.drawGeneralParam = function () {
     var rect = new Rectangle();
     rect.width = (this.contents.width - this.standardPadding()) / 2;
     rect.y = this.lineHeight() * 2;
     rect.height = this.lineHeight();
+		
+	//--魔改--距离调整
+	var disY = this.lineHeight() * 2;
+
+
     var dx = rect.x + this.textPadding();
     var dw = rect.width - this.textPadding() * 2;
-    this.drawDarkRect(rect.x, rect.y, rect.width, rect.height);
+    this.drawDarkRect(rect.x, rect.y - disY, rect.width, rect.height);
     this.changeTextColor(this.systemColor());
-    this.drawText(TextManager.level, dx, rect.y, dw, "left");
+    this.drawText(TextManager.level, dx, rect.y - disY, dw, "left");
     this.changeTextColor(this.normalColor());
     text = Yanfly.Util.toGroup(this._actor.level);
-    this.drawText(text, dx, rect.y, dw, "right");
+	
+    this.drawText(text, dx, rect.y - disY, dw, "right");
+	
     for (var i = 0; i < 8; ++i) {
         if (i < 2) {
             rect.y += this.lineHeight();
@@ -742,12 +773,14 @@ Window_StatusInfo.prototype.drawGeneralParam = function () {
             rect.x += rect.width;
             dx += rect.width;
         }
-        this.drawDarkRect(rect.x, rect.y, rect.width, rect.height);
+
+		
+        this.drawDarkRect(rect.x, rect.y - disY, rect.width, rect.height);
         this.changeTextColor(this.systemColor());
-        this.drawText(TextManager.param(i), dx, rect.y, dw, "left");
+        this.drawText(TextManager.param(i), dx, rect.y - disY, dw, "left");
         this.changeTextColor(this.normalColor());
         text = Yanfly.Util.toGroup(this._actor.param(i));
-        this.drawText(text, dx, rect.y, dw, "right");
+        this.drawText(text, dx, rect.y - disY, dw, "right");
     }
 };
 
@@ -778,6 +811,14 @@ Window_StatusInfo.prototype.drawGeneralExp = function (dx, dy, dw, dh) {
     dy = this.lineHeight() * 2;
     dw = (this.contents.width - this.textPadding()) / 2;
     dx = this.textPadding() + dw;
+	
+	//--魔改--距离调整
+	var disY = this.lineHeight() * 2;
+	
+	dy -= disY;
+	
+	
+	
     // Current Exp
     this.changeTextColor(this.systemColor());
     text = TextManager.expTotal.format(TextManager.exp);
