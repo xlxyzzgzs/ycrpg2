@@ -2132,7 +2132,7 @@ if (Imported.YEP_BattleEngineCore) {
     Window_Help.prototype.drawBattlerWithIcons = function (battler) {
         var icons = battler.allIcons();
         var text = battler.name();
-        var wx = 0;
+        var wx = (this.contents.width - this.textWidthEx(text)) / 2;
         var wy = 0;
         this.drawTextEx(text, wx, wy);
         wy += this.lineHeight();

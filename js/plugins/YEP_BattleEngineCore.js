@@ -4732,7 +4732,7 @@ Window_Help.prototype.specialSelectionText = function (action) {
 
 Window_Help.prototype.drawBattler = function (battler) {
     var text = battler.name();
-    var wx = 0;
+    var wx = (this.contents.width - this.textWidthEx(text)) / 2;
     var wy = (this.contents.height - this.lineHeight()) / 2;
     this.drawTextEx(text, wx, wy);
 };
@@ -5210,7 +5210,7 @@ Window_EnemyVisualSelect.prototype.refresh = function () {
     this.contents.fontSize = Yanfly.Param.BECEnemyFontSize;
     var text = this._battler.name();
     var wy = this.contents.height - this.lineHeight();
-    this.drawTextEx(text, 0, wy);
+    this.drawText(text, 0, wy, this.contents.width, "center");
 };
 
 //=============================================================================
