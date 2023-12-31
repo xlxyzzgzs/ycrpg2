@@ -99,6 +99,17 @@ Yanfly.SCD.version = 1.11;
  * @default 100
  *
  * @help
+ *
+ * 魔改作者: 流逝的岁月
+ * 魔改版本: v1.00
+ *
+ *
+ * 魔改内容: v1.00 使显示冷却回合 的文本内容向上取整
+ *
+ *
+ *
+ *
+ *
  * ============================================================================
  * Introduction
  * ============================================================================
@@ -272,6 +283,10 @@ Yanfly.SCD.version = 1.11;
  *
  *   将这两个标签插入技能的记事框中，为其提供确定预热值的独特方法。
  *   “warmup”变量确定预热的回合数。
+ * 
+ *   插件提供的函数：
+ *   改变user的指定技能的冷却
+ *   user.addCooldown(技能ID,冷却改变值);
  *
  * ============================================================================
  * Yanfly Engine Plugins - Battle Engine Extension - Action Sequence Commands
@@ -375,6 +390,11 @@ if (Imported.YEP_SkillCore) {
     //=============================================================================
     // Parameter Variables
     //=============================================================================
+
+
+	var Zzy = Zzy || {};
+	Zzy.CXSCD = Zzy.CXSCD || {};
+	
 
     Yanfly.Parameters = PluginManager.parameters("YEP_X_SkillCooldowns");
     Yanfly.Param = Yanfly.Param || {};
@@ -1464,6 +1484,12 @@ if (Imported.YEP_SkillCore) {
         var value = this._actor.cooldown(skill.id);
         if (value % 1 !== 0) value = value.toFixed(2);
         if (value <= 0.009) value = 0.01;
+		
+		//---魔改--- v1.00 修改数据向上取整
+		value = value.ceil(value);
+		
+		
+		
         var text = fmt.format(Yanfly.Util.toGroup(value));
         this.contents.fontSize = Yanfly.Param.CDFontSize;
         this.drawText(text, wx, wy, dw, "right");
@@ -1483,6 +1509,11 @@ if (Imported.YEP_SkillCore) {
         var value = this._actor.warmup(skill.id);
         if (value % 1 !== 0) value = value.toFixed(2);
         if (value <= 0.009) value = 0.01;
+		
+		//---魔改--- v1.00 修改数据向上取整
+		value = value.ceil(value);
+			
+
         var text = fmt.format(Yanfly.Util.toGroup(value));
         this.contents.fontSize = Yanfly.Param.WUFontSize;
         this.drawText(text, wx, wy, dw, "right");
