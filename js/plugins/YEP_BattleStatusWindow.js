@@ -778,8 +778,10 @@ Window_BattleStatus.prototype.drawActorIcons = function (index) {
         var wx = x + iconWidth * i;
         var wy = y;
 
-        this.drawIcon(state.iconIndex, wx, wy);
-        this.drawStateTurns(actor, state, wx, wy);
+        this.drawIcon(state.iconIndex, wx, wy + 2);
+        if (state.autoRemovalTiming > 0) {
+            this.drawStateTurns(actor, state, wx, wy);
+        }
         this.drawStateCounter(actor, state, wx, wy);
     }, this);
 
@@ -791,7 +793,7 @@ Window_BattleStatus.prototype.drawActorIcons = function (index) {
         var wx = x + iconWidth * i;
         var wy = y;
 
-        this.drawIcon(actor.buffIconIndex(actor.buff(buff), buff), wx, wy);
+        this.drawIcon(actor.buffIconIndex(actor.buff(buff), buff), wx, wy + 2);
         this.drawBuffTurns(actor, buff, wx, wy);
         this.drawBuffRate(actor, buff, wx, wy);
     }, this);
