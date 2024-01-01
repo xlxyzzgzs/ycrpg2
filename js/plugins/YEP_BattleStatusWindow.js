@@ -468,10 +468,10 @@ Yanfly.BSW.Window_BattleStatus_initialize = Window_BattleStatus.prototype.initia
 Window_BattleStatus.prototype.initialize = function () {
     this._guageHeight = Imported.YEP_CoreEngine ? this.gaugeHeight() : 6;
     this._guageHeight = Math.max(16, this._guageHeight);
-    this._actorsStateIcon = []; // [index] = [nextRenderStartIndex ,icons]
-    this._actorsStateIconMaxTick = 90;
-    this._actorsStateIconCurrentTick = 0;
-    this._actorsStateIconNum = 4;
+    this._actorsStateBuff = []; // [index] = [nextRenderStartIndex ,icons]
+    this._actorsStateBuffMaxTick = 90;
+    this._actorsStateBuffCurrentTick = 0;
+    this._actorsStateBuffNum = 4;
     Yanfly.BSW.Window_BattleStatus_initialize.call(this);
 };
 
@@ -544,7 +544,19 @@ Window_BattleStatus.prototype.drawItem = function (index) {
     this.drawGuages(index, actor);
     // this.drawActorActionIcon(actor, rect.x + rect.width - Window_Base._iconWidth, rect.y);
 
-    this._actorsStateIcon[index] = [0, actor.allIcons()];
+    this._actorsStateBuff[index] = {
+        startIndex: 0,
+        states: actor.states().filter(function (state) {
+            return state.iconIndex > 0;
+        }),
+        buffs: actor._buffs
+            .map(function (_, index) {
+                return index;
+            })
+            .filter(function (index) {
+                return actor.isBuffOrDebuffAffected(index);
+            }),
+    };
     this.drawActorIcons(index);
 };
 
@@ -738,38 +750,55 @@ Window_BattleStatus.prototype.update = function () {
 };
 
 Window_BattleStatus.prototype.updateStateIcons = function () {
-    this._actorsStateIconCurrentTick++;
-    if (this._actorsStateIconCurrentTick < this._actorsStateIconMaxTick) return;
+    this._actorsStateBuffCurrentTick++;
+    if (this._actorsStateBuffCurrentTick < this._actorsStateBuffMaxTick) return;
 
-    this._actorsStateIconCurrentTick = 0;
+    this._actorsStateBuffCurrentTick = 0;
     for (var index = 0; index < $gameParty.battleMembers().length; index++) {
         this.drawActorIcons(index);
     }
 };
 
 Window_BattleStatus.prototype.drawActorIcons = function (index) {
-    var startIcons = this._actorsStateIcon[index][0];
-    var icons = this._actorsStateIcon[index][1];
     var rect = this.stateAreaRect(index);
+    var actor = $gameParty.battleMembers()[index];
 
-    this.contents.clearRect(rect.x, rect.y, rect.width, rect.height);
-    if (icons.length <= 0) {
-        return;
-    }
+    var states = this._actorsStateBuff[index]["states"];
+    var buffs = this._actorsStateBuff[index]["buffs"];
+    var startIndex = this._actorsStateBuff[index]["startIndex"];
+    var endIndex = startIndex + this._actorsStateBuffNum;
 
     var iconWidth = Window_Base._iconWidth;
     var x = rect.x + 2;
     var y = rect.y;
-    for (var i = 0; i < this._actorsStateIconNum; i++) {
-        if (icons[i + startIcons] === undefined) continue;
-        var icon = icons[i + startIcons];
-        this.drawIcon(icon, x, y);
-        x += iconWidth;
-    }
 
-    this._actorsStateIcon[index][0] += this._actorsStateIconNum;
-    if (this._actorsStateIcon[index][0] >= icons.length) {
-        this._actorsStateIcon[index][0] = 0;
+    this.contents.clearRect(rect.x, rect.y, rect.width, rect.height);
+
+    states.slice(startIndex, endIndex).forEach(function (state, i) {
+        var wx = x + iconWidth * i;
+        var wy = y;
+
+        this.drawIcon(state.iconIndex, wx, wy);
+        this.drawStateTurns(actor, state, wx, wy);
+        this.drawStateCounter(actor, state, wx, wy);
+    }, this);
+
+    x = x + iconWidth * states.slice(startIndex, endIndex).length;
+    startIndex = startIndex < states.length ? 0 : startIndex - states.length;
+    endIndex = endIndex < states.length ? 0 : endIndex - states.length;
+
+    buffs.slice(startIndex, endIndex).forEach(function (buff, i) {
+        var wx = x + iconWidth * i;
+        var wy = y;
+
+        this.drawIcon(actor.buffIconIndex(actor.buff(buff), buff), wx, wy);
+        this.drawBuffTurns(actor, buff, wx, wy);
+        this.drawBuffRate(actor, buff, wx, wy);
+    }, this);
+
+    this._actorsStateBuff[index]["startIndex"] += this._actorsStateBuffNum;
+    if (this._actorsStateBuff[index]["startIndex"] >= states.length + buffs.length) {
+        this._actorsStateBuff[index]["startIndex"] = 0;
     }
 };
 
