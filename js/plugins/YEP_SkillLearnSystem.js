@@ -15,6 +15,21 @@ Yanfly.SLS.version = 1.13;
  * @plugindesc v1.13 技能学习系统☁️
  * @author Yanfly Engine Plugins
  *
+ * @param ---魔改---
+ * @default
+ *
+ *
+ * @param ShowGoldWindowFormat
+ * @text 显示金币窗口的文本
+ * @desc 文本样式,其中%1会被替换为角色的JP值,%2会被替换为当前的金币数值,支持转义字符
+ * @default %1\c[1]JP\i[188]    \c[0]%2\c[1]金\i[313]
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  * @param ---命令---
  * @default
  *
@@ -113,6 +128,14 @@ Yanfly.SLS.version = 1.13;
  * @default 100
  *
  * @help
+ *
+ * 魔改作者: 流逝的岁月
+ * 魔改版本: v1.00
+ *
+ * 魔改内容: v1.00 将对界面进行调整
+ *
+ *
+ *
  * ============================================================================
  * Introduction
  * ============================================================================
@@ -313,6 +336,17 @@ Yanfly.SLS.version = 1.13;
 
 Yanfly.Parameters = PluginManager.parameters("YEP_SkillLearnSystem");
 Yanfly.Param = Yanfly.Param || {};
+
+
+
+var Zzy = Zzy || {};
+Zzy.CYSLS = Zzy.CYSLS || {};
+
+
+Zzy.CYSLS.ShowGoldWindowFormat = Yanfly.Parameters['ShowGoldWindowFormat'] ? String(Yanfly.Parameters['ShowGoldWindowFormat']) : '%1\\c[1]JP\\i[188]    \\c[0]%2\\c[1]金\\i[313]';
+
+
+
 
 Yanfly.Param.SLSCommand = String(Yanfly.Parameters["Learn Command"]);
 Yanfly.Param.SLSShowLearn = String(Yanfly.Parameters["Show Command"]);
@@ -1473,7 +1507,10 @@ Scene_Skill.prototype.createSkillLearnWindow = function () {
 Scene_Skill.prototype.createGoldWindow = function () {
     if (!Yanfly.Param.SLSGoldWindow) return;
     var wx = Graphics.boxWidth / 2;
-    this._goldWindow = new Window_Gold(wx, 0);
+	
+	//---魔改--- v1.00 金币窗口修改
+	
+    this._goldWindow = new Window_ZzyCYSLSGold(wx, 0);
     this._goldWindow.width = Graphics.boxWidth / 2;
     this._goldWindow.y = Graphics.boxHeight - this._goldWindow.height;
     this._skillTypeWindow.setGoldWindow(this._goldWindow);
@@ -1726,7 +1763,10 @@ Scene_LearnSkill.prototype.createSkillLearnWindow = function () {
 Scene_LearnSkill.prototype.createGoldWindow = function () {
     if (!eval(Yanfly.Param.SLSGoldWindow)) return;
     var wx = Graphics.boxWidth / 2;
-    this._goldWindow = new Window_Gold(wx, 0);
+	
+	//---魔改--- v1.00 金币窗口修改
+	
+    this._goldWindow = new Window_ZzyCYSLSGold(wx, 0);
     this._goldWindow.width = Graphics.boxWidth / 2;
     this._goldWindow.y = Graphics.boxHeight - this._goldWindow.height;
     this._goldWindow.createContents();
@@ -1873,6 +1913,76 @@ Scene_LearnSkill.prototype.onConfirmCancel = function () {
     this._confirmWindow.close();
     this._skillLearnWindow.activate();
 };
+
+
+//---魔改--- v1.00 新的窗口类型
+
+//=============================================================================
+// Window_ZzyCYSLSGold
+//=============================================================================
+
+
+function Window_ZzyCYSLSGold() {
+    this.initialize.apply(this, arguments);
+}
+
+Window_ZzyCYSLSGold.prototype = Object.create(Window_Gold.prototype);
+Window_ZzyCYSLSGold.prototype.constructor = Window_ZzyCYSLSGold;
+
+Window_ZzyCYSLSGold.prototype.initialize = function(x, y) 
+{
+    Window_Gold.prototype.initialize.call(this, x, y);
+};
+
+
+Window_ZzyCYSLSGold.prototype.refresh = function()
+{
+	var x = this.textPadding();
+	var width = this.contents.width - this.textPadding() * 2;
+	this.contents.clear();
+	
+	//绘制文本信息
+	var actor = SceneManager._scene.actor();
+	var jp = actor.jp();
+	var gold = $gameParty.gold();
+	var tf = Zzy.CYSLS.ShowGoldWindowFormat;//获取文本格式
+	var text = tf.format(jp,gold);
+	var wex = this.textWidthEx(text);
+	var ofx = 0;
+	if(wex > width)ofx = 0;
+	else
+	{ofx = (width-wex)/2;}
+	
+	//绘制JP--位于中心
+	this.drawTextEx(text,x+ofx,0);
+}
+
+Window_ZzyCYSLSGold.prototype.textWidthEx = function(text) //计算宽高
+{
+    return this.drawTextEx(text, 0, this.contents.height);
+};
+
+//---魔改--- v1.00 关闭Scene_Skill界面下的Window_SkillStatus界面的JP绘制
+Window_SkillStatus.prototype.drawActorJp = function(actor, id, wx, wy, ww, align) 
+{
+	if(SceneManager._scene instanceof Scene_Skill)return undefined;//不进行绘制
+	
+    // var jp = actor.jp(id);
+    // var icon = '\\i[' + Yanfly.Icon.Jp + ']';
+    // var fmt = Yanfly.Param.JpMenuFormat;
+    // var text = fmt.format(Yanfly.Util.toGroup(jp), Yanfly.Param.Jp, icon);
+    // if (align === 'left') {
+      // wx = 0;
+    // } else if (align === 'center') {
+      // wx += (ww - this.textWidthEx(text)) / 2;
+    // } else {
+      // wx += ww - this.textWidthEx(text);
+    // }
+    // this.drawTextEx(text, wx, wy);
+};
+
+
+
 
 //=============================================================================
 // Utilities
