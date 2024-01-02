@@ -76,26 +76,60 @@ Yanfly.Equip.version = 1.16;
  * @help
  *
  * 魔改作者: 流逝的岁月
- * 魔改版本: v1.03
+ * 魔改版本: v1.04
  *
  *
- *           v1.02 修改参数结构,自定义化调整接口
+ *
+ *
+ *           v1.04 添加额外标签,实现功能拓展,可在下方 数据库备注 中查看用法
+ *           v1.03 修改参数结构,自定义化调整接口
  *           v1.02 添加更多的信息显示,调整布局
  *           v1.01 公式中添加user,User变量
  * 魔改内容: v1.00 允许卸载装备或是安装装备时,自动执行脚本
  *
  *
+ *
+ *-------------------------------------------------------------------------------
+ *
+ *
+ * 关于参数中设置的公式问题
+ * 其实是可以输入一段js代码,这会更佳灵活的去操作数据
+ * 
+ * 以下是在写入公式时可以带入的数据信息:
+ *
+ * v[ID],V[ID]              //id替换,将会返回全局变量的值
+ * s[ID],S[ID]              //id替换,将会返回全局开关的值
+ * gw,GW                    //游戏窗口的宽度
+ * gh,GH                    //游戏窗口的高度
+ * User,user,a                   //使用者的信息
+ *
+ *
+ *
+ *-------------------------------------------------------------------------------
+ *
+ *
+ *
+ *
  * 需要在 数据库 -> 武器/护甲 -> 备注 中添加一下内容
+ *
+ *
+ *
+ * <ZzyYEC GoldPer: x>                      //x需要替换为金币倍率,值1代表爆率提升1%,值100代表爆率提升100%,这可以是一个公式
+ * <ZzyYEC EscapePer: x>                    //x需要替换为逃跑倍率,值1代表概率提升1%,值100代表爆率提升100%,这可以是一个公式
+ * <ZzyYEC ExMTp: x>                        //x需要替换为TP上限,值1代表提升1上限,值100代表提升100上限,这可以是一个公式
+ *
+ *
+ *
  *
  * <ZzyYEC Eq Start>               //这会在装备时,调用执行一段脚本,这是一个双标签,需要将两个标签全部写入,可以输入一段公式
  * ...
  * <ZzyYEC Eq End>
  *
  *
- *
  * <ZzyYEC UnEq Start>             //这会在卸载时,调用执行一段脚本,这是一个双标签,需要将两个标签全部写入,可以输入一段公式
  * ...
  * <ZzyYEC UnEq End>
+ *
  *
  *
  *
@@ -115,7 +149,7 @@ if($gameSwitches.value(10))
  * 
  * 以下是在写入公式时可以带入的数据信息:
  *
- * User,user                //如果有,那这个值就是目前指定的 持有者(玩家)对象
+ * a,User,user                //如果有,那这个值就是目前指定的 持有者(玩家)对象
  * Item,item                //如果有,那这个值就是目前 安装/卸载 的装备对象
  * v[ID],V[ID]              //id替换,将会返回全局变量的值
  * s[ID],S[ID]              //id替换,将会返回全局开关的值
@@ -465,7 +499,22 @@ DataManager.processEquipNotetags2 = function(group) {
 				obj.params[7] = value;
 				break;
 			  }
-		  }	  
+		  }	////---魔改--- v1.04 添加新的备注标签
+		  else if(line.match(/<ZzyYEC GOLDPER:[ ](.*)>/i))//金币爆率
+			{
+				var goldPerEval = String(RegExp.$1);
+				obj.ZzyYEC['goldPer'] = goldPerEval;
+			}
+			else if(line.match(/<ZzyYEC ESCAPEPER:[ ](.*)>/i))//逃跑增加率
+			{
+				var escapePerEval = String(RegExp.$1);
+				obj.ZzyYEC['escapePer'] = escapePerEval;
+			}	
+			else if(line.match(/<ZzyYEC EXMTP:[ ](.*)>/i))//额外的TP上限
+			{
+				var exMTpEval = String(RegExp.$1);
+				obj.ZzyYEC['exMTp'] = exMTpEval;
+			}
 		  
 	  }
 
@@ -642,6 +691,7 @@ Zzy.YEC.GetItem = function(eqInfo)
 Zzy.YEC.EvalTrans = function(evalStr,item,user)
 {
 	var User = user;
+	var a = user;
 	var Item = item;
 	var v = $gameVariables._data;
 	var s = $gameSwitches._data;
@@ -1501,3 +1551,95 @@ Yanfly.Util.displayError = function(e, code, message) {
 //=============================================================================
 // End of File
 //=============================================================================
+
+
+
+//---魔改--- v1.04
+
+//实现 逃跑概率 金币爆率 TP上限的拓展
+
+Game_Party.prototype.GetZzyYECExValueOfEq = function(vstr)//通过装备获取属性
+{
+	var acts = $gameParty.members();
+	var totalV = 0;//总数
+	for(var i=0;i<acts.length;i++)
+	{
+		var act = acts[i];
+		if(act)
+		{
+			totalV += act.GetZzyYECExValueOfEq(vstr);
+		}
+	}
+	return totalV;
+}
+
+Game_Actor.prototype.GetZzyYECExValueOfEq = function(vstr)//通过装备获取属性
+{
+	var eqs = this.equips();
+	var totalV = 0;//总数
+	for(var i=0;i<eqs.length;i++)
+	{
+		var eq = eqs[i];
+		if(eq && eq.ZzyYEC && eq.ZzyYEC[vstr])
+		{
+			var vEval = eq.ZzyYEC[vstr];
+			totalV += Zzy.YEC.EvalTransformation(vEval,this);
+		}
+	}
+	return totalV;
+}
+
+
+Zzy.YEC.Game_Actor_maxTp = Game_Actor.prototype.maxTp;
+Game_Actor.prototype.maxTp = function() //修改角色最大的maxTp
+{
+	var tv = Zzy.YEC.Game_Actor_maxTp.call(this);
+	var ext = this.GetZzyYECExValueOfEq('exMTp');
+	ext = ext ? ext : 0;
+	return Math.round(tv + ext);
+};
+
+
+Zzy.YEC.BattleManager_makeRewards = BattleManager.makeRewards;
+BattleManager.makeRewards = function() 
+{
+	//拓展制作战利品
+	Zzy.YEC.BattleManager_makeRewards.call(this);
+	
+	var exGoldPer = 1 + $gameParty.GetZzyYECExValueOfEq('goldPer')*0.01;
+	exGoldPer = exGoldPer ? exGoldPer : 0;
+	exGoldPer = Math.max(0,exGoldPer);
+	this._rewards.gold *= exGoldPer;
+	this._rewards.gold = Math.round(this._rewards.gold);
+};
+
+
+Zzy.YEC.BattleManager_makeEscapeRatio = BattleManager.makeEscapeRatio;
+BattleManager.makeEscapeRatio = function () 
+{
+	Zzy.YEC.BattleManager_makeEscapeRatio.call(this);
+	this._escapeRatio = this._escapeRatio ? this._escapeRatio : 0;
+	var exEscapePer = $gameParty.GetZzyYECExValueOfEq('escapePer')*0.01;
+	this._escapeRatio += exEscapePer;//添加额外的逃跑
+};
+
+
+//公式
+Zzy.YEC.EvalTransformation = function(formula,actor)//转换
+{
+	var v = $gameVariables._data;
+	var s = $gameSwitches._data;
+	var V = v;
+	var S = s;
+	var gw = Graphics.boxWidth;
+	var gh = Graphics.boxHeight;
+	var GW = gw;
+	var GH = gh;
+	var user = actor;
+	var User = actor;
+	var a = actor;
+	
+	return eval(formula);
+}
+
+
