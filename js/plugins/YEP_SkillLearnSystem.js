@@ -19,10 +19,57 @@ Yanfly.SLS.version = 1.13;
  * @default
  *
  *
+ * @param IsHideLearnSkill
+ * @text 是否隐藏过学习技能
+ * @parent ---魔改---
+ * @type boolean
+ * @on YES
+ * @off NO
+ * @desc 控制学习过技能是否在学习系统界面中显示
+ * YES - true     NO - false
+ * @default true
+ *
+ *
+ *
+ *
+ *
  * @param ShowGoldWindowFormat
  * @text 显示金币窗口的文本
  * @desc 文本样式,其中%1会被替换为角色的JP值,%2会被替换为当前的金币数值,支持转义字符
  * @default %1\c[1]JP\i[188]    \c[0]%2\c[1]金\i[313]
+ *
+ *
+ * @param ForgetNote
+ * @text 显示遗忘显示文本
+ * @type note
+ * @desc 这是显示遗忘的文本内容,支持多行显示
+ * @default "会遗忘所有的学习技能\n并返回全部的JP点!"
+ *
+ * @param ForgetCommandText
+ * @text 遗忘命令文本
+ * @type text
+ * @desc 此处可以设置命令的文本信息
+ * @default 一键遗忘
+ *
+ * @param ForgetYesText
+ * @text 遗忘确认文本
+ * @type text
+ * @desc 设置遗忘确认的文本内容
+ * @default 确认
+ *
+ * @param ForgetNoText
+ * @text 遗忘取消文本
+ * @type text
+ * @desc 设置遗忘取消的文本内容
+ * @default 取消
+ *
+ *
+ * @param ForgeItemID
+ * @text 遗忘道具ID
+ * @type item
+ * @desc 此处需要指定遗忘道具的ID,如果ID值为0,那么不启用这个功能,每次进行遗忘将会消耗一个遗忘道具
+ * @default 0
+ *
  *
  *
  *
@@ -130,8 +177,14 @@ Yanfly.SLS.version = 1.13;
  * @help
  *
  * 魔改作者: 流逝的岁月
- * 魔改版本: v1.00
+ * 魔改版本: v1.02
  *
+ *
+ *
+ *
+ *
+ * 魔改内容: v1.02 隐藏全部的已学习技能
+ * 魔改内容: v1.01 增加一键遗忘的功能
  * 魔改内容: v1.00 将对界面进行调整
  *
  *
@@ -343,7 +396,20 @@ var Zzy = Zzy || {};
 Zzy.CYSLS = Zzy.CYSLS || {};
 
 
+Zzy.CYSLS.Command_F = 'zzycyslsf';//遗忘
+
+
 Zzy.CYSLS.ShowGoldWindowFormat = Yanfly.Parameters['ShowGoldWindowFormat'] ? String(Yanfly.Parameters['ShowGoldWindowFormat']) : '%1\\c[1]JP\\i[188]    \\c[0]%2\\c[1]金\\i[313]';
+Zzy.CYSLS.ForgetNote = Yanfly.Parameters['ForgetNote'] ? JSON.parse(Yanfly.Parameters['ForgetNote']) : '';
+
+
+
+Zzy.CYSLS.ForgetCommandText = String(Yanfly.Parameters['ForgetCommandText'] || '一键遗忘');
+Zzy.CYSLS.ForgetYesText = String(Yanfly.Parameters['ForgetYesText'] || '确认');
+Zzy.CYSLS.ForgetNoText = String(Yanfly.Parameters['ForgetNoText'] || '取消');
+Zzy.CYSLS.ForgeItemID = parseInt(Yanfly.Parameters['ForgeItemID'] || 0);
+Zzy.CYSLS.IsHideLearnSkill = eval(Yanfly.Parameters['IsHideLearnSkill'] || true);
+
 
 
 
@@ -901,12 +967,23 @@ Window_SkillLearn.prototype.createSkillLearnData = function () {
     for (var i = 0; i < this.getClass().learnSkills.length; ++i) {
         var skillId = this.getClass().learnSkills[i];
         var skill = $dataSkills[skillId];
-        if (skill && this.includes(skill)) this._data.push(skill);
+		
+		if(Zzy.CYSLS.IsHideLearnSkill)//---魔改--- v1.02 隐藏全部的已学习技能
+		{
+			if (skill && this.includes(skill) && !this._actor.isLearnedSkill(skillId)) this._data.push(skill);
+		}
+		else
+		{
+			if (skill && this.includes(skill)) this._data.push(skill);
+		}
+		
     }
     this._data = this._data.sort(function (a, b) {
         return a.id - b.id;
     });
     this._data = this._data.filter(Yanfly.Util.onlyUnique);
+	
+;
 };
 
 Window_SkillLearn.prototype.includes = function (skill) {
@@ -1321,7 +1398,9 @@ Window_SkillLearnCommand.prototype.setSkillLearnDataWindow = function (w) {
     this.update();
 };
 
-Window_SkillLearnCommand.prototype.makeCommandList = function () {
+Window_SkillLearnCommand.prototype.makeCommandList = function () 
+{
+	
     if (!this._actor) return;
     this.addClassCommand(this._actor.currentClass().id);
     this._currentClass = this._actor.currentClass().id;
@@ -1341,7 +1420,27 @@ Window_SkillLearnCommand.prototype.addClassCommand = function (classId) {
         name = this._actor.nickname();
     }
     this.addCommand(name, "class", true, classId);
+	
+	//---魔改--- v1.00 添加新的选项
+	
+	this.addCommand(Zzy.CYSLS.ForgetCommandText,Zzy.CYSLS.Command_F,this.IsEnableZzyCommand_F());
 };
+
+
+
+
+Window_SkillLearnCommand.prototype.IsEnableZzyCommand_F = function()
+{
+	//此处检测是否拥有遗忘道具,进行开关的显示
+	if(Zzy.CYSLS.ForgeItemID)
+	{
+		return $gameParty.hasItem($dataItems[Zzy.CYSLS.ForgeItemID]);
+	}
+	return true;
+}
+
+
+
 
 Window_SkillLearnCommand.prototype.update = function () {
     Window_Command.prototype.update.call(this);
@@ -1353,8 +1452,20 @@ Window_SkillLearnCommand.prototype.update = function () {
         var classId = this.currentExt();
         this._skillLearnWindow.setClass(classId);
     }
-    if (this._statusWindow && this._currentClassIndex !== this.index()) {
+    if (this._statusWindow && this._currentClassIndex !== this.index()) 
+	{
         this._currentClassIndex = this.index();
+		
+		//---魔改--- v1.00 将不会使用原版数据计算
+		if(this._currentClassIndex>0 && this._list[this._currentClassIndex].symbol === Zzy.CYSLS.Command_F)
+		{
+			//此处不会绘制任何的数据信息
+			return;		
+		}
+
+		
+		
+		
         var actor = JsonEx.makeDeepCopy(this._actor);
         if (!actor) return;
         var classId = this.currentExt();
@@ -1610,6 +1721,16 @@ Scene_Skill.prototype.processLearnSkill = function (skill, classId) {
         var cost = skill.learnCostJp;
         cost += this.actor().customLearnSkillJpCost(skill);
         this.actor().loseJp(cost, classId);
+		
+		if(cost)
+		{
+			//---魔改--- v1.00 损失技能JP进行存储
+			this.actor()._ZzyCYSLSCache = this.actor()._ZzyCYSLSCache || [];//技能缓存记录
+			var info = {skillId:skill.id,jpCost:cost};
+			this.actor()._ZzyCYSLSCache.push(info);//记录JP消耗值,进行缓存
+		}
+
+		
     }
     this.processLearnCostEval(skill, classId);
     this.actor().refresh();
@@ -1706,6 +1827,12 @@ Scene_LearnSkill.prototype.create = function () {
     this.createGoldWindow();
     this.createSkillLearnDataWindow();
     this.createConfirmWindow();
+	
+	//---魔改--- v1.01 创造提示遗忘文本窗口 创造确认取消窗口
+	this.createForgetHelpWindow();
+	this.createForgetCommandWindow();//此窗口需要获取Help窗口计算的宽度,因此一定要在下面加载
+	
+	
     this.refreshActor();
     this.adjustSelection();
 };
@@ -1726,9 +1853,102 @@ Scene_LearnSkill.prototype.createCommandWindow = function () {
     this._commandWindow.setHandler("cancel", this.popScene.bind(this));
     this._commandWindow.setHandler("pagedown", this.nextActor.bind(this));
     this._commandWindow.setHandler("pageup", this.previousActor.bind(this));
+	
+	
+	//---魔改--- v1.01 添加一键遗忘
+	this._commandWindow.setHandler(Zzy.CYSLS.Command_F, this.ExeForgetSkill.bind(this));
+	
+	
     this._commandWindow.setHelpWindow(this._helpWindow);
     this.addWindow(this._commandWindow);
 };
+
+
+Scene_LearnSkill.prototype.ExeForgetSkill = function()//执行一键遗忘操作,弹出提示
+{
+	//进行弹开
+	this._windowForgetCommand.open();
+	this._windowForgetHelp.open();
+	
+	this._windowForgetCommand.select(0);//自动选择确认
+	this._windowForgetCommand.activate();//设置为活跃
+	
+}
+
+
+
+
+
+Scene_LearnSkill.prototype.createForgetHelpWindow = function()
+{
+	this._windowForgetHelp = new Window_ZzyCYSLSForgetHelp();
+	
+	this.addWindow(this._windowForgetHelp);
+}
+
+Scene_LearnSkill.prototype.createForgetCommandWindow = function()
+{
+	this._windowForgetCommand = new Window_ZzyCYSLSForgetCommand();
+
+	this._windowForgetCommand.setHandler('zzycyslsf',this.ForgetCommandOk.bind(this));
+	this._windowForgetCommand.setHandler('cancel',this.ForgetCommandCancel.bind(this));
+
+	this.addWindow(this._windowForgetCommand);
+}
+
+
+Scene_LearnSkill.prototype.ForgetCommandOk = function()
+{
+	this.ForgetCommandJumpCommandWindow();
+	
+	//此处消耗道具
+	var gjp = Zzy.CYSLS.GetForgetOfActorJP(this.actor().actorId());//获取遗忘剩余JP
+	var res = Zzy.CYSLS.ExeForgetOfActor(this.actor().actorId());//执行遗忘技能
+	
+	
+	if(res)
+	{
+		//消耗一个遗忘石
+		if(Zzy.CYSLS.ForgeItemID)
+		{
+			$gameParty.loseItem($dataItems[Zzy.CYSLS.ForgeItemID],1);
+		}
+		
+	}
+	
+	//增加原本的JP值
+	if(gjp>0)this.actor().gainJp(gjp);
+
+	 SoundManager.playUseSkill();//播放获取音效
+	 
+	 //刷新所有的窗口
+	 //this.refreshStatus();
+	 this._windowForgetCommand.refresh();
+	 this._windowForgetHelp.refresh();
+	 this._goldWindow.refresh();
+	 this._commandWindow.refresh();//刷新
+	 
+}
+
+Scene_LearnSkill.prototype.ForgetCommandCancel = function()
+{
+	this.ForgetCommandJumpCommandWindow();
+	SoundManager.playCancel();//取消音效
+	
+}
+
+
+
+Scene_LearnSkill.prototype.ForgetCommandJumpCommandWindow = function()//进行跳转
+{
+	this._windowForgetCommand.close();//取消
+	this._windowForgetHelp.close();
+	//this._windowForgetCommand.deselect();//取消活跃
+	this._commandWindow.activate();//设置活跃	
+}
+
+
+
 
 Scene_LearnSkill.prototype.createStatusWindow = function () {
     var wx = this._commandWindow.width;
@@ -1840,6 +2060,17 @@ Scene_LearnSkill.prototype.processLearnSkill = function (skill, classId) {
         var cost = skill.learnCostJp;
         cost += this.actor().customLearnSkillJpCost(skill);
         this.actor().loseJp(cost, classId);
+		
+		if(cost)
+		{
+			//---魔改--- v1.00 损失技能JP进行存储
+			this.actor()._ZzyCYSLSCache = this.actor()._ZzyCYSLSCache || [];//技能缓存记录
+			var info = {skillId:skill.id,jpCost:cost};
+			this.actor()._ZzyCYSLSCache.push(info);//记录JP消耗值,进行缓存
+
+		}
+
+		
     }
     this.processLearnCostEval(skill, classId);
     this.actor().refresh();
@@ -1875,13 +2106,24 @@ Scene_LearnSkill.prototype.processLearnCostEval = function (skill, classId) {
     }
 };
 
-Scene_LearnSkill.prototype.onLearnCancel = function () {
-    if (Imported.YEP_ClassChangeCore) {
+Scene_LearnSkill.prototype.onLearnCancel = function ()
+{
+	
+	//---魔改--- v1.00 识别一键遗忘的效果
+	
+	
+	var fIndex = this._commandWindow.findSymbol(Zzy.CYSLS.Command_F);
+	
+	//检测是否选择添加有效
+    if (Imported.YEP_ClassChangeCore || (fIndex && this._commandWindow._list[fIndex].enabled)) 
+	{
         this._skillLearnWindow.deselect();
         this._skillLearnDataWindow.setSkill(null);
         this._commandWindow.activate();
         this._helpWindow.setItem(null);
-    } else {
+    } 
+	else 
+	{
         this.popScene();
     }
 };
@@ -1913,6 +2155,143 @@ Scene_LearnSkill.prototype.onConfirmCancel = function () {
     this._confirmWindow.close();
     this._skillLearnWindow.activate();
 };
+
+
+
+
+//=============================================================================
+// Window_ZzyCYSLSForgetHelp
+//=============================================================================
+
+
+function Window_ZzyCYSLSForgetHelp() {
+    this.initialize.apply(this, arguments);
+}
+
+Window_ZzyCYSLSForgetHelp.prototype = Object.create(Window_Base.prototype);
+Window_ZzyCYSLSForgetHelp.prototype.constructor = Window_ZzyCYSLSForgetHelp;
+
+Window_ZzyCYSLSForgetHelp.prototype.initialize = function() 
+{
+    Window_Base.prototype.initialize.call(this, 0, 0,Graphics.boxWidth,Graphics.boxHeight);
+	this.openness = 0;//隐藏
+	
+	this.refresh();
+};
+
+
+
+
+
+Window_ZzyCYSLSForgetHelp.prototype.refresh = function()//进行一次刷新
+{
+	var textArr = Zzy.CYSLS.ForgetNote.split('\n');
+	var width = 0;
+	
+	this.contents.clear();//清理
+	
+	for(var i=0;i<textArr.length;i++)
+	{
+		var text = textArr[i];
+		var t = this.textWidthEx(text);
+		width = Math.max(width,t);
+		
+	}
+	
+	var len = textArr.length;
+	var height = this.fittingHeight(len);
+	
+	
+	var pad = this.standardPadding();
+	
+	this.move(0,0,width+pad*2,height);//修改宽高
+	
+	
+	var lh = this.lineHeight();
+	for(var i=0;i<textArr.length;i++)
+	{
+		var text = textArr[i];
+		this.drawTextEx(text,0,lh*i);
+	}
+	
+	//设置位置居中处理
+	var cx = Graphics.boxWidth / 2 - this.width / 2;
+	var cy = Graphics.boxHeight / 2 - this.height;
+	
+	//设置位置
+	this.x = cx;
+	this.y = cy;
+	
+}
+
+
+
+
+
+//=============================================================================
+// Window_ZzyCYSLSForgetCommand
+//=============================================================================
+
+
+function Window_ZzyCYSLSForgetCommand() {
+    this.initialize.apply(this, arguments);
+}
+
+Window_ZzyCYSLSForgetCommand.prototype = Object.create(Window_Command.prototype);
+Window_ZzyCYSLSForgetCommand.prototype.constructor = Window_ZzyCYSLSForgetCommand;
+
+Window_ZzyCYSLSForgetCommand.prototype.initialize = function() 
+{
+    Window_Command.prototype.initialize.call(this, 200,200);
+	this.openness = 0;
+	this.deactivate();//取消活跃
+	this.deselect();//取消选择
+	
+	this.SetAutoPosition();//自动设置位置处理
+};
+
+
+Window_ZzyCYSLSForgetCommand.prototype.makeCommandList = function()
+{
+	this.addCommand(Zzy.CYSLS.ForgetYesText, 'zzycyslsf', true);
+	this.addCommand(Zzy.CYSLS.ForgetNoText, 'cancel', true);	
+}
+
+
+
+Window_ZzyCYSLSForgetCommand.prototype.playOkSound = function() //不会进行声音播放
+{
+    SoundManager.playOk();
+};
+
+
+
+Window_ZzyCYSLSForgetCommand.prototype.SetAutoPosition = function()
+{
+	var win = SceneManager._scene._windowForgetHelp;
+
+	this.x = Graphics.boxWidth / 2 - this.width / 2;
+	this.y = Graphics.boxHeight / 2;
+
+}
+
+
+Window_ZzyCYSLSForgetCommand.prototype.windowWidth = function() 
+{
+    return SceneManager._scene._windowForgetHelp.width;//返回帮助窗口的宽度值
+};
+
+Window_ZzyCYSLSForgetCommand.prototype.itemTextAlign = function() {
+    return 'center';
+};
+
+
+
+
+
+
+
+
 
 
 //---魔改--- v1.00 新的窗口类型
@@ -2016,6 +2395,65 @@ Yanfly.Util.displayError = function (e, code, message) {
         }
     }
 };
+
+
+//---魔改--- v1.00 恢复函数
+Zzy.CYSLS.ExeForgetOfActor = function(actorId)//遗忘一个角色全部的技能,并返回点数
+{
+	//将角色的技能进行遗忘
+	var actor = $gameActors.actor(actorId);
+	var fg = false;
+	if(actor)
+	{
+		var cache = actor._ZzyCYSLSCache;
+		if(cache)
+		{
+			for(var i=0;i<cache.length;i++)
+			{
+				var info = cache[i];
+				var skillId = info.skillId;
+
+				if(skillId && actor.isLearnedSkill(skillId))
+				{
+					actor.forgetSkill(skillId);//对这个技能进行遗忘
+					fg = true;
+				}
+			}		
+		}
+
+		actor._ZzyCYSLSCache = [];//清理所有的缓存
+		
+	}
+	
+	return fg;
+}
+
+Zzy.CYSLS.GetForgetOfActorJP = function(actorId)//通过一个角色返回其遗忘点
+{
+	var actor = $gameActors.actor(actorId);
+	if(actor)
+	{
+		var tjp = 0;
+		var cache = actor._ZzyCYSLSCache;
+		if(cache)
+		{
+			for(var i=0;i<cache.length;i++)
+			{
+				var info = cache[i];
+				tjp += info.jpCost;
+			}
+		}
+		return tjp;
+	}
+	return 0;
+}
+
+
+
+
+
+
+
 
 //=============================================================================
 // End of File

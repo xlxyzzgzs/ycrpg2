@@ -126,8 +126,11 @@ Yanfly.JP.version = 1.09;
  *
  *
  * 魔改作者: 流逝的岁月
- * 魔改版本: v1.00
+ * 魔改版本: v1.01
  *
+ *
+ *
+ * 魔改内容: v1.01 拓展角色可使用 备注的方式来定义JP公式
  * 魔改内容: v1.00 将JP的概念提升到每个角色级,而并不是原本的职业级,因此涉及到角色职业级的功能将自动向上安排,谨记!
  *
  *
@@ -165,6 +168,13 @@ Yanfly.JP.version = 1.09;
  * 以下是一些与工作点相关的标签。
  *
  * Actor Notetags
+ *
+ *   <ZzyJP Per Level: x>  升级将会获取到多少JP,其中x可以是一个公式
+ *   --魔改--  拓展功能
+ *
+ *
+ *
+ *
  *   <Starting JP: x>
  *   对于参与者的初始类，将参与者的起始JP值设置为x。
  *
@@ -320,9 +330,15 @@ DataManager.processJPNotetags1 = function(group) {
 				obj.startingJp[obj.classId] = parseInt(RegExp.$1);
 			} else if (line.match(note2)) {
         obj.startingJp[parseInt(RegExp.$1)] = parseInt(RegExp.$2);
-      } else if (line.match(note3)) {
+      } 
+	  else if (line.match(note3)) 
+	  {
 				obj.jpRate = parseFloat(RegExp.$1 * 0.01);
-			}
+	  }//---魔改--- v1.01 拓展ZzyJP Per Level: x
+	  else if(line.match(/<ZZYJP PER LEVEL:[ ](.*)>/i))
+	  {
+		  obj.ZzyJpLv = String(RegExp.$1);
+	  }
 		}
 	}
 };
@@ -578,7 +594,8 @@ Game_Actor.prototype.changeClass = function(classId, keepExp) {
 };
 
 Yanfly.JP.Game_Actor_levelUp = Game_Actor.prototype.levelUp;
-Game_Actor.prototype.levelUp = function() {
+Game_Actor.prototype.levelUp = function() //---魔改---   v1.01增加JP值拓展
+{
     Yanfly.JP.Game_Actor_levelUp.call(this);
     if (this._preventJpLevelUpGain) return;
     var user = this;
@@ -586,7 +603,7 @@ Game_Actor.prototype.levelUp = function() {
     var a = this;
     var b = this;
     var level = this.level;
-    var code = Yanfly.Param.JpPerLevel;
+    var code = this.GetZzyJPOfLevelEval();//替换使用公式
     try {
       var value = eval(code)
     } catch (e) {
@@ -597,6 +614,17 @@ Game_Actor.prototype.levelUp = function() {
 
 		this.gainJp(value, this.currentClass().id);
 };
+
+
+
+Game_Actor.prototype.GetZzyJPOfLevelEval = function()
+{
+	var data = $dataActors[this.actorId()];
+	if(!data)return Yanfly.Param.JpPerLevel;
+	return data.ZzyJpLv ? data.ZzyJpLv : Yanfly.Param.JpPerLevel;
+}
+
+
 
 //=============================================================================
 // Game_Enemy

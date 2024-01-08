@@ -5,6 +5,32 @@
  * @author Aloe Guvner
  *
  *
+
+ *
+ * @param ---魔改---
+ * @default
+ *
+ *
+ * @param NoSceneClassName
+ * @text 不显示的场景名
+ * @type text[]
+ * @desc 需要知道当前不显示的场景类名,才可以进行处理
+ * @default ["Scene_Battle"]
+ *
+ * @param NoMenuBaseScene
+ * @text 基于菜单类不显示
+ * @parent ---魔改---
+ * @type boolean
+ * @on YES
+ * @off NO
+ * @desc 开启后,所以基于菜单的场景名都不会显示
+ * YES - true     NO - false
+ * @default true
+ *
+ *
+ *
+ *
+ *
  * @param dPadSettings
  * @text D-Pad Settings
  * @type struct<dpad>
@@ -58,6 +84,13 @@
  * @default false
  *
  * @help
+ * 
+ * 魔改作者: 流逝的岁月
+ * 魔改版本: v1.00
+ *
+ *
+ * 魔改内容: v1.00 支持识别某些窗口不会显示自定义按键,需要知道当前界面的类名
+ *
  *
  * //=============================================================================
  * // Background:
@@ -482,6 +515,35 @@
 var Imported = Imported || {};
 Imported.VituralButtons_OnlyForSelf = true;
 var ALOE = ALOE || {};
+
+
+
+var Zzy = Zzy || {};
+Zzy.VBOFS = Zzy.VBOFS || {};
+
+Zzy.VBOFS.Param = PluginManager.parameters("VirtualButtons_OnlyForSelf");
+Zzy.VBOFS.NoSceneClassName = Zzy.VBOFS.Param['NoSceneClassName'] ? JSON.parse(Zzy.VBOFS.Param['NoSceneClassName']) : [];
+
+Zzy.VBOFS.NoMenuBaseScene = eval(Zzy.VBOFS.Param['NoMenuBaseScene'] || true);
+
+
+
+Zzy.VBOFS.ToNoSceneClassNameStruct = function()
+{
+	var struct = {};
+	
+	for(var i=0;i<Zzy.VBOFS.NoSceneClassName.length;i++)
+	{
+		var name = Zzy.VBOFS.NoSceneClassName[i];
+		struct[name] = true;
+	}
+	return struct;
+}
+
+Zzy.VBOFS.NoSceneClassNameStruct = Zzy.VBOFS.ToNoSceneClassNameStruct();
+
+
+
 (function () {
     "use strict";
 
@@ -666,26 +728,57 @@ var ALOE = ALOE || {};
         }
     };
 
-    Sprite_VirtualButton.prototype.updateVisibility = function () {
-        if (this._hiding && this.opacity > 0) {
-            if (this._delayCounter < this._delay) {
-                this._delayCounter++;
-            } else {
-                this.opacity -= 255 / this._duration;
-                if (this.opacity <= 0) {
-                    this._delayCounter = 0;
-                    this._showing = false;
-                }
-            }
-        } else if (this._showing && this.opacity < 255) {
-            if (this._delayCounter < this._delay) {
-                this._delayCounter++;
-            } else {
-                this.opacity += 255 / this._duration;
-                if (this.opacity >= 255) this._delayCounter = 0;
-            }
-        }
+    Sprite_VirtualButton.prototype.updateVisibility = function ()
+	{
+		if(Zzy.VBOFS.CheckInClass())//菜单界面
+		{
+			//---魔改--- v1.00 隐藏指定窗口的显示条件
+			this.opacity -= 1;
+			this.opacity = this.opacity < 0 ? 0 : this.opacity;
+		}
+		else
+		{
+			   if (this._hiding && this.opacity > 0) {
+					if (this._delayCounter < this._delay) {
+						this._delayCounter++;
+					} else {
+						this.opacity -= 255 / this._duration;
+						if (this.opacity <= 0) {
+							this._delayCounter = 0;
+							this._showing = false;
+						}
+					}
+				} else if (this._showing && this.opacity < 255) {
+					if (this._delayCounter < this._delay) {
+						this._delayCounter++;
+					} else {
+						this.opacity += 255 / this._duration;
+						if (this.opacity >= 255) this._delayCounter = 0;
+					}
+				}			
+		}
+		
+
     };
+	
+	
+	Zzy.VBOFS.CheckInClass = function()
+	{
+		if(Zzy.VBOFS.NoMenuBaseScene)
+		{
+			if(SceneManager._scene instanceof Scene_MenuBase)return true;
+		}
+		var name = SceneManager._scene.constructor.name;
+		return !!Zzy.VBOFS.NoSceneClassNameStruct[name];
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 
     Sprite_VirtualButton.prototype.updateActive = function () {
         if (this.opacity === 255 && !this.moving && !this._pluginHidden && !this._hiding) {
