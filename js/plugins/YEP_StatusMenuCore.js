@@ -361,9 +361,13 @@ Yanfly.Status = Yanfly.Status || {};
  *
  *
  * 魔改作者: 流逝的岁月
- * 魔改版本: v1.00
+ * 魔改版本: v1.01
  *
- * 魔改内容: 隐藏状态窗口,信息窗口的绘制内容   使下方信息向上调整
+ *
+ *
+ *
+ * 魔改内容: v1.01 界面调整
+ * 魔改内容: v1.00 隐藏状态窗口,信息窗口的绘制内容   使下方信息向上调整
  *
  * ============================================================================
  * Introduction
@@ -747,7 +751,7 @@ Window_StatusInfo.prototype.drawGeneralParam = function () {
 	//--魔改--距离调整
 	var disY = this.lineHeight() * 2;
 
-
+	//---魔改--- v1.01 调整界面布局
     var dx = rect.x + this.textPadding();
     var dw = rect.width - this.textPadding() * 2;
     this.drawDarkRect(rect.x, rect.y - disY, rect.width, rect.height);
@@ -758,30 +762,100 @@ Window_StatusInfo.prototype.drawGeneralParam = function () {
 	
     this.drawText(text, dx, rect.y - disY, dw, "right");
 	
-    for (var i = 0; i < 8; ++i) {
-        if (i < 2) {
-            rect.y += this.lineHeight();
-        } else if (i === 2) {
-            rect.y += this.lineHeight();
-            rect.width /= 2;
-            dw = rect.width - this.textPadding() * 2;
-        } else if (i % 2 === 0) {
-            rect.x = 0;
-            dx = rect.x + this.textPadding();
-            rect.y += this.lineHeight();
-        } else {
-            rect.x += rect.width;
-            dx += rect.width;
-        }
+	
+	var paramPosIndexArr = [0,1,2,4,3,5,7,undefined,6];
+		
+	
+	
+	//设置取一半
+	
+	
+	
+	for (var i = 0; i < paramPosIndexArr.length; ++i) 
+	{
+		var pid = paramPosIndexArr[i];//进行转换
+		
+		var hw = rect.width/2;
+		var hdw = hw - this.textPadding() * 2;
+		
+		
+		if(i === paramPosIndexArr.length - 1)//最后一个
+		{
+			hw = rect.width;
+			hdw = dw;
+		}
+		
+		
+		if (i % 2 === 0) 
+		{
+			rect.x = 0;
+			dx = rect.x + this.textPadding();
+			rect.y += this.lineHeight();
+		}
+		else
+		{
+			rect.x += hw;
+			dx += hw;
+		}		
+		
+		
+		if(pid === undefined)
+		{
+			//---魔改--- v1.01 显示魔法反击率
+			this.drawDarkRect(rect.x, rect.y - disY, hw, rect.height);
+			this.changeTextColor(this.systemColor());
+			this.drawText(Yanfly.Param.StatusAttr_mrf, dx, rect.y - disY, hdw, "left");
+			this.changeTextColor(this.normalColor());
+			text = Yanfly.Util.toGroup(this._actor.xparam(5));
+			
+			text = text + '%';//添加百分号
+			
+			this.drawText(text, dx, rect.y - disY, hdw, "right");			
+		}
+		else
+		{
+			this.drawDarkRect(rect.x, rect.y - disY, hw, rect.height);
+			this.changeTextColor(this.systemColor());
+			this.drawText(TextManager.param(pid), dx, rect.y - disY, hdw, "left");
+			this.changeTextColor(this.normalColor());
+			text = Yanfly.Util.toGroup(this._actor.param(pid));
+			this.drawText(text, dx, rect.y - disY, hdw, "right");	
+		
+		}
+		
+				
+	}
+	
+	
+	
+	
+    // for (var i = 0; i < 8; ++i) 
+	// {
+
+        // if (i < 2) 
+		// {
+            // rect.y += this.lineHeight();
+        // } else if (i === 2) {
+            // rect.y += this.lineHeight();
+            // rect.width /= 2;
+            // dw = rect.width - this.textPadding() * 2;
+        // } else if (i % 2 === 0) {
+            // rect.x = 0;
+            // dx = rect.x + this.textPadding();
+            // rect.y += this.lineHeight();
+        // } else {
+            // rect.x += rect.width;
+            // dx += rect.width;
+        // }
 
 		
-        this.drawDarkRect(rect.x, rect.y - disY, rect.width, rect.height);
-        this.changeTextColor(this.systemColor());
-        this.drawText(TextManager.param(i), dx, rect.y - disY, dw, "left");
-        this.changeTextColor(this.normalColor());
-        text = Yanfly.Util.toGroup(this._actor.param(i));
-        this.drawText(text, dx, rect.y - disY, dw, "right");
-    }
+        // this.drawDarkRect(rect.x, rect.y - disY, rect.width, rect.height);
+        // this.changeTextColor(this.systemColor());
+        // this.drawText(TextManager.param(i), dx, rect.y - disY, dw, "left");
+        // this.changeTextColor(this.normalColor());
+        // text = Yanfly.Util.toGroup(this._actor.param(i));
+        // this.drawText(text, dx, rect.y - disY, dw, "right");
+    // }
 };
 
 Window_StatusInfo.prototype.actorCurrentExpRate = function (actor) {

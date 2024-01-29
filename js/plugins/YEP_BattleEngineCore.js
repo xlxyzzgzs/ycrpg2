@@ -637,6 +637,26 @@ Yanfly.BEC.version = 1.5;
  * @default false
  *
  * @help
+ *
+ * 魔改作者: 流逝的岁月
+ * 魔改版本: v1.00
+ *
+ * 魔改内容: v1.00 封装了一些函数功能,可以使用
+ *
+ 
+$gameTroop.LowerHpIndex = function()//返回血量第一低的敌人的下标
+$gameParty.LowerHpIndex = function()//返回血量第一低的队友的下标
+
+$gameTroop.Lower2HpIndex = function()//返回血量第二低的敌人的下标,如果没有,则会返回第一血量下标
+$gameParty.Lower2HpIndex = function()//返回血量第二低的队友的下标,如果没有,则会返回第一血量下标
+
+$gameTroop.HighHpIndex = function()//返回血量第一高的敌人的下标
+$gameParty.HighHpIndex = function()//返回血量第一高的队友的下标
+
+$gameTroop.High2HpIndex = function()//返回血量第二高的敌人的下标,如果没有,则会返回第一血量下标
+$gameParty.High2HpIndex = function()//返回血量第二高的队友的下标,如果没有,则会返回第一血量下标
+
+ *
  * ============================================================================
  * Introduction
  * ============================================================================
@@ -1178,6 +1198,12 @@ Yanfly.BEC.version = 1.5;
 
 Yanfly.Parameters = PluginManager.parameters("YEP_BattleEngineCore");
 Yanfly.Param = Yanfly.Param || {};
+
+var Zzy = Zzy || {};
+Zzy.CYBEC = Zzy.CYBEC || {};
+
+
+
 
 Yanfly.Param.BECSystem = String(Yanfly.Parameters["Default System"]);
 Yanfly.Param.BECEscRatio = String(Yanfly.Parameters["Escape Ratio"]);
@@ -5569,6 +5595,111 @@ Yanfly.Util.onlyUnique = function (value, index, self) {
     return self.indexOf(value) === index;
 };
 
+
+
+
+
+
+//=============================================================================
+//Zzy.CYBEC.Function
+//=============================================================================
+
+//---魔改--- v1.01 函数功能打包
+Zzy.CYBEC.LowerHpIndexOfArr = function(mems)
+{
+	var li = 0;
+	for(var i=1;i<mems.length;i++)
+	{
+		if(mems[li].hp > mems[i].hp)li = i;
+	}
+	return li;	
+}
+
+Zzy.CYBEC.HighHpIndexOfArr = function(mems)
+{
+	var li = 0;
+	for(var i=1;i<mems.length;i++)
+	{
+		if(mems[li].hp < mems[i].hp)li = i;
+	}
+	return li;	
+}
+
+Zzy.CYBEC.Lower2HpIndex = function(unArr)
+{
+	var mems = unArr.aliveMembers();
+	if(mems.length < 1)return 0;
+	if(mems.length === 1)return 0;
+	var lIndex = Zzy.CYBEC.LowerHpIndexOfArr(mems);
+	mems.splice(lIndex,1);
+	var nIndex = Zzy.CYBEC.LowerHpIndexOfArr(mems);
+	if(nIndex >= lIndex)return nIndex+1;
+	return nIndex;	
+}
+
+Zzy.CYBEC.High2HpIndex = function(unArr)
+{
+	var mems = unArr.aliveMembers();
+	if(mems.length < 1)return 0;
+	if(mems.length === 1)return 0;
+	var lIndex = Zzy.CYBEC.HighHpIndexOfArr(mems);
+	mems.splice(lIndex,1);
+	var nIndex = Zzy.CYBEC.HighHpIndexOfArr(mems);
+	if(nIndex >= lIndex)return nIndex+1;
+	return nIndex;	
+}
+
+
+Game_Troop.prototype.LowerHpIndex = function()//血量第一低的敌人
+{
+	return Zzy.CYBEC.LowerHpIndexOfArr(this.aliveMembers());
+}
+
+Game_Party.prototype.LowerHpIndex = function()//血量第一低的队友
+{
+	return Zzy.CYBEC.LowerHpIndexOfArr(this.aliveMembers());
+}
+
+
+Game_Troop.prototype.Lower2HpIndex = function()//血量第二低的敌人
+{
+	return Zzy.CYBEC.Lower2HpIndex(this);
+}
+
+Game_Party.prototype.Lower2HpIndex = function()//血量第二低的队友
+{
+	return Zzy.CYBEC.Lower2HpIndex(this);
+}
+
+Game_Troop.prototype.HighHpIndex = function()//血量第一高的敌人
+{
+	return Zzy.CYBEC.HighHpIndexOfArr(this.aliveMembers());
+}
+
+Game_Party.prototype.HighHpIndex = function()//血量第一高的队友
+{
+	return Zzy.CYBEC.HighHpIndexOfArr(this.aliveMembers());
+}
+
+Game_Troop.prototype.High2HpIndex = function()//血量第二高的敌人
+{
+	return Zzy.CYBEC.High2HpIndex(this);
+}
+
+Game_Party.prototype.High2HpIndex = function()//血量第二高的队友
+{
+	return Zzy.CYBEC.High2HpIndex(this);
+}
+
+
+
 //=============================================================================
 // End of File
 //=============================================================================
+
+
+
+
+
+
+

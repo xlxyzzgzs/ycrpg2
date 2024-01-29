@@ -15,6 +15,30 @@ Yanfly.Core.version = 1.31;
  * @plugindesc v1.31 [v1.0]  系统 - 引擎核心
  * @author Yanfly Engine Plugins （drill_up翻译）
  *
+ *
+ *
+ * @param ---魔改---
+ * @default
+ *
+ * @param MaxLuk
+ * @text 幸运-最大值
+ * @parent ---魔改---
+ * @type text
+ * @desc 将限制所有角色的最大值上限,这可以是一个公式
+ * @default 999
+ *
+ * @param MaxMrf
+ * @text 魔法反射率-最大值
+ * @parent ---魔改---
+ * @type text
+ * @desc 将限制所有角色的最大值上限,其中0代表0%,100代表100%这可以是一个公式
+ * @default 100
+ *
+ *
+ *
+ *
+ *
+ *
  * @param ---屏幕---
  * @default
  *
@@ -513,6 +537,36 @@ Yanfly.Core.version = 1.31;
  * @default 29
  *
  * @help
+ *
+ * 魔改作者: 流逝的岁月
+ * 魔改版本: v1.00
+ *
+ *
+ *
+ * 魔改内容: v1.00 添加了 幸运 魔法反射率 的控制值 , 添加脚本控制 魔法反射是否有效,可通过脚本进行控制
+ *
+ *
+ * -以下是可能会用到的脚本信息
+ * Zzy.CYCE.EnableMrf()      //开启魔法反射效果
+ * Zzy.CYCE.DisableMrf()     //关闭魔法反射效果
+ * $gameSystem._ZzyCYCECanMrf = true     //开启反射
+ * $gameSystem._ZzyCYCECanMrf = false     //禁用反射
+ *
+ *
+ *
+ *
+ *
+ * 关于参数中设置的公式问题
+ * 其实是可以输入一段js代码,这会更佳灵活的去操作数据
+ * 
+ * 以下是在写入公式时可以带入的数据信息:
+ *
+ * v[ID],V[ID]              //id替换,将会返回全局变量的值
+ * s[ID],S[ID]              //id替换,将会返回全局开关的值
+ * gw,GW                    //游戏窗口的宽度
+ * gh,GH                    //游戏窗口的高度
+ *
+ *
  * ============================================================================
  *   插件介绍
  * ============================================================================
@@ -826,9 +880,24 @@ Yanfly.Core.version = 1.31;
 // Parameter Variables
 //=============================================================================
 
+
+
 Yanfly.Parameters = PluginManager.parameters("YEP_CoreEngine");
 Yanfly.Param = Yanfly.Param || {};
 Yanfly.Icon = Yanfly.Icon || {};
+
+
+var Zzy = Zzy || {};
+Zzy.CYCE = Zzy.CYCE || {};
+
+Zzy.CYCE.MaxLuk = String(Yanfly.Parameters['MaxLuk'] || 999);
+Zzy.CYCE.MaxMrf = String(Yanfly.Parameters['MaxMrf'] || 100);
+
+
+
+
+
+
 
 Yanfly.Param.ScreenWidth = Number(Yanfly.Parameters["屏幕宽度"] || 816);
 Yanfly.Param.ScreenHeight = Number(Yanfly.Parameters["屏幕高度"] || 624);
@@ -2712,6 +2781,143 @@ Yanfly.Util.displayError = function (e, code, message) {
     }
 };
 
+
+
+
+
+
+//---魔改--- v1.00 最大值限制
+
+
+
+
+
+//=============================================================================
+//Game_Actor
+//=============================================================================
+
+
+
+Zzy.CYCE.Game_Actor_param = Game_Actor.prototype.param;
+Game_Actor.prototype.param = function(paramId) 
+{
+	var value = Zzy.CYCE.Game_Actor_param.call(this,paramId);
+	if(paramId === 7)//幸运
+	{
+		var maxValue = Zzy.CYCE.EvalTransformation(Zzy.CYCE.MaxLuk);
+		value = value > maxValue ? maxValue : value;
+	}
+	return value;//
+};
+
+Zzy.CYCE.Game_Actor_xparam = Game_Actor.prototype.xparam;
+Game_Actor.prototype.xparam = function(paramId)
+{
+	var value = Zzy.CYCE.Game_Actor_xparam.call(this,paramId);
+	if(paramId === 5)//魔法反射率
+	{
+		var maxValue = Zzy.CYCE.EvalTransformation(Zzy.CYCE.MaxMrf) * 0.01;
+		value = value > maxValue ? maxValue : value;
+	}
+	return value;
+};
+
+
+
+//=============================================================================
+//Game_Enemy
+//=============================================================================
+
+Zzy.CYCE.Game_Enemy_param = Game_Enemy.prototype.param;
+Game_Enemy.prototype.param = function(paramId) 
+{
+	var value = Zzy.CYCE.Game_Enemy_param.call(this,paramId);
+	if(paramId === 7)//幸运
+	{
+		var maxValue = Zzy.CYCE.EvalTransformation(Zzy.CYCE.MaxLuk);
+		value = value > maxValue ? maxValue : value;
+	}
+	return value;//
+};
+
+
+Zzy.CYCE.Game_Enemy_xparam = Game_Enemy.prototype.xparam;
+Game_Enemy.prototype.xparam = function(paramId)
+{
+	var value = Zzy.CYCE.Game_Enemy_xparam.call(this,paramId);
+	if(paramId === 5)//魔法反射率
+	{
+		var maxValue = Zzy.CYCE.EvalTransformation(Zzy.CYCE.MaxMrf) * 0.01;
+		value = value > maxValue ? maxValue : value;
+	}
+	return value;
+};
+
+
+//=============================================================================
+//Game_Action
+//=============================================================================
+//此处进行反射判断检测
+Zzy.CYCE.Game_Action_itemMrf = Game_Action.prototype.itemMrf;
+Game_Action.prototype.itemMrf = function(target) 
+{
+	if(!Zzy.CYCE.GetCanMrf())return 0;//不可以进行反射
+	return Zzy.CYCE.Game_Action_itemMrf.call(this,target);
+};
+
+
+
+
+//=============================================================================
+//Zzy.CYCE.Function
+//=============================================================================
+
+//公式
+Zzy.CYCE.EvalTransformation = function(formula)//转换
+{
+	var v = $gameVariables._data;
+	var s = $gameSwitches._data;
+	var V = v;
+	var S = s;
+	var gw = Graphics.boxWidth;
+	var gh = Graphics.boxHeight;
+	var GW = gw;
+	var GH = gh;
+	
+	return eval(formula);
+}
+
+
+
+Zzy.CYCE.EnableMrf = function()      //开启魔法反射效果
+{
+	$gameSystem._ZzyCYCECanMrf = true;
+}
+
+Zzy.CYCE.DisableMrf = function()     //关闭魔法反射效果
+{
+	$gameSystem._ZzyCYCECanMrf = false;
+}
+
+//获取反射
+Zzy.CYCE.GetCanMrf = function()
+{
+	if($gameSystem._ZzyCYCECanMrf === undefined)$gameSystem._ZzyCYCECanMrf = true;
+	return $gameSystem._ZzyCYCECanMrf;
+}
+
+
+
+
 //=============================================================================
 // End of File
 //=============================================================================
+
+
+
+
+
+
+
+
+

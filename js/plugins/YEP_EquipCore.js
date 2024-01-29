@@ -76,11 +76,11 @@ Yanfly.Equip.version = 1.16;
  * @help
  *
  * 魔改作者: 流逝的岁月
- * 魔改版本: v1.04
+ * 魔改版本: v1.05
  *
  *
- *
- *
+ * 
+ *           v1.05 修改界面的布局方式
  *           v1.04 添加额外标签,实现功能拓展,可在下方 数据库备注 中查看用法
  *           v1.03 修改参数结构,自定义化调整接口
  *           v1.02 添加更多的信息显示,调整布局
@@ -149,7 +149,7 @@ if($gameSwitches.value(10))
  * 
  * 以下是在写入公式时可以带入的数据信息:
  *
- * a,User,user                //如果有,那这个值就是目前指定的 持有者(玩家)对象
+ * User,user                //如果有,那这个值就是目前指定的 持有者(玩家)对象
  * Item,item                //如果有,那这个值就是目前 安装/卸载 的装备对象
  * v[ID],V[ID]              //id替换,将会返回全局变量的值
  * s[ID],S[ID]              //id替换,将会返回全局开关的值
@@ -1105,13 +1105,13 @@ Window_StatCompare.prototype.drawParamName = function(y, paramId)
 	{
 		var pid = Window_StatCompare.BaseParamMap[paramId];
 		name = TextManager.param(pid);
-	}
+	}	
 	else
 	{
 		paramId -= bLen;
 		var pid = Window_StatCompare.XParamMap[paramId];
-		var tArr = ['命中率','暴击率','回避率'];
-		name = tArr[pid]
+		var tArr = Window_StatCompare.XParamMapTextArr;
+		name = tArr[pid];
 	}
 	
 	
@@ -1275,9 +1275,15 @@ Window_StatCompare.prototype.drawParamDifference = function(y, paramId)
 
 
 //--魔改--
+// Window_StatCompare.BaseParamMap = [0,1,2,3,4,5,6];
+// Window_StatCompare.XParamMap = [0,2,1];
+// Window_StatCompare.XParamMapTextArr = ['命中率','暴击率','回避率'];
 
-Window_StatCompare.BaseParamMap = [0,1,2,3,4,5,6];
-Window_StatCompare.XParamMap = [0,2,1];
+
+//---魔改--- v1.05
+Window_StatCompare.BaseParamMap = [0,1,2,3,4,5,6,7];
+Window_StatCompare.XParamMap = [0,1];
+Window_StatCompare.XParamMapTextArr = ['命中率','暴击率'];
 
 Window_StatCompare.ParamsLen = Window_StatCompare.BaseParamMap.length + Window_StatCompare.XParamMap.length;//默认12个参数
 
