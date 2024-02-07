@@ -1282,7 +1282,7 @@ Window_StatCompare.prototype.drawParamDifference = function(y, paramId)
 
 //---魔改--- v1.05
 Window_StatCompare.BaseParamMap = [0,1,2,3,4,5,6,7];
-Window_StatCompare.XParamMap = [0,1];
+Window_StatCompare.XParamMap = [0,2];
 Window_StatCompare.XParamMapTextArr = ['命中率','暴击率'];
 
 Window_StatCompare.ParamsLen = Window_StatCompare.BaseParamMap.length + Window_StatCompare.XParamMap.length;//默认12个参数
