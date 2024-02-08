@@ -639,8 +639,9 @@ Yanfly.BEC.version = 1.5;
  * @help
  *
  * 魔改作者: 流逝的岁月
- * 魔改版本: v1.00
+ * 魔改版本: v1.01
  *
+ * 魔改内容: v1.01 将忽略存活同时生命为0的角色
  * 魔改内容: v1.00 封装了一些函数功能,可以使用
  *
  
@@ -5600,9 +5601,58 @@ Yanfly.Util.onlyUnique = function (value, index, self) {
 
 
 
+
+
+
+
 //=============================================================================
 //Zzy.CYBEC.Function
 //=============================================================================
+
+
+Game_Party.prototype.ZzyCBECAliveMembers = function()//排除0血量
+{
+	var mems = this.aliveMembers();
+	var nmems = [];
+	var map = [];
+	for(var i=0;i<mems.length;i++)
+	{
+		var mem = mems[i];
+		if(mem.hp > 0)
+		{
+			nmems.push(mem);
+			map.push(i);
+		}
+	}
+	var info = {};
+	info.mems = nmems;
+	info.map = map;
+	return info;
+}
+
+
+Game_Troop.prototype.ZzyCBECAliveMembers = function()//排除0血量
+{
+	var mems = this.aliveMembers();
+	var nmems = [];
+	var map = [];
+	for(var i=0;i<mems.length;i++)
+	{
+		var mem = mems[i];
+		if(mem.hp > 0)
+		{
+			nmems.push(mem);
+			map.push(i);
+		}
+	}
+	var info = {};
+	info.mems = nmems;
+	info.map = map;
+	return info;
+}
+
+
+
 
 //---魔改--- v1.01 函数功能打包
 Zzy.CYBEC.LowerHpIndexOfArr = function(mems)
@@ -5610,6 +5660,7 @@ Zzy.CYBEC.LowerHpIndexOfArr = function(mems)
 	var li = 0;
 	for(var i=1;i<mems.length;i++)
 	{
+		if(mems[i].hp <= 0)continue;//跳过血量等于0的判定
 		if(mems[li].hp > mems[i].hp)li = i;
 	}
 	return li;	
@@ -5620,6 +5671,7 @@ Zzy.CYBEC.HighHpIndexOfArr = function(mems)
 	var li = 0;
 	for(var i=1;i<mems.length;i++)
 	{
+		if(mems[i].hp <= 0)continue;//跳过血量等于0的判定
 		if(mems[li].hp < mems[i].hp)li = i;
 	}
 	return li;	
@@ -5627,26 +5679,30 @@ Zzy.CYBEC.HighHpIndexOfArr = function(mems)
 
 Zzy.CYBEC.Lower2HpIndex = function(unArr)
 {
-	var mems = unArr.aliveMembers();
+	var info = unArr.ZzyCBECAliveMembers();
+	var mems = info.mems;
+	var map = info.map;
 	if(mems.length < 1)return 0;
 	if(mems.length === 1)return 0;
 	var lIndex = Zzy.CYBEC.LowerHpIndexOfArr(mems);
 	mems.splice(lIndex,1);
 	var nIndex = Zzy.CYBEC.LowerHpIndexOfArr(mems);
 	if(nIndex >= lIndex)return nIndex+1;
-	return nIndex;	
+	return map[nIndex];
 }
 
 Zzy.CYBEC.High2HpIndex = function(unArr)
 {
-	var mems = unArr.aliveMembers();
+	var info = unArr.ZzyCBECAliveMembers();
+	var mems = info.mems;
+	var map = info.map;	
 	if(mems.length < 1)return 0;
 	if(mems.length === 1)return 0;
 	var lIndex = Zzy.CYBEC.HighHpIndexOfArr(mems);
 	mems.splice(lIndex,1);
 	var nIndex = Zzy.CYBEC.HighHpIndexOfArr(mems);
 	if(nIndex >= lIndex)return nIndex+1;
-	return nIndex;	
+	return map[nIndex];
 }
 
 
