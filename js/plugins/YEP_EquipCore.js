@@ -76,10 +76,10 @@ Yanfly.Equip.version = 1.16;
  * @help
  *
  * 魔改作者: 流逝的岁月
- * 魔改版本: v1.05
+ * 魔改版本: v1.06
  *
  *
- * 
+ *           v1.06 修复暴击不显示的问题
  *           v1.05 修改界面的布局方式
  *           v1.04 添加额外标签,实现功能拓展,可在下方 数据库备注 中查看用法
  *           v1.03 修改参数结构,自定义化调整接口
@@ -1281,9 +1281,10 @@ Window_StatCompare.prototype.drawParamDifference = function(y, paramId)
 
 
 //---魔改--- v1.05
+//---魔改--- v1.06 修复索引值的问题
 Window_StatCompare.BaseParamMap = [0,1,2,3,4,5,6,7];
 Window_StatCompare.XParamMap = [0,2];
-Window_StatCompare.XParamMapTextArr = ['命中率','暴击率'];
+Window_StatCompare.XParamMapTextArr = ['命中率',undefined,'暴击率'];
 
 Window_StatCompare.ParamsLen = Window_StatCompare.BaseParamMap.length + Window_StatCompare.XParamMap.length;//默认12个参数
 
