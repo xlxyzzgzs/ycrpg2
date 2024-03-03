@@ -16,6 +16,15 @@ Yanfly.Quest.version = 1.01;
  * @author Yanfly Engine Plugins 汉化：硕明云书
  *
  * @help
+ *
+ * 魔改作者: 流逝的岁月
+ * 魔改版本: v1.00
+ *
+ * 魔改内容: v1.00 添加滑块滚动区域
+ *
+ * 注意: 插件重写了 Window_QuestData.prototype.processTouch 这是极有可能造成不兼容的情况的!
+ *
+ *
  * ============================================================================
  * 指令
  * ============================================================================
@@ -413,6 +422,59 @@ Yanfly.Quest.version = 1.01;
  * ============================================================================
  * End of Help
  * ============================================================================
+ *
+ * @param ---魔改---
+ * @default
+ *
+ * @param BarWidth
+ * @text 条组宽度
+ * @parent ---魔改---
+ * @type number
+ * @desc 这是添加到右侧滑块的宽度值,默认值28
+ * @default 28
+ *
+ * @param BarPadding
+ * @text 条组空隙
+ * @parent ---魔改---
+ * @type number
+ * @desc 这是条组和文本预留的空隙,默认值为6
+ * @default 6
+ *
+ * @param BarBackColor
+ * @text 底层条背景颜色
+ * @parent ---魔改---
+ * @type text
+ * @desc 支持#000000 ~ #ffffff 和 rgba(0~255,0~255,0~255,0~1) 两种颜色文本的格式
+ * @default rgba(0,0,0,0.5)
+ *
+ * @param BarBlockColor
+ * @text 滑动条颜色
+ * @parent ---魔改---
+ * @type text
+ * @desc 支持#000000 ~ #ffffff 和 rgba(0~255,0~255,0~255,0~1) 两种颜色文本的格式
+ * @default rgba(160,160,160,0.8)
+ *
+ * @param BarTouchColor
+ * @text 选中滑动条颜色
+ * @parent ---魔改---
+ * @type text
+ * @desc 支持#000000 ~ #ffffff 和 rgba(0~255,0~255,0~255,0~1) 两种颜色文本的格式
+ * @default rgba(200,200,200,1)
+ *
+ *
+ * @param BarBlockDis
+ * @text 滑动条间距
+ * @parent ---魔改---
+ * @type number
+ * @desc 这是滑动条和背景条之间的间距,默认值为2
+ * @default 2
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  * @param ---Main Menu---
  * @text 主菜单
@@ -2189,8 +2251,29 @@ if (Utils.RPGMAKER_VERSION && Utils.RPGMAKER_VERSION >= "1.3.5") {
     // Parameter Variables
     //=============================================================================
 
+
+
+
+	var Zzy = Zzy || {};
+	Zzy.XTQJ = Zzy.XTQJ || {};
+
+
     Yanfly.Parameters = PluginManager.parameters("YEP_QuestJournal");
     Yanfly.Param = Yanfly.Param || {};
+	
+	
+	Zzy.XTQJ.BarWidth = parseInt(Yanfly.Parameters['BarWidth'] || 28);//条组宽度
+	Zzy.XTQJ.BarPadding = parseInt(Yanfly.Parameters['BarPadding'] || 6);
+	Zzy.XTQJ.BarBackColor = String(Yanfly.Parameters['BarBackColor'] || 'rgba(0,0,0,0.5)');//底层颜色
+	Zzy.XTQJ.BarBlockColor = String(Yanfly.Parameters['BarBlockColor'] || 'rgba(160,160,160,0.8)');//灰色条块
+	Zzy.XTQJ.BarTouchColor = String(Yanfly.Parameters['BarTouchColor'] || 'rgba(200,200,200,1)');//点中颜色
+	Zzy.XTQJ.BarBlockDis = parseInt(Yanfly.Parameters['BarBlockDis'] || 2);//灰色条块间距
+
+
+
+	
+	
+	
 
     Yanfly.Param.QuestCmdName = String(Yanfly.Parameters["Quest Command"]);
     Yanfly.Param.QuestCmdShow = eval(Yanfly.Parameters["Show Command"]);
@@ -2202,6 +2285,297 @@ if (Utils.RPGMAKER_VERSION && Utils.RPGMAKER_VERSION >= "1.3.5") {
     Yanfly.Param.QuestTitleWindow = JSON.parse(Yanfly.Parameters["Quest Title Window"]);
     Yanfly.Param.QuestDataWindow = JSON.parse(Yanfly.Parameters["Quest Data Window"]);
     Yanfly.Quest.LunaticMode = JSON.parse(Yanfly.Parameters["Lunatic Mode"]);
+
+
+
+
+
+
+
+//=============================================================================
+// Window_Selectable
+//=============================================================================
+//---魔改--- v1.00 用于添加滚动条样式
+
+Window_Selectable.prototype.IsZzyXTQJScrollBar = function()
+{return false;}
+
+Zzy.XTQJ.Window_Selectable_itemWidth = Window_Selectable.prototype.itemWidth;
+Window_Selectable.prototype.itemWidth = function() 
+{
+	var iw = Zzy.XTQJ.Window_Selectable_itemWidth.call(this);
+	if(this.IsZzyXTQJScrollBar())
+	{
+		var mcs = this.maxCols();
+		var dis = (this.DefaultZzyXTQJBarWidth()+this.DefaultZzyXTQJBarPadding()*2) / mcs;
+		return iw - dis;
+	}
+	else return iw;
+};
+
+
+
+Window_Selectable.prototype.DefaultZzyXTQJBarWidth = function()
+{return Zzy.XTQJ.BarWidth;}
+
+Window_Selectable.prototype.DefaultZzyXTQJBarPadding = function()
+{return Zzy.XTQJ.BarPadding;}
+
+Window_Selectable.prototype.DefaultZzyXTQJBarBackColor = function()
+{return Zzy.XTQJ.BarBackColor;}
+
+Window_Selectable.prototype.DefaultZzyXTQJBarBlockColor = function()
+{return Zzy.XTQJ.BarBlockColor;}
+
+Window_Selectable.prototype.DefaultZzyXTQJBarTouchColor = function()
+{return Zzy.XTQJ.BarTouchColor;}
+
+Window_Selectable.prototype.DefaultZzyXTQJBarBlockDis = function()
+{return Zzy.XTQJ.BarBlockDis;}
+
+
+
+Zzy.XTQJ.Window_Selectable_refresh = Window_Selectable.prototype.refresh;
+Window_Selectable.prototype.refresh = function()//刷新-可能需要重写
+{
+	Zzy.XTQJ.Window_Selectable_refresh.call(this);
+	if(this.IsZzyXTQJScrollBar())this.DrawZzyXTQJBar();//绘制条组
+}
+
+
+Window_Selectable.prototype.GetZzyXTQJBarRect = function()//获取空间
+{
+	// var width = this.contents.width;
+	// var height = this.contents.height;
+
+	var pad = this.standardPadding();
+	var width = this.width - pad * 2;
+	var height = this.height - pad * 2;
+
+	var rt = new Rectangle(width - this.DefaultZzyXTQJBarWidth(),
+	0,
+	this.DefaultZzyXTQJBarWidth(),
+	height);
+	
+	return rt;
+}
+
+
+Window_Selectable.prototype.DrawZzyXTQJBar = function()
+{
+	var barRt = this.GetZzyXTQJBarRect();
+	
+	//初始化申请位图
+	if(!this._ZzyXTQJBarContnets)
+	{
+		var pad = this.standardPadding();
+		this._ZzyXTQJBarContnets = new Sprite();
+		this._ZzyXTQJBarContnets.bitmap = new Bitmap(barRt.width,barRt.height);
+		this.addChild(this._ZzyXTQJBarContnets);
+		this._ZzyXTQJBarContnets.x = barRt.x + pad;
+		this._ZzyXTQJBarContnets.y = barRt.y + pad;
+	}
+	this._ZzyXTQJBarContnets.bitmap.clear();
+	
+	
+	this.DrawZzyXTQJBarBack(barRt);//绘制底层
+	this.DrawZzyXTQJBarBlock(barRt);//绘制条块
+	
+
+}
+
+Window_Selectable.prototype.DrawZzyXTQJBarBack = function(barRt)
+{
+	var color = this.DefaultZzyXTQJBarBackColor();
+	
+	this._ZzyXTQJBarContnets.bitmap.fillAll(color);
+	//this.contents.fillRect(barRt.x,barRt.y,barRt.width,barRt.height,color);
+}
+
+Window_Selectable.prototype.DrawZzyXTQJBarBlock = function(barRt)
+{
+	var color = this._ZzyXTQJHit ? this.DefaultZzyXTQJBarTouchColor() : this.DefaultZzyXTQJBarBlockColor();
+	var rt = this.GetZzyXTQJBlockBarRect();
+	
+	var dis = Zzy.XTQJ.BarBlockDis;
+	this._ZzyXTQJBarContnets.bitmap.fillRect(rt.x,rt.y,rt.width,rt.height,color);
+	//this.contents.fillRect(rt.x,rt.y,rt.width,rt.height,color);
+}
+
+
+Window_Selectable.prototype.GetZzyXTQJBarRectArea = function()//获取区域
+{
+	var barRt = this.GetZzyXTQJBarRect();
+	var dis = this.DefaultZzyXTQJBarBlockDis();
+	var nbarRt = new Rectangle(
+	barRt.x + dis,
+	barRt.y + dis,
+	barRt.width - dis*2,
+	barRt.height - dis*2);	
+	
+	return nbarRt;
+}
+
+
+
+Window_Selectable.prototype.GetZzyXTQJBlockBarRect = function()
+{
+	//会计算当前滚动条的位置
+
+	var rate = this.GetZzyXTQJBarRate();
+	
+	var nbarRt = this.GetZzyXTQJBarRectArea();
+	
+	var dis = Zzy.XTQJ.BarBlockDis;
+	
+	var barHieght = nbarRt.height * rate;
+	var rt = new Rectangle(dis,
+	dis,
+	nbarRt.width,
+	barHieght);
+	var tp = this.topRow();//对应位置
+	var mtp = this.maxTopRow();//最大顶层
+	
+	var trate = mtp ? tp / mtp : 0;
+	rt.y += (nbarRt.height-rt.height) * trate;	
+	return rt;
+}
+
+
+
+Window_Selectable.prototype.GetZzyXTQJBarRate = function()
+{
+	var mr = this.maxRows();
+	var mpr = this.maxPageRows();
+	var rate = mpr / mr;	
+	return Math.min(1,rate);
+}
+
+
+
+
+// 因refresh会重置,关闭这个刷新
+Zzy.XTQJ.Window_Selectable_processTouch = Window_Selectable.prototype.processTouch;
+Window_Selectable.prototype.processTouch = function() 
+{
+	Zzy.XTQJ.Window_Selectable_processTouch.call(this);
+	
+	//刷新关闭Touch
+	if(!this._touching)
+	{
+		if(this._ZzyXTQJHit)
+		{
+			this._ZzyXTQJHit = false;
+			//this.refresh();
+			this.DrawZzyXTQJBar();
+		}
+	}
+
+};
+
+
+
+Window_Selectable.prototype.IsHitZzyXTQJBar = function(x,y)//点中测试
+{
+	var rt = this.GetZzyXTQJBlockBarRect();
+	var padding = this.standardPadding();
+	rt.x += padding;
+	rt.y += padding;
+	
+	if(x >= rt.x && 
+	x <= rt.width+rt.x	&& 
+	y >= rt.y && 
+	y <= rt.height+rt.y)return true;
+
+	return false;
+}
+
+
+
+Zzy.XTQJ.Window_Selectable_update = Window_Selectable.prototype.update;
+Window_Selectable.prototype.update = function()
+{
+	Zzy.XTQJ.Window_Selectable_update.call(this);
+	if(this.IsZzyXTQJScrollBar())this.UpdateZzyXTQJHit();
+}
+
+Window_Selectable.prototype.UpdateZzyXTQJHit = function()
+{
+	if(!this._ZzyXTQJHit)return;
+	
+	this._ZzyXTQJHitEX = this.canvasToLocalX(TouchInput.x);
+	this._ZzyXTQJHitEY = this.canvasToLocalY(TouchInput.y);
+	
+	var cDis = this._ZzyXTQJHitCY - this._ZzyXTQJHitEY;
+	if(Math.abs(cDis) >= this._ZzyXTQJPosInfo.dis / 2)
+	{
+		this._ZzyXTQJHitCY = this._ZzyXTQJHitEY;
+		if(cDis < 0)this.scrollDown();
+		else this.scrollUp();
+	}
+}
+
+
+Window_Selectable.prototype.MakeZzyXTQJArea = function()//制作翻页区域
+{
+	var mtp = this.maxTopRow();//最大顶层	
+	var rt = this.GetZzyXTQJBarRectArea();
+	var dis = rt.height / mtp;
+	var posY = [];
+	for(var i=0;i<mtp;i++)
+	{
+		posY[i] = dis / 2 + i*dis;
+	}
+	this._ZzyXTQJPosInfo = {};
+	this._ZzyXTQJPosInfo.posYArr = posY;
+	this._ZzyXTQJPosInfo.dis = dis;
+}
+
+
+Zzy.XTQJ.Window_Selectable_onTouch = Window_Selectable.prototype.onTouch;
+Window_Selectable.prototype.onTouch = function(triggered) 
+{
+	if(this.IsZzyXTQJScrollBar())
+	{
+		if(triggered)
+		{
+			var x = this.canvasToLocalX(TouchInput.x);
+			var y = this.canvasToLocalY(TouchInput.y);
+			if(this.IsHitZzyXTQJBar(x, y))
+			{
+				if(!this._ZzyXTQJHit)
+				{
+					this._ZzyXTQJHit = true;//点选中时
+					//this.refresh();//执行一次刷新
+					this.DrawZzyXTQJBar();
+				}
+				this._ZzyXTQJHit = true;//点选中时
+				//配置点击X和点击Y
+				this._ZzyXTQJHitSX = x;
+				this._ZzyXTQJHitSY = y;
+				this._ZzyXTQJHitEX = x;
+				this._ZzyXTQJHitEY = y;	
+				this._ZzyXTQJHitCX = x;
+				this._ZzyXTQJHitCY = y;	
+			}
+		}
+	}	
+	Zzy.XTQJ.Window_Selectable_onTouch.call(this,triggered);
+};
+
+
+Window_Selectable.prototype.RefreshZzyXTQJ = function()
+{
+	if(this.IsZzyXTQJScrollBar())
+	{
+		this.MakeZzyXTQJArea();//计算Area区域
+		this.DrawZzyXTQJBar();//绘制条组
+	}
+}
+
+
+
+
 
     //=============================================================================
     // TouchInput
@@ -3434,7 +3808,118 @@ if (Utils.RPGMAKER_VERSION && Utils.RPGMAKER_VERSION >= "1.3.5") {
         }
     };
 
-    Window_QuestData.prototype.refresh = function () {
+
+
+	//---魔改--- v1.00 识别Window_QuestData
+
+
+	Window_QuestData.prototype.IsZzyXTQJScrollBar = function()
+	{return true;}
+
+
+
+	Window_QuestData.prototype.GetZzyXTQJBarRate = function()
+	{
+		
+		var pad = this.standardPadding();
+		
+		//var mr = this.maxRows();
+		//var mpr = this.maxPageRows();
+		var mr = this.contents.height;
+		var mpr = this.height - pad * 2;
+		
+		var rate = mpr / mr;
+		return Math.min(1,rate);
+	}
+
+	Window_QuestData.prototype.GetZzyXTQJBlockBarRect = function()
+	{
+		//会计算当前滚动条的位置
+		
+		var rate = this.GetZzyXTQJBarRate();
+		
+		var nbarRt = this.GetZzyXTQJBarRectArea();
+		var dis = Zzy.XTQJ.BarBlockDis;
+		var barHieght = nbarRt.height * rate;
+		var rt = new Rectangle(dis,
+		dis,
+		nbarRt.width,
+		barHieght);
+		
+
+		var tp = this.origin.y;
+		var mtp = this.contentsHeight() - this.height + this.standardPadding() * 2;
+		
+		var trate = mtp ? tp / mtp : 0;
+
+		rt.y += (nbarRt.height-rt.height) * trate;	
+		
+		return rt;
+	}
+
+	
+	
+	
+	//滚动重写
+	Window_QuestData.prototype.UpdateZzyXTQJHit = function()
+	{
+		if(!this._ZzyXTQJHit)return;
+		
+		this._ZzyXTQJHitEX = this.canvasToLocalX(TouchInput.x);
+		this._ZzyXTQJHitEY = this.canvasToLocalY(TouchInput.y);
+		
+		var cDis = this._ZzyXTQJHitCY - this._ZzyXTQJHitEY;
+		var dis = this.scrollSpeed() * 4;
+		if(Math.abs(cDis) >= dis)
+		{
+			this._ZzyXTQJHitCY = this._ZzyXTQJHitEY;
+			if(cDis < 0)this.scrollOriginDown(dis);
+			else if(cDis > 0)this.scrollOriginUp(dis);
+			this.DrawZzyXTQJBar();//进行刷新
+		}
+	}	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	//执行点击选中位置
+	Window_QuestData.prototype.IsHitZzyXTQJBar = function(x,y)//点中测试
+	{
+		var pad = this.standardPadding();
+		x -= this._ZzyXTQJBarContnets.x - pad;
+		y -= this._ZzyXTQJBarContnets.y - pad;
+		var rt = this.GetZzyXTQJBlockBarRect();
+		var padding = this.standardPadding();
+		rt.x += padding;
+		rt.y += padding;
+		if(x >= rt.x && 
+		x <= rt.width+rt.x	&& 
+		y >= rt.y && 
+		y <= rt.height+rt.y)return true;
+		return false;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+    Window_QuestData.prototype.refresh = function () 
+	{
         if (this._countdown > 0) return;
         this.contents.clear();
         this._lastOriginY = -200;
@@ -3445,7 +3930,19 @@ if (Utils.RPGMAKER_VERSION && Utils.RPGMAKER_VERSION >= "1.3.5") {
         } else {
             this.drawEmpty();
         }
+		
+		
+		//---魔改--- v1.00 绘制滚动条
+		this.RefreshZzyXTQJ();
     };
+	
+	
+	
+	
+	
+	
+	
+	
 
     Window_QuestData._questNoDataFmt = JSON.parse(Yanfly.Param.QuestDataWindow["No Data Text"] || "");
 
@@ -3563,6 +4060,55 @@ if (Utils.RPGMAKER_VERSION && Utils.RPGMAKER_VERSION >= "1.3.5") {
         if (this.isOpenAndActive()) this.updateKeyScrolling();
     };
 
+
+
+
+
+//---魔改--- v1.00 重写 processTouch 此处可能会造成不兼容的情况
+Window_QuestData.prototype.processTouch = function() {
+    if (this.isOpenAndActive() || SceneManager._scene._listWindow.active) 
+	{
+        if (TouchInput.isTriggered() && this.isTouchedInsideFrame()) {
+            this._touching = true;
+            this.onTouch(true);
+        } else if (TouchInput.isCancelled()) {
+            if (this.isCancelEnabled()) {
+                this.processCancel();
+            }
+        }
+        if (this._touching) {
+            if (TouchInput.isPressed()) {
+                this.onTouch(false);
+            } else {
+                this._touching = false;
+            }
+        }
+    } else {
+        this._touching = false;
+    }
+	
+	
+	//刷新关闭Touch
+	if(!this._touching)
+	{
+		if(this._ZzyXTQJHit)
+		{
+			this._ZzyXTQJHit = false;
+			//this.refresh();
+			this.DrawZzyXTQJBar();
+		}
+	}	
+	
+};
+
+
+
+
+
+
+
+
+
     Window_QuestData.prototype.updateCountdown = function () {
         if (this._countdown > 0) {
             this._countdown -= 1;
@@ -3625,11 +4171,36 @@ if (Utils.RPGMAKER_VERSION && Utils.RPGMAKER_VERSION >= "1.3.5") {
         var threshold = 20;
         if (TouchInput.wheelY >= threshold) {
             this.scrollOriginDown(this.scrollSpeed() * 4);
+			
+			if(this._ZzyXTQJBarContnets)
+			{
+				this.DrawZzyXTQJBar();//刷新
+			}
+			
+			
         }
         if (TouchInput.wheelY <= -threshold) {
             this.scrollOriginUp(this.scrollSpeed() * 4);
+			
+			if(this._ZzyXTQJBarContnets)
+			{
+				this.DrawZzyXTQJBar();//刷新
+			}
         }
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //=============================================================================
     // Window_QuestTitle

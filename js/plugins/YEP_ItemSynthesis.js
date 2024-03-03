@@ -16,6 +16,58 @@ Yanfly.IS.version = 1.11;
  * through an item synthesis system.
  * @author Yanfly Engine Plugins
  *
+ *
+ *
+ * @param ---魔改---
+ * @default
+ *
+ * @param BarWidth
+ * @text 条组宽度
+ * @parent ---魔改---
+ * @type number
+ * @desc 这是添加到右侧滑块的宽度值,默认值28
+ * @default 28
+ *
+ * @param BarPadding
+ * @text 条组空隙
+ * @parent ---魔改---
+ * @type number
+ * @desc 这是条组和文本预留的空隙,默认值为6
+ * @default 6
+ *
+ * @param BarBackColor
+ * @text 底层条背景颜色
+ * @parent ---魔改---
+ * @type text
+ * @desc 支持#000000 ~ #ffffff 和 rgba(0~255,0~255,0~255,0~1) 两种颜色文本的格式
+ * @default rgba(0,0,0,0.5)
+ *
+ * @param BarBlockColor
+ * @text 滑动条颜色
+ * @parent ---魔改---
+ * @type text
+ * @desc 支持#000000 ~ #ffffff 和 rgba(0~255,0~255,0~255,0~1) 两种颜色文本的格式
+ * @default rgba(160,160,160,0.8)
+ *
+ * @param BarTouchColor
+ * @text 选中滑动条颜色
+ * @parent ---魔改---
+ * @type text
+ * @desc 支持#000000 ~ #ffffff 和 rgba(0~255,0~255,0~255,0~1) 两种颜色文本的格式
+ * @default rgba(200,200,200,1)
+ *
+ *
+ * @param BarBlockDis
+ * @text 滑动条间距
+ * @parent ---魔改---
+ * @type number
+ * @desc 这是滑动条和背景条之间的间距,默认值为2
+ * @default 2
+ *
+ *
+ *
+ *
+ *
  * @param ---General---
  * @default
  *
@@ -211,6 +263,16 @@ Yanfly.IS.version = 1.11;
  * @default 0
  *
  * @help
+ *
+ *
+ * 魔改作者: 流逝的岁月
+ * 魔改版本: v1.00
+ *
+ * 魔改内容: v1.00 添加滑块滚动区域
+ *
+ *
+ *
+ *
  * ============================================================================
  * Introduction
  * ============================================================================
@@ -395,8 +457,26 @@ Yanfly.IS.version = 1.11;
 // Parameter Variables
 //=============================================================================
 
+
+
+
+
+var Zzy = Zzy || {};
+Zzy.XYIS = Zzy.XYIS || {};
+
+
+
 Yanfly.Parameters = PluginManager.parameters("YEP_ItemSynthesis");
 Yanfly.Param = Yanfly.Param || {};
+
+
+Zzy.XYIS.BarWidth = parseInt(Yanfly.Parameters['BarWidth'] || 28);//条组宽度
+Zzy.XYIS.BarPadding = parseInt(Yanfly.Parameters['BarPadding'] || 6);
+Zzy.XYIS.BarBackColor = String(Yanfly.Parameters['BarBackColor'] || 'rgba(0,0,0,0.5)');//底层颜色
+Zzy.XYIS.BarBlockColor = String(Yanfly.Parameters['BarBlockColor'] || 'rgba(160,160,160,0.8)');//灰色条块
+Zzy.XYIS.BarTouchColor = String(Yanfly.Parameters['BarTouchColor'] || 'rgba(200,200,200,1)');//点中颜色
+Zzy.XYIS.BarBlockDis = parseInt(Yanfly.Parameters['BarBlockDis'] || 2);//灰色条块间距
+
 
 Yanfly.Param.ISSynthCmd = String(Yanfly.Parameters["Synthesis Command"]);
 Yanfly.Param.ISShowSynth = String(Yanfly.Parameters["Show Command"]);
@@ -431,6 +511,268 @@ Yanfly.Param.ISDefSEName = String(Yanfly.Parameters["Default SE"]);
 Yanfly.Param.ISDefVol = Number(Yanfly.Parameters["Default Volume"]);
 Yanfly.Param.ISDefPitch = Number(Yanfly.Parameters["Default Pitch"]);
 Yanfly.Param.ISDefPant = Number(Yanfly.Parameters["Default Pan"]);
+
+
+
+
+//================================================================
+//Window_Selectable
+//================================================================
+//---魔改--- 添加Scroll滑块
+Window_Selectable.prototype.IsZzyXYISScrollBar = function()
+{return false;}
+
+Zzy.XYIS.Window_Selectable_itemWidth = Window_Selectable.prototype.itemWidth;
+Window_Selectable.prototype.itemWidth = function() 
+{
+	var iw = Zzy.XYIS.Window_Selectable_itemWidth.call(this);
+	if(this.IsZzyXYISScrollBar())
+	{
+		var mcs = this.maxCols();
+		var dis = (this.DefaultZzyXYISBarWidth()+this.DefaultZzyXYISBarPadding()*2) / mcs;
+		return iw - dis;
+	}
+	else return iw;
+};
+
+
+
+Window_Selectable.prototype.DefaultZzyXYISBarWidth = function()
+{return Zzy.XYIS.BarWidth;}
+
+Window_Selectable.prototype.DefaultZzyXYISBarPadding = function()
+{return Zzy.XYIS.BarPadding;}
+
+Window_Selectable.prototype.DefaultZzyXYISBarBackColor = function()
+{return Zzy.XYIS.BarBackColor;}
+
+Window_Selectable.prototype.DefaultZzyXYISBarBlockColor = function()
+{return Zzy.XYIS.BarBlockColor;}
+
+Window_Selectable.prototype.DefaultZzyXYISBarTouchColor = function()
+{return Zzy.XYIS.BarTouchColor;}
+
+Window_Selectable.prototype.DefaultZzyXYISBarBlockDis = function()
+{return Zzy.XYIS.BarBlockDis;}
+
+
+
+Zzy.XYIS.Window_Selectable_refresh = Window_Selectable.prototype.refresh;
+Window_Selectable.prototype.refresh = function()//刷新-可能需要重写
+{
+	Zzy.XYIS.Window_Selectable_refresh.call(this);
+	if(this.IsZzyXYISScrollBar())this.DrawZzyXYISBar();//绘制条组
+}
+
+
+Window_Selectable.prototype.GetZzyXYISBarRect = function()//获取空间
+{
+	var width = this.contents.width;
+	var height = this.contents.height;
+	
+	var rt = new Rectangle(width - this.DefaultZzyXYISBarWidth(),
+	0,
+	this.DefaultZzyXYISBarWidth(),
+	height);
+	
+	return rt;
+}
+
+
+Window_Selectable.prototype.DrawZzyXYISBar = function()
+{
+	
+	var barRt = this.GetZzyXYISBarRect();
+	this.DrawZzyXYISBarBack(barRt);//绘制底层
+	this.DrawZzyXYISBarBlock(barRt);//绘制条块
+	
+
+}
+
+Window_Selectable.prototype.DrawZzyXYISBarBack = function(barRt)
+{
+	var color = this.DefaultZzyXYISBarBackColor();
+	this.contents.fillRect(barRt.x,barRt.y,barRt.width,barRt.height,color);
+}
+
+Window_Selectable.prototype.DrawZzyXYISBarBlock = function(barRt)
+{
+	var color = this._ZzyXYISHit ? this.DefaultZzyXYISBarTouchColor() : this.DefaultZzyXYISBarBlockColor();
+	var rt = this.GetZzyXYISBlockBarRect();
+	
+	this.contents.fillRect(rt.x,rt.y,rt.width,rt.height,color);
+}
+
+
+Window_Selectable.prototype.GetZzyXYISBarRectArea = function()//获取区域
+{
+	var barRt = this.GetZzyXYISBarRect();
+	var dis = this.DefaultZzyXYISBarBlockDis();
+	var nbarRt = new Rectangle(
+	barRt.x + dis,
+	barRt.y + dis,
+	barRt.width - dis*2,
+	barRt.height - dis*2);	
+	
+	return nbarRt;
+}
+
+
+
+Window_Selectable.prototype.GetZzyXYISBlockBarRect = function()
+{
+	//会计算当前滚动条的位置
+
+	var rate = this.GetZzyXYISBarRate();
+	
+	var nbarRt = this.GetZzyXYISBarRectArea();
+	
+	var barHieght = nbarRt.height * rate;
+	var rt = new Rectangle(nbarRt.x,
+	nbarRt.y,
+	nbarRt.width,
+	barHieght);
+	var tp = this.topRow();//对应位置
+	var mtp = this.maxTopRow();//最大顶层
+	var trate = mtp ? tp / mtp : 0;
+	rt.y += (nbarRt.height-rt.height) * trate;	
+	
+	return rt;
+}
+
+
+
+Window_Selectable.prototype.GetZzyXYISBarRate = function()
+{
+	var mr = this.maxRows();
+	var mpr = this.maxPageRows();
+	var rate = mpr / mr;	
+	return Math.min(1,rate);
+}
+
+
+
+
+
+Zzy.XYIS.Window_Selectable_processTouch = Window_Selectable.prototype.processTouch;
+Window_Selectable.prototype.processTouch = function() 
+{
+	Zzy.XYIS.Window_Selectable_processTouch.call(this);
+	
+	//刷新关闭Touch
+	if(!this._touching)
+	{
+		if(this._ZzyXYISHit)
+		{
+			this._ZzyXYISHit = false;
+			this.refresh();
+		}
+	}
+
+};
+
+
+
+Window_Selectable.prototype.IsHitZzyXYISBar = function(x,y)//点中测试
+{
+	var rt = this.GetZzyXYISBlockBarRect();
+	var padding = this.standardPadding();
+	rt.x += padding;
+	rt.y += padding;
+	
+	if(x >= rt.x && 
+	x <= rt.width+rt.x	&& 
+	y >= rt.y && 
+	y <= rt.height+rt.y)return true;
+
+	return false;
+}
+
+
+
+Zzy.XYIS.Window_Selectable_update = Window_Selectable.prototype.update;
+Window_Selectable.prototype.update = function()
+{
+	Zzy.XYIS.Window_Selectable_update.call(this);
+	if(this.IsZzyXYISScrollBar())this.UpdateZzyXYISHit();
+}
+
+Window_Selectable.prototype.UpdateZzyXYISHit = function()
+{
+	if(!this._ZzyXYISHit)return;
+	
+	this._ZzyXYISHitEX = this.canvasToLocalX(TouchInput.x);
+	this._ZzyXYISHitEY = this.canvasToLocalY(TouchInput.y);
+	
+	var cDis = this._ZzyXYISHitCY - this._ZzyXYISHitEY;
+	if(Math.abs(cDis) >= this._ZzyXYISPosInfo.dis / 2)
+	{
+		this._ZzyXYISHitCY = this._ZzyXYISHitEY;
+		if(cDis < 0)this.scrollDown();
+		else this.scrollUp();
+	}
+}
+
+
+Window_Selectable.prototype.MakeZzyXYISArea = function()//制作翻页区域
+{
+	var mtp = this.maxTopRow();//最大顶层	
+	var rt = this.GetZzyXYISBarRectArea();
+	var dis = rt.height / mtp;
+	var posY = [];
+	for(var i=0;i<mtp;i++)
+	{
+		posY[i] = dis / 2 + i*dis;
+	}
+	this._ZzyXYISPosInfo = {};
+	this._ZzyXYISPosInfo.posYArr = posY;
+	this._ZzyXYISPosInfo.dis = dis;
+}
+
+
+Zzy.XYIS.Window_Selectable_onTouch = Window_Selectable.prototype.onTouch;
+Window_Selectable.prototype.onTouch = function(triggered) 
+{
+	if(this.IsZzyXYISScrollBar())
+	{
+		if(triggered)
+		{
+			var x = this.canvasToLocalX(TouchInput.x);
+			var y = this.canvasToLocalY(TouchInput.y);
+			if(this.IsHitZzyXYISBar(x, y))
+			{
+				if(!this._ZzyXYISHit)
+				{
+					this._ZzyXYISHit = true;//点选中时
+					this.refresh();//执行一次刷新
+				}
+				this._ZzyXYISHit = true;//点选中时
+				//配置点击X和点击Y
+				this._ZzyXYISHitSX = x;
+				this._ZzyXYISHitSY = y;
+				this._ZzyXYISHitEX = x;
+				this._ZzyXYISHitEY = y;	
+				this._ZzyXYISHitCX = x;
+				this._ZzyXYISHitCY = y;	
+			}
+		}
+	}	
+	Zzy.XYIS.Window_Selectable_onTouch.call(this,triggered);
+};
+
+
+Window_Selectable.prototype.RefreshZzyXYIS = function()
+{
+	if(this.IsZzyXYISScrollBar())
+	{
+		this.MakeZzyXYISArea();//计算Area区域
+		this.DrawZzyXYISBar();//绘制条组
+	}
+}
+
+
+
+
 
 //=============================================================================
 // DataManager
@@ -911,6 +1253,7 @@ function Window_SynthesisStatus() {
     this.initialize.apply(this, arguments);
 }
 
+
 Window_SynthesisStatus.prototype = Object.create(Window_Base.prototype);
 Window_SynthesisStatus.prototype.constructor = Window_SynthesisStatus;
 
@@ -919,14 +1262,27 @@ Window_SynthesisStatus.prototype.initialize = function (wx, wy, ww, wh) {
     this.refresh();
 };
 
+
+
 Window_SynthesisStatus.prototype.refresh = function () {
     this.contents.clear();
+	
+	
     var dy = 0;
     dy = this.drawCollectedRecipes(dy);
     dy = this.drawCraftedItems(dy);
     dy = this.drawCraftedWeapons(dy);
     dy = this.drawCraftedArmors(dy);
+	
+	
 };
+
+
+
+
+
+
+
 
 Window_SynthesisStatus.prototype.drawCollectedRecipes = function (dy) {
     if (Yanfly.Param.ISColRecipes.length <= 0) return dy;
@@ -991,6 +1347,27 @@ Window_SynthesisStatus.prototype.drawCraftedArmors = function (dy) {
     this.drawText(text, 0, dy, dw, "right");
     return dy + this.lineHeight();
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //=============================================================================
 // Window_SynthesisList
@@ -1136,12 +1513,27 @@ function Window_SynthesisIngredients() {
     this.initialize.apply(this, arguments);
 }
 
+
+//---魔改--- v1.00 修改继承对象 Window_Base 改为 Window_Selectable
+
 Window_SynthesisIngredients.prototype = Object.create(Window_Base.prototype);
 Window_SynthesisIngredients.prototype.constructor = Window_SynthesisIngredients;
 
 Window_SynthesisIngredients.prototype.initialize = function (wx, wy, ww, wh) {
     Window_Base.prototype.initialize.call(this, wx, wy, ww, wh);
+	
+	
+	this._ZzyXYISSelectWindow = new Window_SynthesisIngredientsSelect(this);
+	this.addChild(this._ZzyXYISSelectWindow);
 };
+
+
+
+
+
+
+
+
 
 Window_SynthesisIngredients.prototype.refresh = function (item) {
     this.contents.clear();
@@ -1150,17 +1542,27 @@ Window_SynthesisIngredients.prototype.refresh = function (item) {
     this.resetFontSettings();
     this.resetTextColor();
     this.drawItemIngredients(item, this.lineHeight());
+	
+	
+	
 };
 
 Window_SynthesisIngredients.prototype.drawItemIngredients = function (item, wy) {
     var ww = this.contents.width;
     this.changeTextColor(this.systemColor());
     this.drawText(Yanfly.Param.ISIngredientsList, 0, 0, ww, "center");
-    this.changeTextColor(this.normalColor());
-    for (var i = 0; i < item.synthIngredients.length; ++i) {
-        wy = this.drawItemDetails(i, wy);
-        if (wy + this.lineheight > this.contents.height) break;
-    }
+	
+	
+	//---魔改--- v1.00 停止部分绘制
+    // this.changeTextColor(this.normalColor());
+    // for (var i = 0; i < item.synthIngredients.length; ++i) {
+        // wy = this.drawItemDetails(i, wy);
+        // if (wy + this.lineheight > this.contents.height) break;
+    // }
+	
+	if(this._ZzyXYISSelectWindow)this._ZzyXYISSelectWindow.refresh();
+	
+	
     this.drawItemSynthCost(item, wy);
 };
 
@@ -1224,6 +1626,148 @@ Window_SynthesisIngredients.prototype.drawItemSynthCost = function (item, wy) {
     var ww = this.contents.width - 4;
     this.drawCurrencyValue(value, TextManager.currencyUnit, 0, wy, ww);
 };
+
+
+
+
+
+//---魔改--- v1.00 拓展:用于将内容全部单独存入,实现可翻找的滚动条功能
+//=============================================================================
+// Window_SynthesisIngredientsSelect
+//=============================================================================
+
+function Window_SynthesisIngredientsSelect() {
+    this.initialize.apply(this, arguments);
+}
+
+
+//---魔改--- v1.00 修改继承对象 Window_Base 改为 Window_Selectable
+
+Window_SynthesisIngredientsSelect.prototype = Object.create(Window_Selectable.prototype);
+Window_SynthesisIngredientsSelect.prototype.constructor = Window_SynthesisIngredientsSelect;
+
+Window_SynthesisIngredientsSelect.prototype.initialize = function (win) 
+{
+	var sy = win.lineHeight();
+	
+	this._win = win;
+    Window_Selectable.prototype.initialize.call(this, 0, sy, win.width, win.height-sy);
+	this.opacity = 0;
+};
+
+
+//---魔改--- v1.00 添加识别ScrollBar对象
+Window_SynthesisIngredientsSelect.prototype.IsZzyXYISScrollBar = function()
+{return true;}
+
+Window_SynthesisIngredientsSelect.prototype.refresh = function()
+{
+	this.MakeZzyXYISData();//制作列表
+	
+	Window_Selectable.prototype.refresh.call(this);
+	
+	this.RefreshZzyXYIS();//绘制条
+}
+
+Window_SynthesisIngredientsSelect.prototype.MakeZzyXYISData = function()
+{
+	this._data = [];
+	this._data2 = [];
+	var item = this._win._item;
+
+	for (var i = 0; i < item.synthIngredients.length; ++i)
+	{
+		this._data.push(DataManager.getSynthesisIngredient(item, i));
+		this._data2.push(DataManager.getSynthesisQuantity(item, i));
+	}
+
+	
+}
+
+
+Window_SynthesisIngredientsSelect.prototype.drawItem = function(index)
+{
+	var ingredient = this._data[index];
+	var quantity = this._data2[index];
+	var rt = this.itemRect(index);
+
+	this.resetFontSettings();
+	this.drawItemName.call(this, ingredient, rt.x, rt.y, rt.width);
+
+    if (Yanfly.Param.ISAmountFmt) {
+        this.drawItemQuantity(index,rt);
+    } else {
+        this.drawItemQuantity2(index,rt);
+    }
+
+}
+
+Window_SynthesisIngredientsSelect.prototype.maxItems = function()
+{return this._data ? this._data.length : 0;}
+
+
+Window_SynthesisIngredientsSelect.prototype.drawItemQuantity = function (index, rt) 
+{
+	var ingredient = this._data[index];
+	var quantity = this._data2[index];
+    var ww = rt.width;
+    this.contents.fontSize = Yanfly.Param.ISQuantitySize;
+    this.changeTextColor(this.normalColor());
+    var num = "/" + Yanfly.Util.toGroup($gameParty.numItems(ingredient));
+    this.drawText(num, rt.x, rt.y, rt.width, "right");
+    ww -= this.textWidth(num);
+    if ($gameParty.numItems(ingredient) >= quantity) {
+        this.changeTextColor(this.powerUpColor());
+    } else {
+        this.changeTextColor(this.powerDownColor());
+    }
+    var text = String(Yanfly.Util.toGroup(quantity));
+    this.drawText(text, rt.x, rt.y, ww, "right");
+};
+
+Window_SynthesisIngredientsSelect.prototype.drawItemQuantity2 = function (index, rt) 
+{
+	var ingredient = this._data[index];
+	var quantity = this._data2[index];
+    var owned = $gameParty.numItems(ingredient);
+    var ww = rt.width
+    this.contents.fontSize = Yanfly.Param.ISQuantitySize;
+    this.changeTextColor(this.normalColor());
+    var num = "/" + Yanfly.Util.toGroup(quantity);
+    this.drawText(num, rt.x, rt.y, rt.width, "right");
+    ww -= this.textWidth(num);
+    if ($gameParty.numItems(ingredient) >= quantity) {
+        this.changeTextColor(this.powerUpColor());
+    } else {
+        this.changeTextColor(this.powerDownColor());
+    }
+    var text = String(Yanfly.Util.toGroup(owned));
+    this.drawText(text, rt.x, rt.y, ww, "right");
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //=============================================================================
 // Window_SynthesisNumber

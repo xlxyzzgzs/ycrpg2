@@ -1,5 +1,5 @@
 /*:
- * @plugindesc v1.04 LiuYue_SeniorChest 高级箱子
+ * @plugindesc v1.05 LiuYue_SeniorChest 高级箱子
  * @author 流逝的岁月
  *
  * @help
@@ -20,8 +20,6 @@
  *
  *
  * 
- * 
- *
  *
  *
  *
@@ -115,7 +113,7 @@
  *
 ------------------------------------------------------------
 
-
+ 我叫坂本：v1.05 兼容LiuYue_GainItemTips提示道具插件,如果处于YuanShen模式下获取物品,也会进行显示
  我叫坂本：v1.04 拓展脚本函数
  我叫坂本：v1.03 添加与旧存档兼容,修复宝箱中武器以及护甲无法添加到背包中的bug
  我叫坂本：v1.02 调整yuanshen箱子在地图边缘显示位置的问题,增加可控的额外参数
@@ -528,807 +526,919 @@
  *
  */
 
+
+
+
+
 var LiuYue = LiuYue || {};
-LiuYue.LiuYue_SeniorChest = true; //插件启动
+LiuYue.LiuYue_SeniorChest = true;//插件启动
 
 var Zzy = Zzy || {};
 Zzy.SCF = Zzy.SCF || {};
-Zzy.SCF.version = 1.04;
-Zzy.Parameters = PluginManager.parameters("LiuYue_SeniorChest");
+Zzy.SCF.version = 1.04;  
+Zzy.Parameters = PluginManager.parameters('LiuYue_SeniorChest');
 Zzy.Param = Zzy.Param || {};
+ 
+Zzy.Param.SCFOverlapMode = String(Zzy.Parameters['OverlapMode']);
+Zzy.Param.SCFShowMode = String(Zzy.Parameters['ShowMode']);
+Zzy.Param.SCFIsFilterText = eval(String(Zzy.Parameters['IsFilterText']));
+Zzy.Param.SCFCoinIcon = parseInt(Zzy.Parameters['CoinIcon']);//金币图标
 
-Zzy.Param.SCFOverlapMode = String(Zzy.Parameters["OverlapMode"]);
-Zzy.Param.SCFShowMode = String(Zzy.Parameters["ShowMode"]);
-Zzy.Param.SCFIsFilterText = eval(String(Zzy.Parameters["IsFilterText"]));
-Zzy.Param.SCFCoinIcon = parseInt(Zzy.Parameters["CoinIcon"]); //金币图标
+Zzy.Param.SCFCMaxCols = parseInt(Zzy.Parameters['CMaxCols']);//最大列数
+Zzy.Param.SCFIsCAllTake = eval(String(Zzy.Parameters['IsCAllTake']));//是否拥有全部取走选项
+Zzy.Param.SCFCAllTakeText = String(Zzy.Parameters['CAllTakeText']);//全部取走文本
+Zzy.Param.SCFIsCClose = eval(String(Zzy.Parameters['IsCClose']));//是否拥有关闭宝箱选项
+Zzy.Param.SCFCCloseText = String(Zzy.Parameters['CCloseText']);//全部取走文本
+Zzy.Param.SCFIsCAutoLine = eval(String(Zzy.Parameters['IsCAutoLine']));//自动队列
 
-Zzy.Param.SCFCMaxCols = parseInt(Zzy.Parameters["CMaxCols"]); //最大列数
-Zzy.Param.SCFIsCAllTake = eval(String(Zzy.Parameters["IsCAllTake"])); //是否拥有全部取走选项
-Zzy.Param.SCFCAllTakeText = String(Zzy.Parameters["CAllTakeText"]); //全部取走文本
-Zzy.Param.SCFIsCClose = eval(String(Zzy.Parameters["IsCClose"])); //是否拥有关闭宝箱选项
-Zzy.Param.SCFCCloseText = String(Zzy.Parameters["CCloseText"]); //全部取走文本
-Zzy.Param.SCFIsCAutoLine = eval(String(Zzy.Parameters["IsCAutoLine"])); //自动队列
 
-Zzy.Param.SCFYMaxCols = parseInt(Zzy.Parameters["YMaxCols"]); //最大列数
-Zzy.Param.SCFYMaxList = parseInt(Zzy.Parameters["YMaxList"]); //最大行数
-Zzy.Param.SCFYWindowWidth = parseInt(Zzy.Parameters["YWindowWidth"]); //窗口宽度
-Zzy.Param.SCFYWindowOp = parseInt(Zzy.Parameters["YWindowOp"]); //窗口透明度
-Zzy.Param.SCFYTakeRange = parseInt(Zzy.Parameters["YTakeRange"]); //拾取范围
-Zzy.Param.SCFYColor1 = String(Zzy.Parameters["YColor1"]); //底板颜色1
-Zzy.Param.SCFYColor2 = String(Zzy.Parameters["YColor2"]); //底板颜色2
-Zzy.Param.SCFYOffsetX = Number(Zzy.Parameters["YOffsetX"]); //窗口偏移X
-Zzy.Param.SCFYOffsetY = Number(Zzy.Parameters["YOffsetY"]); //窗口偏移Y
-Zzy.Param.SCFYFadeFrame = Number(Zzy.Parameters["YFadeFrame"]); //渐变帧数
-Zzy.Param.SCFYDistance = parseInt(Zzy.Parameters["YDistance"]); //矩形间距
-Zzy.Param.SCFYIsHorShow = eval(String(Zzy.Parameters["YIsHorShow"])); //是否水平绘制
-Zzy.Param.SCFYIsAutoOpen = eval(String(Zzy.Parameters["YIsAutoOpen"])); //自动开箱
-Zzy.Param.SCFYIsLimitWindow = eval(String(Zzy.Parameters["YIsLimitWindow"])); //限制屏幕
+Zzy.Param.SCFYMaxCols = parseInt(Zzy.Parameters['YMaxCols']);//最大列数
+Zzy.Param.SCFYMaxList = parseInt(Zzy.Parameters['YMaxList']);//最大行数
+Zzy.Param.SCFYWindowWidth = parseInt(Zzy.Parameters['YWindowWidth']);//窗口宽度
+Zzy.Param.SCFYWindowOp = parseInt(Zzy.Parameters['YWindowOp']);//窗口透明度
+Zzy.Param.SCFYTakeRange = parseInt(Zzy.Parameters['YTakeRange']);//拾取范围
+Zzy.Param.SCFYColor1 = String(Zzy.Parameters['YColor1']);//底板颜色1
+Zzy.Param.SCFYColor2 = String(Zzy.Parameters['YColor2']);//底板颜色2
+Zzy.Param.SCFYOffsetX = Number(Zzy.Parameters['YOffsetX']);//窗口偏移X
+Zzy.Param.SCFYOffsetY = Number(Zzy.Parameters['YOffsetY']);//窗口偏移Y
+Zzy.Param.SCFYFadeFrame = Number(Zzy.Parameters['YFadeFrame']);//渐变帧数
+Zzy.Param.SCFYDistance = parseInt(Zzy.Parameters['YDistance']);//矩形间距
+Zzy.Param.SCFYIsHorShow = eval(String(Zzy.Parameters['YIsHorShow']));//是否水平绘制
+Zzy.Param.SCFYIsAutoOpen = eval(String(Zzy.Parameters['YIsAutoOpen']));//自动开箱
+Zzy.Param.SCFYIsLimitWindow = eval(String(Zzy.Parameters['YIsLimitWindow']));//限制屏幕
 
-Zzy.Param.SCFCoinColor = String(Zzy.Parameters["CoinColor"]); //金币颜色
 
-Zzy.Param.SCFCountNumWidth = String(Zzy.Parameters["CountNumWidth"]); //道具预留
-Zzy.Param.SCFCountCoinWidth = String(Zzy.Parameters["CountCoinWidth"]); //金币预留
+Zzy.Param.SCFCoinColor = String(Zzy.Parameters['CoinColor']);//金币颜色
+
+
+Zzy.Param.SCFCountNumWidth = String(Zzy.Parameters['CountNumWidth']);//道具预留
+Zzy.Param.SCFCountCoinWidth = String(Zzy.Parameters['CountCoinWidth']);//金币预留
+
+
+
 
 //声音
-Zzy.SCF.MakeSE = function (seName, seVolume, sePitch, sePan) {
-    if (!seName) return undefined;
-    var se = {
-        name: seName,
-        volume: seVolume ? seVolume : 100,
-        pitch: sePitch ? sePitch : 100,
-        pan: sePan ? sePan : 0,
-    };
-    return se;
-};
+Zzy.SCF.MakeSE = function(seName,seVolume,sePitch,sePan)
+{
+	if(!seName)return undefined;
+	var se = {
+		name:seName,
+		volume:(seVolume ? seVolume : 100),
+		pitch:(sePitch ? sePitch : 100),
+		pan:(sePan ? sePan : 0)
+	};
+	return se;
+}
 
-Zzy.Param.SCFTakeSound = String(Zzy.Parameters["TakeSound"]);
-Zzy.Param.SCFTakeVolume = parseInt(Zzy.Parameters["TakeVolume"]);
-Zzy.Param.SCFTakePitch = parseInt(Zzy.Parameters["TakePitch"]);
-Zzy.Param.SCFTakePan = parseInt(Zzy.Parameters["TakePan"]);
-Zzy.Param.SCFTakeSE = Zzy.SCF.MakeSE(
-    Zzy.Param.SCFTakeSound,
-    Zzy.Param.SCFTakeVolume,
-    Zzy.Param.SCFTakePitch,
-    Zzy.Param.SCFTakePan
-);
 
-Zzy.Param.SCFNoItemSound = String(Zzy.Parameters["NoItemSound"]);
-Zzy.Param.SCFNoItemVolume = parseInt(Zzy.Parameters["NoItemVolume"]);
-Zzy.Param.SCFNoItemPitch = parseInt(Zzy.Parameters["NoItemPitch"]);
-Zzy.Param.SCFNoItemPan = parseInt(Zzy.Parameters["NoItemPan"]);
-Zzy.Param.SCFNoItemSE = Zzy.SCF.MakeSE(
-    Zzy.Param.SCFNoItemSound,
-    Zzy.Param.SCFNoItemVolume,
-    Zzy.Param.SCFNoItemPitch,
-    Zzy.Param.SCFNoItemPan
-);
+Zzy.Param.SCFTakeSound = String(Zzy.Parameters['TakeSound']);
+Zzy.Param.SCFTakeVolume = parseInt(Zzy.Parameters['TakeVolume']);
+Zzy.Param.SCFTakePitch = parseInt(Zzy.Parameters['TakePitch']);
+Zzy.Param.SCFTakePan = parseInt(Zzy.Parameters['TakePan']);
+Zzy.Param.SCFTakeSE = Zzy.SCF.MakeSE(Zzy.Param.SCFTakeSound,Zzy.Param.SCFTakeVolume,Zzy.Param.SCFTakePitch,Zzy.Param.SCFTakePan);
 
-Zzy.Param.SCFAllTakeSound = String(Zzy.Parameters["AllTakeSound"]);
-Zzy.Param.SCFAllTakeVolume = parseInt(Zzy.Parameters["AllTakeVolume"]);
-Zzy.Param.SCFAllTakePitch = parseInt(Zzy.Parameters["AllTakePitch"]);
-Zzy.Param.SCFAllTakePan = parseInt(Zzy.Parameters["AllTakePan"]);
-Zzy.Param.SCFAllTakeSE = Zzy.SCF.MakeSE(
-    Zzy.Param.SCFAllTakeSound,
-    Zzy.Param.SCFAllTakeVolume,
-    Zzy.Param.SCFAllTakePitch,
-    Zzy.Param.SCFAllTakePan
-);
+Zzy.Param.SCFNoItemSound = String(Zzy.Parameters['NoItemSound']);
+Zzy.Param.SCFNoItemVolume = parseInt(Zzy.Parameters['NoItemVolume']);
+Zzy.Param.SCFNoItemPitch = parseInt(Zzy.Parameters['NoItemPitch']);
+Zzy.Param.SCFNoItemPan = parseInt(Zzy.Parameters['NoItemPan']);
+Zzy.Param.SCFNoItemSE = Zzy.SCF.MakeSE(Zzy.Param.SCFNoItemSound,Zzy.Param.SCFNoItemVolume,Zzy.Param.SCFNoItemPitch,Zzy.Param.SCFNoItemPan);
 
-Zzy.Param.SCFCloseSound = String(Zzy.Parameters["CloseSound"]);
-Zzy.Param.SCFCloseVolume = parseInt(Zzy.Parameters["CloseVolume"]);
-Zzy.Param.SCFClosePitch = parseInt(Zzy.Parameters["ClosePitch"]);
-Zzy.Param.SCFClosePan = parseInt(Zzy.Parameters["ClosePan"]);
-Zzy.Param.SCFCloseSE = Zzy.SCF.MakeSE(
-    Zzy.Param.SCFCloseSound,
-    Zzy.Param.SCFCloseVolume,
-    Zzy.Param.SCFClosePitch,
-    Zzy.Param.SCFClosePan
-);
+Zzy.Param.SCFAllTakeSound = String(Zzy.Parameters['AllTakeSound']);
+Zzy.Param.SCFAllTakeVolume = parseInt(Zzy.Parameters['AllTakeVolume']);
+Zzy.Param.SCFAllTakePitch = parseInt(Zzy.Parameters['AllTakePitch']);
+Zzy.Param.SCFAllTakePan = parseInt(Zzy.Parameters['AllTakePan']);
+Zzy.Param.SCFAllTakeSE = Zzy.SCF.MakeSE(Zzy.Param.SCFAllTakeSound,Zzy.Param.SCFAllTakeVolume,Zzy.Param.SCFAllTakePitch,Zzy.Param.SCFAllTakePan);
 
-Zzy.Param.SCFChangeItemSound = String(Zzy.Parameters["ChangeItemSound"]);
-Zzy.Param.SCFChangeItemVolume = parseInt(Zzy.Parameters["ChangeItemVolume"]);
-Zzy.Param.SCFChangeItemPitch = parseInt(Zzy.Parameters["ChangeItemPitch"]);
-Zzy.Param.SCFChangeItemPan = parseInt(Zzy.Parameters["ChangeItemPan"]);
-Zzy.Param.SCFChangeItemSE = Zzy.SCF.MakeSE(
-    Zzy.Param.SCFChangeItemSound,
-    Zzy.Param.SCFChangeItemVolume,
-    Zzy.Param.SCFChangeItemPitch,
-    Zzy.Param.SCFChangeItemPan
-);
+Zzy.Param.SCFCloseSound = String(Zzy.Parameters['CloseSound']);
+Zzy.Param.SCFCloseVolume = parseInt(Zzy.Parameters['CloseVolume']);
+Zzy.Param.SCFClosePitch = parseInt(Zzy.Parameters['ClosePitch']);
+Zzy.Param.SCFClosePan = parseInt(Zzy.Parameters['ClosePan']);
+Zzy.Param.SCFCloseSE = Zzy.SCF.MakeSE(Zzy.Param.SCFCloseSound,Zzy.Param.SCFCloseVolume,Zzy.Param.SCFClosePitch,Zzy.Param.SCFClosePan);
+
+Zzy.Param.SCFChangeItemSound = String(Zzy.Parameters['ChangeItemSound']);
+Zzy.Param.SCFChangeItemVolume = parseInt(Zzy.Parameters['ChangeItemVolume']);
+Zzy.Param.SCFChangeItemPitch = parseInt(Zzy.Parameters['ChangeItemPitch']);
+Zzy.Param.SCFChangeItemPan = parseInt(Zzy.Parameters['ChangeItemPan']);
+Zzy.Param.SCFChangeItemSE = Zzy.SCF.MakeSE(Zzy.Param.SCFChangeItemSound,Zzy.Param.SCFChangeItemVolume,Zzy.Param.SCFChangeItemPitch,Zzy.Param.SCFChangeItemPan);
+
+
 
 Zzy.Param.SCFAllSE = [];
-Zzy.Param.SCFAllSE = [
-    undefined,
-    Zzy.Param.SCFTakeSE,
-    Zzy.Param.SCFNoItemSE,
-    Zzy.Param.SCFAllTakeSE,
-    Zzy.Param.SCFCloseSE,
-    Zzy.Param.SCFChangeItemSE,
-];
+Zzy.Param.SCFAllSE = [undefined,Zzy.Param.SCFTakeSE,Zzy.Param.SCFNoItemSE,Zzy.Param.SCFAllTakeSE,Zzy.Param.SCFCloseSE,Zzy.Param.SCFChangeItemSE];
 //1.取物品
 //2.没有物品
 //3.全部拿走
 //4.关闭宝箱
 //5.切换选项
 
-Zzy.SCF.TempCacheChest = []; //缓存箱
+Zzy.SCF.TempCacheChest = [];//缓存箱
 
 Zzy.SCF.TempSpeed1 = 16;
 Zzy.SCF.TempSpeed2 = 8;
 Zzy.SCF.TempSpeed3 = 4;
 
-Zzy.SCF.TempCallInfo = undefined; //临时呼叫信息
+Zzy.SCF.TempCallInfo = undefined;//临时呼叫信息
 
-Zzy.SCF.TempNotRepeatFrame = 3; //临时等待帧数,这是为了方式宝箱出现双次打开,因为框架特殊的机制,在未拥有指令行的事件中,触碰有概率出现执行两次start函数的情况
+Zzy.SCF.TempNotRepeatFrame = 3;//临时等待帧数,这是为了方式宝箱出现双次打开,因为框架特殊的机制,在未拥有指令行的事件中,触碰有概率出现执行两次start函数的情况
 //通过等待帧数来避免此类情况的执行
+
+
+
+
 
 //=================================================================
 //DataManager
 //=================================================================
 Zzy.SCF.DataManager_loadGame = DataManager.loadGame;
-DataManager.loadGame = function (
-    savefileId //旧存档兼容
-) {
-    var result = Zzy.SCF.DataManager_loadGame.call(this, savefileId);
-
-    this.ZzySCFInitData();
-
-    return result;
-};
-
-DataManager.ZzySCFInitData = function () //初始化参数
+DataManager.loadGame = function(savefileId) //旧存档兼容
 {
-    if (!$gameSystem.GetIsZzySCFLoaded()) {
-        //初始化
-        $gameSystem.ZzySCFInitData(); //初始化数据
-        $gameSystem.SetIsZzySCFLoaded(true);
-    }
-};
+	var result = Zzy.SCF.DataManager_loadGame.call(this,savefileId);
+	
+	this.ZzySCFInitData();
+
+	return result;
+}
+
+DataManager.ZzySCFInitData = function()//初始化参数
+{
+	if(!$gameSystem.GetIsZzySCFLoaded())
+	{
+		//初始化
+		$gameSystem.ZzySCFInitData();//初始化数据
+		$gameSystem.SetIsZzySCFLoaded(true);
+	}	
+}
+
+
+
+
 
 //=================================================================
 //Game_System
 //=================================================================
 
 Zzy.SCF.Game_System_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function () {
+Game_System.prototype.initialize = function() 
+{
     Zzy.SCF.Game_System_initialize.call(this);
-    this.ZzySCFInitData(); //初始化数据
-
-    this._IsZzySCFLoaded = true; //是否载入完成
+	this.ZzySCFInitData();//初始化数据
+	
+	this._IsZzySCFLoaded = true;//是否载入完成
+	
 };
+	
+Game_System.prototype.GetIsZzySCFLoaded = function()
+{
+	if(this._IsZzySCFLoaded === undefined)
+	{this._IsZzySCFLoaded = false;}
+	return this._IsZzySCFLoaded;
+}
 
-Game_System.prototype.GetIsZzySCFLoaded = function () {
-    if (this._IsZzySCFLoaded === undefined) {
-        this._IsZzySCFLoaded = false;
-    }
-    return this._IsZzySCFLoaded;
-};
+Game_System.prototype.SetIsZzySCFLoaded = function(enable)
+{
+	this._IsZzySCFLoaded = enable;
+}
 
-Game_System.prototype.SetIsZzySCFLoaded = function (enable) {
-    this._IsZzySCFLoaded = enable;
-};
 
-Game_System.prototype.ZzySCFInitData = function () {
-    this._ZzySCFOverlapMode = Zzy.SCF.OverlapModeToID(Zzy.Param.SCFOverlapMode);
-    this._ZzySCFShowMode = Zzy.SCF.ShowModeToID(Zzy.Param.SCFShowMode);
-    this._ZzySCFIsFilterText = Zzy.Param.SCFIsFilterText;
 
-    this._ZzySCFCoinIcon = Zzy.Param.SCFCoinIcon;
+Game_System.prototype.ZzySCFInitData = function()
+{
+	this._ZzySCFOverlapMode = Zzy.SCF.OverlapModeToID(Zzy.Param.SCFOverlapMode);
+	this._ZzySCFShowMode = Zzy.SCF.ShowModeToID(Zzy.Param.SCFShowMode);
+	this._ZzySCFIsFilterText = Zzy.Param.SCFIsFilterText;
+	
+	this._ZzySCFCoinIcon = Zzy.Param.SCFCoinIcon;
+	
+	this._ZzySCFCMaxCols = Zzy.Param.SCFCMaxCols;//最大列数
+	this._ZzySCFIsCAllTake = Zzy.Param.SCFIsCAllTake;//是否拥有全部取走选项
+	this._ZzySCFCAllTakeText = Zzy.Param.SCFCAllTakeText;//全部取走文本
+	this._ZzySCFIsCClose = Zzy.Param.SCFIsCClose;//是否拥有关闭宝箱选项
+	this._ZzySCFCCloseText = Zzy.Param.SCFCCloseText;//全部取走文本
+	this._ZzySCFIsCAutoLine = Zzy.Param.SCFIsCAutoLine;//自动队列
+	
+	
+	this._ZzySCFYMaxCols = Zzy.Param.SCFYMaxCols;//最大列数
+	this._ZzySCFYMaxList = Zzy.Param.SCFYMaxList;//最大行数
+	this._ZzySCFYWindowWidth = Zzy.Param.SCFYWindowWidth;//窗口最大宽度
+	this._ZzySCFYWindowOp = Zzy.Param.SCFYWindowOp;//窗口透明度
+	this._ZzySCFYTakeRange = Zzy.Param.SCFYTakeRange;//拾取范围
+	this._ZzySCFYColor1 = Zzy.Param.SCFYColor1;//底板颜色1
+	this._ZzySCFYColor2 = Zzy.Param.SCFYColor2;//底板颜色2
+	this._ZzySCFYOffsetX = Zzy.Param.SCFYOffsetX;//窗口偏移X
+	this._ZzySCFYOffsetY = Zzy.Param.SCFYOffsetY;//窗口偏移Y
+	this._ZzySCFYFadeFrame = Zzy.Param.SCFYFadeFrame;//渐变帧数时长
+	this._ZzySCFYDistance = Zzy.Param.SCFYDistance;//水平间距
+	this._ZzySCFYIsHorShow = Zzy.Param.SCFYIsHorShow;//是否水平
+	this._ZzySCFYIsAutoOpen = Zzy.Param.SCFYIsAutoOpen;//是否接近自动开箱
+	this._ZzySCFYIsLimitWindow = Zzy.Param.SCFYIsLimitWindow;//限制界限
 
-    this._ZzySCFCMaxCols = Zzy.Param.SCFCMaxCols; //最大列数
-    this._ZzySCFIsCAllTake = Zzy.Param.SCFIsCAllTake; //是否拥有全部取走选项
-    this._ZzySCFCAllTakeText = Zzy.Param.SCFCAllTakeText; //全部取走文本
-    this._ZzySCFIsCClose = Zzy.Param.SCFIsCClose; //是否拥有关闭宝箱选项
-    this._ZzySCFCCloseText = Zzy.Param.SCFCCloseText; //全部取走文本
-    this._ZzySCFIsCAutoLine = Zzy.Param.SCFIsCAutoLine; //自动队列
+	this._ZzySCFCoinColor = Zzy.Param.SCFCoinColor;//金币颜色
 
-    this._ZzySCFYMaxCols = Zzy.Param.SCFYMaxCols; //最大列数
-    this._ZzySCFYMaxList = Zzy.Param.SCFYMaxList; //最大行数
-    this._ZzySCFYWindowWidth = Zzy.Param.SCFYWindowWidth; //窗口最大宽度
-    this._ZzySCFYWindowOp = Zzy.Param.SCFYWindowOp; //窗口透明度
-    this._ZzySCFYTakeRange = Zzy.Param.SCFYTakeRange; //拾取范围
-    this._ZzySCFYColor1 = Zzy.Param.SCFYColor1; //底板颜色1
-    this._ZzySCFYColor2 = Zzy.Param.SCFYColor2; //底板颜色2
-    this._ZzySCFYOffsetX = Zzy.Param.SCFYOffsetX; //窗口偏移X
-    this._ZzySCFYOffsetY = Zzy.Param.SCFYOffsetY; //窗口偏移Y
-    this._ZzySCFYFadeFrame = Zzy.Param.SCFYFadeFrame; //渐变帧数时长
-    this._ZzySCFYDistance = Zzy.Param.SCFYDistance; //水平间距
-    this._ZzySCFYIsHorShow = Zzy.Param.SCFYIsHorShow; //是否水平
-    this._ZzySCFYIsAutoOpen = Zzy.Param.SCFYIsAutoOpen; //是否接近自动开箱
-    this._ZzySCFYIsLimitWindow = Zzy.Param.SCFYIsLimitWindow; //限制界限
+	this._ZzySCFStorage = [];//库存
+	
+	this._ZzySCFYunChestFlag = [];//打开标记,标记着打开的宝箱事件
+	this._ZzySCFYunEmptyCheck = [];//空白检测标记
+	
+	this._ZzySCFWaitCallInfo = undefined;
+	this._ZzySCFWaitOfChest = undefined;
+}
 
-    this._ZzySCFCoinColor = Zzy.Param.SCFCoinColor; //金币颜色
+Game_System.prototype.GetZzySCFCoinColor = function()
+{
+	return this._ZzySCFCoinColor;
+}
 
-    this._ZzySCFStorage = []; //库存
 
-    this._ZzySCFYunChestFlag = []; //打开标记,标记着打开的宝箱事件
-    this._ZzySCFYunEmptyCheck = []; //空白检测标记
+Game_System.prototype.IsZzySCFYunEmptyCheck = function(mapId,evId)
+{
+	if(!this._ZzySCFYunEmptyCheck[mapId] || !this._ZzySCFYunEmptyCheck[mapId][evId])
+	{return false;}
+	return true;
+}
 
-    this._ZzySCFWaitCallInfo = undefined;
-    this._ZzySCFWaitOfChest = undefined;
-};
+Game_System.prototype.AddZzySCFYunEmptyCheck = function(mapId,evId)
+{
+	if(!this._ZzySCFYunEmptyCheck[mapId])
+	{this._ZzySCFYunEmptyCheck[mapId] = [];}
+	this._ZzySCFYunEmptyCheck[mapId][evId] = true;
+}
 
-Game_System.prototype.GetZzySCFCoinColor = function () {
-    return this._ZzySCFCoinColor;
-};
 
-Game_System.prototype.IsZzySCFYunEmptyCheck = function (mapId, evId) {
-    if (!this._ZzySCFYunEmptyCheck[mapId] || !this._ZzySCFYunEmptyCheck[mapId][evId]) {
-        return false;
-    }
-    return true;
-};
+Game_System.prototype.GetZzySCFYunChestFlag = function(mapId)
+{
+	if(!this._ZzySCFYunChestFlag[mapId])
+	{this._ZzySCFYunChestFlag[mapId] = [];}
+	return this._ZzySCFYunChestFlag[mapId];
+}
 
-Game_System.prototype.AddZzySCFYunEmptyCheck = function (mapId, evId) {
-    if (!this._ZzySCFYunEmptyCheck[mapId]) {
-        this._ZzySCFYunEmptyCheck[mapId] = [];
-    }
-    this._ZzySCFYunEmptyCheck[mapId][evId] = true;
-};
 
-Game_System.prototype.GetZzySCFYunChestFlag = function (mapId) {
-    if (!this._ZzySCFYunChestFlag[mapId]) {
-        this._ZzySCFYunChestFlag[mapId] = [];
-    }
-    return this._ZzySCFYunChestFlag[mapId];
-};
+Game_System.prototype.AddYunChestFlag = function(mapId,eventId)//添加开启标记宝箱事件
+{
+	if(!this._ZzySCFYunChestFlag[mapId])
+	{
+		this._ZzySCFYunChestFlag[mapId] = [];
+	}
+	
+	for(var i=0;i<this._ZzySCFYunChestFlag[mapId].length;i++)
+	{
+		if(this._ZzySCFYunChestFlag[mapId][i] === eventId)
+		{return;}
+	}
+	
+	this._ZzySCFYunChestFlag[mapId].push(eventId);
+}
 
-Game_System.prototype.AddYunChestFlag = function (
-    mapId,
-    eventId //添加开启标记宝箱事件
-) {
-    if (!this._ZzySCFYunChestFlag[mapId]) {
-        this._ZzySCFYunChestFlag[mapId] = [];
-    }
 
-    for (var i = 0; i < this._ZzySCFYunChestFlag[mapId].length; i++) {
-        if (this._ZzySCFYunChestFlag[mapId][i] === eventId) {
-            return;
-        }
-    }
 
-    this._ZzySCFYunChestFlag[mapId].push(eventId);
-};
+Game_System.prototype.GetZzySCFOverlapMode = function()
+{
+	return this._ZzySCFOverlapMode;
+}
 
-Game_System.prototype.GetZzySCFOverlapMode = function () {
-    return this._ZzySCFOverlapMode;
-};
+Game_System.prototype.GetZzySCFShowMode = function()
+{
+	return this._ZzySCFShowMode;
+}
 
-Game_System.prototype.GetZzySCFShowMode = function () {
-    return this._ZzySCFShowMode;
-};
+Game_System.prototype.GetZzySCFCMaxCols = function()
+{
+	return this._ZzySCFCMaxCols;
+}
 
-Game_System.prototype.GetZzySCFCMaxCols = function () {
-    return this._ZzySCFCMaxCols;
-};
+Game_System.prototype.GetZzySCFIsCAllTake = function()
+{
+	return this._ZzySCFIsCAllTake;
+}
 
-Game_System.prototype.GetZzySCFIsCAllTake = function () {
-    return this._ZzySCFIsCAllTake;
-};
+Game_System.prototype.GetZzySCFCAllTakeText = function()
+{
+	return this._ZzySCFCAllTakeText;
+}
 
-Game_System.prototype.GetZzySCFCAllTakeText = function () {
-    return this._ZzySCFCAllTakeText;
-};
+Game_System.prototype.GetZzySCFIsCClose = function()
+{
+	return this._ZzySCFIsCClose;
+}
 
-Game_System.prototype.GetZzySCFIsCClose = function () {
-    return this._ZzySCFIsCClose;
-};
+Game_System.prototype.GetZzySCFCCloseText = function()
+{
+	return this._ZzySCFCCloseText;
+}
 
-Game_System.prototype.GetZzySCFCCloseText = function () {
-    return this._ZzySCFCCloseText;
-};
+Game_System.prototype.GetZzySCFIsCAutoLine = function()
+{
+	return this._ZzySCFIsCAutoLine;
+}
 
-Game_System.prototype.GetZzySCFIsCAutoLine = function () {
-    return this._ZzySCFIsCAutoLine;
-};
 
-Game_System.prototype.ZzySCFRecordInfo = function (
-    eventId,
-    value,
-    itemId,
-    typeId //记录道具
-) {
-    //typeId:1 金币 2道具 3武器 4护甲
-    var mapId = $gameMap.mapId();
-    if (!this._ZzySCFStorage[mapId]) {
-        this._ZzySCFStorage[mapId] = [];
-    }
-    if (!this._ZzySCFStorage[mapId][eventId]) {
-        this._ZzySCFStorage[mapId][eventId] = [];
-    }
 
-    var info = {};
-    info.typeId = typeId; //类型
-    info.value = value; //数值
-    info.itemId = itemId; //物品类型
+Game_System.prototype.ZzySCFRecordInfo = function(eventId,value,itemId,typeId)//记录道具
+{
+	//typeId:1 金币 2道具 3武器 4护甲
+	var mapId = $gameMap.mapId();
+	if(!this._ZzySCFStorage[mapId])
+	{this._ZzySCFStorage[mapId] = [];}
+	if(!this._ZzySCFStorage[mapId][eventId])
+	{this._ZzySCFStorage[mapId][eventId] = [];}
+	
+	var info = {};
+	info.typeId = typeId;//类型
+	info.value = value;//数值
+	info.itemId = itemId;//物品类型
+	
+	this.ZzySCFAddToStorage(mapId,eventId,info);//添加
+}
 
-    this.ZzySCFAddToStorage(mapId, eventId, info); //添加
-};
+Game_System.prototype.ZzySCFSetWaitCall = function(info)//设置等待呼叫
+{
+	if(!info)return;
+	if(!this._ZzySCFStorage[info.mapId])
+	{this._ZzySCFStorage[info.mapId] = [];}
+	if(!this._ZzySCFStorage[info.mapId][info.evId])
+	{this._ZzySCFStorage[info.mapId][info.evId] = [];}	
+	this._ZzySCFWaitCallInfo = info;
+	Zzy.SCF.TempCallInfo = this._ZzySCFWaitCallInfo;
+}
 
-Game_System.prototype.ZzySCFSetWaitCall = function (
-    info //设置等待呼叫
-) {
-    if (!info) return;
-    if (!this._ZzySCFStorage[info.mapId]) {
-        this._ZzySCFStorage[info.mapId] = [];
-    }
-    if (!this._ZzySCFStorage[info.mapId][info.evId]) {
-        this._ZzySCFStorage[info.mapId][info.evId] = [];
-    }
-    this._ZzySCFWaitCallInfo = info;
-    Zzy.SCF.TempCallInfo = this._ZzySCFWaitCallInfo;
-};
+Game_System.prototype.GetZzySCFStorage = function(mapId,evId)
+{
+	if(!this._ZzySCFStorage[mapId])
+	{this._ZzySCFStorage[mapId] = [];}
+	if(!this._ZzySCFStorage[mapId][evId])
+	{this._ZzySCFStorage[mapId][evId] = [];}
+	return this._ZzySCFStorage[mapId][evId];
 
-Game_System.prototype.GetZzySCFStorage = function (mapId, evId) {
-    if (!this._ZzySCFStorage[mapId]) {
-        this._ZzySCFStorage[mapId] = [];
-    }
-    if (!this._ZzySCFStorage[mapId][evId]) {
-        this._ZzySCFStorage[mapId][evId] = [];
-    }
-    return this._ZzySCFStorage[mapId][evId];
-};
+}
 
-Game_System.prototype.IsZzySCFStorage = function (mapId, evId) {
-    if (!this._ZzySCFStorage[mapId]) return false;
-    if (!this._ZzySCFStorage[mapId][evId]) return false;
+Game_System.prototype.IsZzySCFStorage = function(mapId,evId)
+{
+	if(!this._ZzySCFStorage[mapId])return false;
+	if(!this._ZzySCFStorage[mapId][evId])return false;
+	
+	return true;
+}
 
-    return true;
-};
 
-Game_System.prototype.ZzySCFAddToStorage = function (mapId, eventId, info) {
-    var ev = $gameMap.event(eventId);
+Game_System.prototype.ZzySCFAddToStorage = function(mapId,eventId,info)
+{
+	var ev = $gameMap.event(eventId);
+	
+	//重叠模式 1独立的 2重叠的 3跟随事件
+	switch(this.GetZzySCFOverlapMode())
+	{
+		case 1:
+		if(info.typeId === 1)//金币
+		{
+			this._ZzySCFStorage[mapId][eventId].push(info);
+		}
+		else
+		{
+			var number = info.value;
+			info.value = 1;
+			for(var i=0;i<number;i++)
+			{
+				this._ZzySCFStorage[mapId][eventId].push(info);//逐个压入
+			}
+		}
+		break;
+		case 2://通过typeId遍历重复压入
+			var len = this._ZzySCFStorage[mapId][eventId].length;
+			var tempInfo = undefined;
+			var isBeing = false;
+			for(var i=0;i<len;i++)
+			{
+				tempInfo = this._ZzySCFStorage[mapId][eventId][i];
+				//类型与ID都相同,代表重合
+				if(tempInfo.typeId === info.typeId && tempInfo.itemId === info.itemId)
+				{
+					tempInfo.value += info.value;
+					isBeing = true;
+					break;
+				}
+			}
+			if(!isBeing)
+			{this._ZzySCFStorage[mapId][eventId].push(info);}//逐个压入
+		break;
+		case 3:
+			this._ZzySCFStorage[mapId][eventId].push(info);//正常压入
+		break;
+	}
+}
 
-    //重叠模式 1独立的 2重叠的 3跟随事件
-    switch (this.GetZzySCFOverlapMode()) {
-        case 1:
-            if (info.typeId === 1) {
-                //金币
-                this._ZzySCFStorage[mapId][eventId].push(info);
-            } else {
-                var number = info.value;
-                info.value = 1;
-                for (var i = 0; i < number; i++) {
-                    this._ZzySCFStorage[mapId][eventId].push(info); //逐个压入
-                }
-            }
-            break;
-        case 2: //通过typeId遍历重复压入
-            var len = this._ZzySCFStorage[mapId][eventId].length;
-            var tempInfo = undefined;
-            var isBeing = false;
-            for (var i = 0; i < len; i++) {
-                tempInfo = this._ZzySCFStorage[mapId][eventId][i];
-                //类型与ID都相同,代表重合
-                if (tempInfo.typeId === info.typeId && tempInfo.itemId === info.itemId) {
-                    tempInfo.value += info.value;
-                    isBeing = true;
-                    break;
-                }
-            }
-            if (!isBeing) {
-                this._ZzySCFStorage[mapId][eventId].push(info);
-            } //逐个压入
-            break;
-        case 3:
-            this._ZzySCFStorage[mapId][eventId].push(info); //正常压入
-            break;
-    }
-};
 
 //================================================================
 //Scene_Map
 //================================================================
 Zzy.SCF.Scene_Map_initialize = Scene_Map.prototype.initialize;
-Scene_Map.prototype.initialize = function () {
-    Zzy.SCF.Scene_Map_initialize.call(this);
-    this._ZzySCFYWindow = undefined;
+Scene_Map.prototype.initialize = function() 
+{
+	Zzy.SCF.Scene_Map_initialize.call(this);
+	this._ZzySCFYWindow = undefined;
 };
 
 Zzy.SCF.Scene_Map_start = Scene_Map.prototype.start;
-Scene_Map.prototype.start = function () {
-    Zzy.SCF.Scene_Map_start.call(this);
-    //this.ZzySCFCreateChestWindow();
-    this.ZzySCFCreateYuanWindow();
+Scene_Map.prototype.start = function() 
+{
+	Zzy.SCF.Scene_Map_start.call(this);
+	//this.ZzySCFCreateChestWindow();
+	this.ZzySCFCreateYuanWindow();
 };
 
-Scene_Map.prototype.ZzySCFCreateYuanWindow = function () {
-    //创建窗口
-    this._ZzySCFYWindow = new Window_ZzySCFYuanShen();
-    this.addChild(this._ZzySCFYWindow);
+Scene_Map.prototype.ZzySCFCreateYuanWindow = function()
+{
 
-    this._ZzySCFYWindow.setHandler("ok", this.OnYuanProcessOk.bind(this));
-    this._ZzySCFYWindow.setHandler("cancel", this.OnYuanProcessCancel.bind(this));
-};
+	//创建窗口
+	this._ZzySCFYWindow = new Window_ZzySCFYuanShen();
+	this.addChild(this._ZzySCFYWindow);
+			
+	this._ZzySCFYWindow.setHandler('ok',this.OnYuanProcessOk.bind(this));
+	this._ZzySCFYWindow.setHandler('cancel',this.OnYuanProcessCancel.bind(this));	
+}
 
 Zzy.SCF.Scene_Map_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function () {
-    Zzy.SCF.Scene_Map_update.call(this);
-
-    this.updateZzySCFCallStorage();
-};
-
-Scene_Map.prototype.updateZzySCFCallStorage = function () //刷新是否需要呼叫
+Scene_Map.prototype.update = function() 
 {
-    if (!$gameSystem._ZzySCFWaitCallInfo) return;
-    if ($gameMessage.isBusy()) return; //判断:$gameMessage窗口结束
-
-    this.ZzySCFCallStorageWindow(); //呼叫
-    $gameSystem._ZzySCFWaitCallInfo = undefined;
+	Zzy.SCF.Scene_Map_update.call(this);
+	
+	this.updateZzySCFCallStorage();
 };
 
-Scene_Map.prototype.ZzySCFCallStorageWindow = function () {
-    var mapId = $gameSystem._ZzySCFWaitCallInfo.mapId;
-    var evId = $gameSystem._ZzySCFWaitCallInfo.evId;
-    //Call窗口
-    // if(this._ZzySCFChestWindow)
-    // {
-    // this._ZzySCFChestWindow.CallOpen();//呼叫打开
-    // }
 
-    var ev = $gameMap.event(evId);
-
-    Zzy.SCF.TempCallInfo = $gameSystem._ZzySCFWaitCallInfo;
-    switch ($gameSystem.GetZzySCFShowMode(ev)) {
-        case 1:
-            this.CallZzySCFChestWindow();
-            break;
-        case 2:
-            this.CallZzySCFYuanShenWindow();
-            break;
-    }
-};
-
-Scene_Map.prototype.CallZzySCFChestWindow = function () {
-    SceneManager.push(Scene_ZzySCFChest); //压入场景
-};
-
-Scene_Map.prototype.CallZzySCFYuanShenWindow = function () {
-    this._ZzySCFYWindow.reClick(); //点击
-    this._ZzySCFYWindow.refreshList();
-    this._ZzySCFYWindow.refresh();
-
-    $gameSystem.AddYunChestFlag(this._ZzySCFYWindow.mapId, this._ZzySCFYWindow.evId); //压入到遍历箱中
-};
-
-Scene_Map.prototype.OnYuanProcessOk = function () {
-    if (this._ZzySCFYWindow && this._ZzySCFYWindow.active && this._ZzySCFYWindow.visible) {
-        this._ZzySCFYWindow.OnProcessOk();
-    }
-};
-
-Scene_Map.prototype.OnYuanProcessCancel = function () //取消
+Scene_Map.prototype.updateZzySCFCallStorage = function()//刷新是否需要呼叫
 {
-    if (this._ZzySCFYWindow && this._ZzySCFYWindow.visible) {
-        this._ZzySCFYWindow.froceClose = true; //强制关闭
-        this._ZzySCFYWindow.closeEvId = Zzy.SCF.TempCallInfo ? Zzy.SCF.TempCallInfo.evId : 0;
-    }
-};
+	if(!$gameSystem._ZzySCFWaitCallInfo)return;
+	if($gameMessage.isBusy())return;	//判断:$gameMessage窗口结束
+	
+	this.ZzySCFCallStorageWindow();//呼叫
+	$gameSystem._ZzySCFWaitCallInfo = undefined;
+}
+
+Scene_Map.prototype.ZzySCFCallStorageWindow = function()
+{
+	var mapId = $gameSystem._ZzySCFWaitCallInfo.mapId;
+	var evId = $gameSystem._ZzySCFWaitCallInfo.evId;
+	//Call窗口
+	// if(this._ZzySCFChestWindow)
+	// {
+		// this._ZzySCFChestWindow.CallOpen();//呼叫打开
+	// }
+
+	var ev = $gameMap.event(evId);
+	
+	Zzy.SCF.TempCallInfo = $gameSystem._ZzySCFWaitCallInfo;
+	switch($gameSystem.GetZzySCFShowMode(ev))
+	{
+		case 1:this.CallZzySCFChestWindow();break;
+		case 2:this.CallZzySCFYuanShenWindow();break;
+	}
+	
+}
+
+Scene_Map.prototype.CallZzySCFChestWindow = function()
+{
+	SceneManager.push(Scene_ZzySCFChest);//压入场景
+}
+
+Scene_Map.prototype.CallZzySCFYuanShenWindow = function()
+{
+	this._ZzySCFYWindow.reClick();//点击
+	this._ZzySCFYWindow.refreshList();
+	this._ZzySCFYWindow.refresh();
+	
+	$gameSystem.AddYunChestFlag(this._ZzySCFYWindow.mapId,this._ZzySCFYWindow.evId);//压入到遍历箱中
+	
+}
+
+
+
+Scene_Map.prototype.OnYuanProcessOk = function()
+{
+	if(this._ZzySCFYWindow && this._ZzySCFYWindow.active && this._ZzySCFYWindow.visible)
+	{
+		this._ZzySCFYWindow.OnProcessOk();
+	}
+}
+
+
+Scene_Map.prototype.OnYuanProcessCancel = function()//取消
+{
+	if(this._ZzySCFYWindow && this._ZzySCFYWindow.visible)
+	{
+		this._ZzySCFYWindow.froceClose = true;//强制关闭
+		this._ZzySCFYWindow.closeEvId = Zzy.SCF.TempCallInfo ? Zzy.SCF.TempCallInfo.evId : 0;
+	}
+}
+
 
 Zzy.SCF.Scene_Map_isMenuCalled = Scene_Map.prototype.isMenuCalled;
-Scene_Map.prototype.isMenuCalled = function () {
-    if (this._ZzySCFYWindow && this._ZzySCFYWindow.visible) {
-        return false;
-    }
+Scene_Map.prototype.isMenuCalled = function() 
+{
+	if(this._ZzySCFYWindow && this._ZzySCFYWindow.visible)
+	{return false;}
+	
+	
 
-    return Zzy.SCF.Scene_Map_isMenuCalled.call(this);
+	return Zzy.SCF.Scene_Map_isMenuCalled.call(this);
 };
+
 
 Zzy.SCF.Scene_Map_processMapTouch = Scene_Map.prototype.processMapTouch;
-Scene_Map.prototype.processMapTouch = function () {
-    if (this._ZzySCFYWindow) {
-        if (this._ZzySCFYWindow.visible && this._ZzySCFYWindow.isTouchedInsideFrame()) {
-            return;
-        }
-    }
-
-    Zzy.SCF.Scene_Map_processMapTouch.call(this);
+Scene_Map.prototype.processMapTouch = function() 
+{
+	if(this._ZzySCFYWindow)
+	{
+		if(this._ZzySCFYWindow.visible && this._ZzySCFYWindow.isTouchedInsideFrame())
+		{
+			return;
+		}
+	}
+	
+	Zzy.SCF.Scene_Map_processMapTouch.call(this);
 };
+
+
+
 
 //================================================================
 //Scene_ZzySCFChest
 //================================================================
 
-function Scene_ZzySCFChest() {
+function Scene_ZzySCFChest() 
+{
     this.initialize.apply(this, arguments);
 }
 
 Scene_ZzySCFChest.prototype = Object.create(Scene_MenuBase.prototype);
 Scene_ZzySCFChest.prototype.constructor = Scene_ZzySCFChest;
 
-Scene_ZzySCFChest.prototype.initialize = function () {
-    Scene_MenuBase.prototype.initialize.call(this);
-};
-Scene_ZzySCFChest.prototype.CreateChestWindow = function () {
-    this._HelpWindow = new Window_ZzySCFHelp();
-    this._ChestWindow = new Window_ZzySCFChest();
-    this._SelectWindow = new Window_ZzySCFSelect();
-
-    this.addChild(this._HelpWindow);
-    this.addChild(this._ChestWindow);
-    this.addChild(this._SelectWindow);
-
-    this.initPosition(); //初始化位置
-
-    this._HelpWindow.CallOpen(); //呼叫打开
-    this._ChestWindow.CallOpen(); //呼叫打开
-    this._SelectWindow.CallOpen(); //呼叫打开
-
-    this._HelpWindow.BindChestWindow(this._ChestWindow);
-
-    //this._ChestWindow.setHandler('cancel', this.popScene.bind(this));
-    this._ChestWindow.setHandler("ok", this.OnChestProcessOk.bind(this));
-    this._ChestWindow.setHandler("cancel", this.OnChestProcessCancel.bind(this));
-
-    this._SelectWindow.setHandler("ok", this.OnSelectProcessOk.bind(this));
-};
-
-Scene_ZzySCFChest.prototype.OnChestProcessOk = function () //按下Chest窗口
+Scene_ZzySCFChest.prototype.initialize = function() 
 {
-    if (this._ChestWindow.active) {
-        //可以取出元素
-        this._ChestWindow.OnProcessOk();
-    }
-    this._ChestWindow.activate();
+    Scene_MenuBase.prototype.initialize.call(this);
+
 };
+Scene_ZzySCFChest.prototype.CreateChestWindow = function()
+{
+	this._HelpWindow = new Window_ZzySCFHelp();
+	this._ChestWindow = new Window_ZzySCFChest();
+	this._SelectWindow = new Window_ZzySCFSelect();
 
-Scene_ZzySCFChest.prototype.OnChestProcessCancel = function () {
-    if (this._ChestWindow.active) {
-        if (this._ChestWindow._index >= 0) {
-            this._ChestWindow.deselect();
-        } else {
-            this.popScene(); //退出
-        }
-    }
-};
+	this.addChild(this._HelpWindow);
+	this.addChild(this._ChestWindow);
+	this.addChild(this._SelectWindow);
+	
+	this.initPosition();//初始化位置
+	
+	
+	this._HelpWindow.CallOpen();//呼叫打开	
+	this._ChestWindow.CallOpen();//呼叫打开
+	this._SelectWindow.CallOpen();//呼叫打开
+	
+	
+	this._HelpWindow.BindChestWindow(this._ChestWindow);
+	
+    //this._ChestWindow.setHandler('cancel', this.popScene.bind(this));	
+	this._ChestWindow.setHandler('ok',this.OnChestProcessOk.bind(this));
+	this._ChestWindow.setHandler('cancel',this.OnChestProcessCancel.bind(this));
+	
+	this._SelectWindow.setHandler('ok',this.OnSelectProcessOk.bind(this));	
+	
+}
 
-Scene_ZzySCFChest.prototype.OnSelectProcessOk = function () {
-    if (this._SelectWindow.active) {
-        this._SelectWindow.OnProcessOk();
-    }
-    this._SelectWindow.activate();
-};
+Scene_ZzySCFChest.prototype.OnChestProcessOk = function()//按下Chest窗口
+{
+	if(this._ChestWindow.active)
+	{
+		//可以取出元素
+		this._ChestWindow.OnProcessOk();
+	}
+	this._ChestWindow.activate();
+}
 
-Scene_ZzySCFChest.prototype.initPosition = function () {
-    this._ChestWindow.y = this._HelpWindow.height;
+Scene_ZzySCFChest.prototype.OnChestProcessCancel = function()
+{
+	if(this._ChestWindow.active)
+	{
+		if(this._ChestWindow._index >= 0)
+		{
+			this._ChestWindow.deselect();
+		}
+		else
+		{
+			this.popScene();//退出
+		}	
+	}
+}
 
-    this._SelectWindow.y = Graphics.boxHeight - this._SelectWindow.height;
-    this._SelectWindow.startY = this._SelectWindow.y;
 
-    this._ChestWindow.height = Graphics.boxHeight - this._HelpWindow.height - this._SelectWindow.height;
-};
+Scene_ZzySCFChest.prototype.OnSelectProcessOk = function()
+{
+	if(this._SelectWindow.active)
+	{
+		this._SelectWindow.OnProcessOk();
+	}
+	this._SelectWindow.activate();
+}
 
-Scene_ZzySCFChest.prototype.create = function () {
+Scene_ZzySCFChest.prototype.initPosition = function()
+{
+	this._ChestWindow.y = this._HelpWindow.height;
+	
+	
+	this._SelectWindow.y = Graphics.boxHeight-this._SelectWindow.height;
+	this._SelectWindow.startY = this._SelectWindow.y;
+	
+	this._ChestWindow.height = Graphics.boxHeight-this._HelpWindow.height-this._SelectWindow.height;
+}
+
+Scene_ZzySCFChest.prototype.create = function() 
+{
     Scene_MenuBase.prototype.create.call(this);
-    this.CreateChestWindow(); //创造相关窗口
+	this.CreateChestWindow();//创造相关窗口
 };
 
-Scene_ZzySCFChest.prototype.AllTakeChest = function () {
-    this._ChestWindow.TakeAll();
-};
+Scene_ZzySCFChest.prototype.AllTakeChest = function()
+{
+	this._ChestWindow.TakeAll();
+}
+
+
+
 
 //================================================================
 //Window_ZzySCFChestBase
 //================================================================
 //窗口基类
-function Window_ZzySCFChestBase() {
+function Window_ZzySCFChestBase() 
+{
     this.initialize.apply(this, arguments);
 }
 
 Window_ZzySCFChestBase.prototype = Object.create(Window_Selectable.prototype);
 Window_ZzySCFChestBase.prototype.constructor = Window_ZzySCFChestBase;
 
-Window_ZzySCFChestBase.prototype.initialize = function (x, y, w, h) {
-    x = x ? x : 0;
-    y = y ? y : 0;
-    w = w ? w : Graphics.boxWidth;
-    h = h ? h : Graphics.boxHeight;
-
-    Window_Selectable.prototype.initialize.call(this, x, y, w, h);
-    this.evId = 0;
-    this.mapId = 0;
-    this.initWindow();
+Window_ZzySCFChestBase.prototype.initialize = function(x,y,w,h) 
+{
+	x = x ? x : 0;
+	y = y ? y : 0;
+	w = w ? w : Graphics.boxWidth;
+	h = h ? h : Graphics.boxHeight;
+	
+    Window_Selectable.prototype.initialize.call(this,x,y,w,h);
+	this.evId = 0;
+	this.mapId = 0;
+	this.initWindow();
 };
 
-Window_ZzySCFChestBase.prototype.initWindow = function () {
-    this.Hide();
-};
+Window_ZzySCFChestBase.prototype.initWindow = function()
+{
+	this.Hide();
+}
 
-Window_ZzySCFChestBase.prototype.Hide = function () {
-    this.visible = false;
-    this.opacity = 0;
-};
 
-Window_ZzySCFChestBase.prototype.Show = function () {
-    this.visible = true;
-    this.opacity = 255;
-};
+Window_ZzySCFChestBase.prototype.Hide = function()
+{
+	this.visible = false;
+	this.opacity = 0;	
+}
 
-Window_ZzySCFChestBase.prototype.CallOpen = function () {};
+Window_ZzySCFChestBase.prototype.Show = function()
+{
+	this.visible = true;
+	this.opacity = 255;	
+}
 
-Window_ZzySCFChestBase.prototype.OnProcessOk = function () {};
+Window_ZzySCFChestBase.prototype.CallOpen = function()
+{
+
+}
+
+Window_ZzySCFChestBase.prototype.OnProcessOk = function()
+{
+	
+}
+
 
 //================================================================
 //Window_ZzySCFChest
 //================================================================
 //一般模式窗口
-function Window_ZzySCFChest() {
+function Window_ZzySCFChest() 
+{
     this.initialize.apply(this, arguments);
 }
 
 Window_ZzySCFChest.prototype = Object.create(Window_ZzySCFChestBase.prototype);
 Window_ZzySCFChest.prototype.constructor = Window_ZzySCFChest;
 
-Window_ZzySCFChest.prototype.initialize = function () {
-    this.evId = 0;
-    this.mapId = 0;
-    this._list = [];
-
+Window_ZzySCFChest.prototype.initialize = function() 
+{
+	this.evId = 0;
+	this.mapId = 0;
+	this._list = [];	
+	
     Window_ZzySCFChestBase.prototype.initialize.call(this);
 
-    this.refreshList();
-    this.refresh();
+	this.refreshList();
+	this.refresh();
 
-    this.select(0);
-    this.activate();
+	this.select(0);
+	this.activate();
 };
 
-Window_ZzySCFChest.prototype.CallOpen = function () {
-    Window_ZzySCFChestBase.prototype.CallOpen.call(this);
+Window_ZzySCFChest.prototype.CallOpen = function()
+{
+	Window_ZzySCFChestBase.prototype.CallOpen.call(this);
+	
+	this.Show();
+	this.open();//呼叫打开
+}
 
-    this.Show();
-    this.open(); //呼叫打开
-};
 
-Window_ZzySCFChest.prototype.updateOpen = function () {
+Window_ZzySCFChest.prototype.updateOpen = function() 
+{
     if (this._opening) {
         this.openness += Zzy.SCF.TempSpeed1;
-        if (this.isOpen()) {
+        if (this.isOpen()) 
+		{
             this._opening = false;
         }
     }
 };
 
-Window_ZzySCFChest.prototype.updateClose = function () {
+Window_ZzySCFChest.prototype.updateClose = function() 
+{
     if (this._closing) {
         this.openness -= Zzy.SCF.TempSpeed1;
-        if (this.isClosed()) {
+        if (this.isClosed()) 
+		{
             this._closing = false;
-            this.Hide(); //执行隐藏
+			this.Hide();//执行隐藏
         }
     }
 };
 
-Window_ZzySCFChest.prototype.open = function () {
-    this.openness = 0;
+
+Window_ZzySCFChest.prototype.open = function() 
+{
+	this.openness = 0;
     this._opening = true;
     this._closing = false;
 };
 
-Window_ZzySCFChest.prototype.close = function () {
-    this.openness = 255;
+Window_ZzySCFChest.prototype.close = function() 
+{
+	this.openness = 255;
     this._closing = true;
     this._opening = false;
 };
 
-Window_ZzySCFChest.prototype.refreshList = function () //刷新List
+Window_ZzySCFChest.prototype.refreshList = function()//刷新List
 {
-    this.evId = Zzy.SCF.TempCallInfo.evId;
-    this.mapId = Zzy.SCF.TempCallInfo.mapId;
+	this.evId = Zzy.SCF.TempCallInfo.evId;
+	this.mapId = Zzy.SCF.TempCallInfo.mapId;
+	
+	//获取list
+	this._list = $gameSystem.GetZzySCFStorage(this.mapId,this.evId);
 
-    //获取list
-    this._list = $gameSystem.GetZzySCFStorage(this.mapId, this.evId);
-};
+}
 
-Window_ZzySCFChest.prototype.maxItems = function () {
-    //如果其中道具数不足时,将会填充为额外的空道具槽
-    var minItems = this.maxPageRows() * this.maxCols();
-    return this._list.length > minItems ? this._list.length : minItems;
-};
+Window_ZzySCFChest.prototype.maxItems = function()
+{
+	//如果其中道具数不足时,将会填充为额外的空道具槽
+	var minItems = this.maxPageRows() * this.maxCols();
+	return this._list.length > minItems ? this._list.length : minItems;
+}
 
-Window_ZzySCFChest.prototype.maxCols = function () {
-    return $gameSystem._ZzySCFCMaxCols;
-};
+Window_ZzySCFChest.prototype.maxCols = function()
+{
+	return $gameSystem._ZzySCFCMaxCols;
+}
 
-Window_ZzySCFChest.prototype.drawItem = function (index) {
-    var info = this._list[index];
-    if (info) {
-        var rect = this.itemRectForText(index);
-        var align = this.itemTextAlign();
-        this.resetTextColor();
-        this.changePaintOpacity(true);
+Window_ZzySCFChest.prototype.drawItem = function(index)
+{
+	var info = this._list[index];
+	if(info)
+	{	
+		var rect = this.itemRectForText(index);
+		var align = this.itemTextAlign();
+		this.resetTextColor();
+		this.changePaintOpacity(true);
+		
+		var item = undefined;
+		this.resetTextColor();
+		
+		switch(info.typeId)
+		{
+			case 1://金币
+				item = {};
+				item.iconIndex = $gameSystem._ZzySCFCoinIcon;
+				item.name = this.currencyUnit();
+				item.isCoin = true;
+				this.changeTextColor($gameSystem.GetZzySCFCoinColor());
+			break;
+			case 2:item = $dataItems[info.itemId];
+				this.setZzySCFItemColor(item);
+			break;
+			case 3:item = $dataWeapons[info.itemId];
+				this.setZzySCFItemColor(item);
+			break;
+			case 4:item = $dataArmors[info.itemId];
+				this.setZzySCFItemColor(item);
+			break;
+		}
+		
+		
+		if(item)
+		{
+			var numberWidth = 0;
+			if(item.isCoin)
+			{
+				numberWidth = this.coinWidth();
+			}
+			else
+			{
+				numberWidth = this.numberWidth();
+			}
+			
+			
+			
+			this.drawItemName(item, rect.x, rect.y, rect.width - numberWidth);
+			this.drawItemNumber(info, rect.x, rect.y, rect.width);
+		}
 
-        var item = undefined;
-        this.resetTextColor();
+	}
 
-        switch (info.typeId) {
-            case 1: //金币
-                item = {};
-                item.iconIndex = $gameSystem._ZzySCFCoinIcon;
-                item.name = this.currencyUnit();
-                item.isCoin = true;
-                this.changeTextColor($gameSystem.GetZzySCFCoinColor());
-                break;
-            case 2:
-                item = $dataItems[info.itemId];
-                this.setZzySCFItemColor(item);
-                break;
-            case 3:
-                item = $dataWeapons[info.itemId];
-                this.setZzySCFItemColor(item);
-                break;
-            case 4:
-                item = $dataArmors[info.itemId];
-                this.setZzySCFItemColor(item);
-                break;
-        }
+}
 
-        if (item) {
-            var numberWidth = 0;
-            if (item.isCoin) {
-                numberWidth = this.coinWidth();
-            } else {
-                numberWidth = this.numberWidth();
-            }
+Window_ZzySCFChest.prototype.setZzySCFItemColor = function(item)
+{
+	if(!item.zzySCF || !item.zzySCF.color)
+	{this.resetTextColor();}
+	else
+	{this.changeTextColor(item.zzySCF.color);}
+}
 
-            this.drawItemName(item, rect.x, rect.y, rect.width - numberWidth);
-            this.drawItemNumber(info, rect.x, rect.y, rect.width);
-        }
-    }
-};
 
-Window_ZzySCFChest.prototype.setZzySCFItemColor = function (item) {
-    if (!item.zzySCF || !item.zzySCF.color) {
-        this.resetTextColor();
-    } else {
-        this.changeTextColor(item.zzySCF.color);
-    }
-};
 
-Window_ZzySCFChest.prototype.drawItemName = function (item, x, y, width) {
+Window_ZzySCFChest.prototype.drawItemName = function(item, x, y, width) 
+{
     width = width || 312;
-    if (item) {
-        var iconBoxWidth = Window_Base._iconWidth + 4;
+    if (item) 
+	{
+        var iconBoxWidth = Window_Base._iconWidth + 4;   
         this.drawIcon(item.iconIndex, x + 2, y + 2);
         this.drawText(item.name, x + iconBoxWidth, y, width - iconBoxWidth);
     }
 };
 
-Window_ZzySCFChest.prototype.drawItemNumber = function (info, x, y, width) {
-    if (this.needsNumber()) {
-        if (info.typeId === 1) {
-            this.drawText("x", x, y, width - this.textWidth(Zzy.Param.SCFCountCoinWidth), "right");
-        } else {
-            this.drawText("x", x, y, width - this.textWidth(Zzy.Param.SCFCountNumWidth), "right");
-        }
-
-        this.drawText(String(info.value), x, y, width, "right");
+Window_ZzySCFChest.prototype.drawItemNumber = function(info, x, y, width) 
+{
+    if (this.needsNumber()) 
+	{
+		if(info.typeId === 1)
+		{
+			this.drawText('x', x, y, width - this.textWidth(Zzy.Param.SCFCountCoinWidth), 'right');
+		}
+		else
+		{
+			this.drawText('x', x, y, width - this.textWidth(Zzy.Param.SCFCountNumWidth), 'right');
+		}
+       
+        this.drawText(String(info.value), x, y, width, 'right');
     }
 };
 
-Window_ZzySCFChest.prototype.needsNumber = function () {
+Window_ZzySCFChest.prototype.needsNumber = function() 
+{
     return true;
 };
 
-Window_ZzySCFChest.prototype.numberWidth = function () {
+Window_ZzySCFChest.prototype.numberWidth = function() 
+{
     return this.textWidth(Zzy.Param.SCFCountNumWidth);
 };
 
-Window_ZzySCFChest.prototype.coinWidth = function () {
-    return this.textWidth(Zzy.Param.SCFCountCoinWidth);
-};
+Window_ZzySCFChest.prototype.coinWidth = function()
+{
+	return this.textWidth(Zzy.Param.SCFCountCoinWidth);
+}
 
-Window_ZzySCFChest.prototype.currencyUnit = function () {
+
+Window_ZzySCFChest.prototype.currencyUnit = function() {
     return TextManager.currencyUnit;
 };
 
-Window_ZzySCFChest.prototype.itemTextAlign = function () {
-    return "left";
+Window_ZzySCFChest.prototype.itemTextAlign = function() 
+{
+    return 'left';
 };
 
-Window_ZzySCFChest.prototype.drawAllItems = function () {
+Window_ZzySCFChest.prototype.drawAllItems = function() 
+{
     var topIndex = this.topIndex();
-    for (var i = 0; i < this.maxPageItems(); i++) {
+    for (var i = 0; i < this.maxPageItems(); i++) 
+	{
+		
         var index = topIndex + i;
         if (index < this.maxItems()) {
             this.drawItem(index);
@@ -1336,129 +1446,150 @@ Window_ZzySCFChest.prototype.drawAllItems = function () {
     }
 };
 
-Window_ZzySCFChest.prototype.OnProcessOk = function () {
-    //双击取出道具
+Window_ZzySCFChest.prototype.OnProcessOk = function()
+{
+	//双击取出道具
+	
+	
+	var index = this.index();
+	var info = this._list[index];
 
-    var index = this.index();
-    var info = this._list[index];
+	if(info)
+	{
+		this.GetListInfo(index);
+		
+		var value = info.value;//数量
+		var id = info.itemId;
+		
+		if($gameSystem._ZzySCFIsCAutoLine)
+		{
+			//向前遍历
+			
+			var tList = $gameSystem.GetZzySCFStorage(this.mapId,this.evId);
+			var len = tList.length;
+			
+			for(var i=index;i<len-1;i++)
+			{
+				tList[i] = tList[i+1];
+			}
+			tList[len-1] = undefined;
+		}
+		else
+		{
+			$gameSystem._ZzySCFStorage[this.mapId][this.evId][index] = undefined;
+		}
+		this.refreshList();//刷新list
+		this.refresh();
+		return true;
+	}
+	return false;
+}
 
-    if (info) {
-        this.GetListInfo(index);
 
-        var value = info.value; //数量
-        var id = info.itemId;
+Window_ZzySCFChest.prototype.TakeAll = function()
+{
+	for(var i=0;i<this._list.length;i++)
+	{
+		this.GetListInfo(i);//取出所有道具
+		$gameSystem._ZzySCFStorage[this.mapId][this.evId][i] = undefined;
+	}
+	this.refreshList();//刷新list
+	this.refresh()	
+}
 
-        if ($gameSystem._ZzySCFIsCAutoLine) {
-            //向前遍历
+Window_ZzySCFChest.prototype.GetListInfo = function(index)
+{
+		var info = this._list[index];
+	
+		if(info)
+		{
+			var value = info.value;//数量
+			var id = info.itemId;			
+			
+			switch(info.typeId)
+			{
+				case 1:$gameParty.gainGold(value);break;
+				case 2:
+				var item = $dataItems[id];
+				$gameParty.gainItem(item,value);
+				break;
+				case 3:
+				var weapon = $dataWeapons[id];
+				$gameParty.gainItem(weapon,value);
+				break;
+				case 4:
+				var armor = $dataArmors[id];
+				$gameParty.gainItem(armor,value);
+				break;
+			}				
+		}	
+}
 
-            var tList = $gameSystem.GetZzySCFStorage(this.mapId, this.evId);
-            var len = tList.length;
-
-            for (var i = index; i < len - 1; i++) {
-                tList[i] = tList[i + 1];
-            }
-            tList[len - 1] = undefined;
-        } else {
-            $gameSystem._ZzySCFStorage[this.mapId][this.evId][index] = undefined;
-        }
-        this.refreshList(); //刷新list
-        this.refresh();
-        return true;
-    }
-    return false;
-};
-
-Window_ZzySCFChest.prototype.TakeAll = function () {
-    for (var i = 0; i < this._list.length; i++) {
-        this.GetListInfo(i); //取出所有道具
-        $gameSystem._ZzySCFStorage[this.mapId][this.evId][i] = undefined;
-    }
-    this.refreshList(); //刷新list
-    this.refresh();
-};
-
-Window_ZzySCFChest.prototype.GetListInfo = function (index) {
-    var info = this._list[index];
-
-    if (info) {
-        var value = info.value; //数量
-        var id = info.itemId;
-
-        switch (info.typeId) {
-            case 1:
-                $gameParty.gainGold(value);
-                break;
-            case 2:
-                var item = $dataItems[id];
-                $gameParty.gainItem(item, value);
-                break;
-            case 3:
-                var weapon = $dataWeapons[id];
-                $gameParty.gainItem(weapon, value);
-                break;
-            case 4:
-                var armor = $dataArmors[id];
-                $gameParty.gainItem(armor, value);
-                break;
-        }
-    }
-};
-
-Window_ZzySCFChest.prototype.processOk = function () {
-    if (this.itemCan()) {
+Window_ZzySCFChest.prototype.processOk = function() 
+{
+    if (this.itemCan()) 
+	{
         this.playOkSound();
         this.updateInputData();
         this.callOkHandler();
-    } else {
+    } 
+	else 
+	{
         this.playBuzzerSound();
     }
 };
 
-Window_ZzySCFChest.prototype.processCancel = function () {
-    this.playCancelSound();
+
+Window_ZzySCFChest.prototype.processCancel = function() 
+{
+	this.playCancelSound();
     this.updateInputData();
     this.callCancelHandler();
 };
 
-Window_ZzySCFChest.prototype.playCancelSound = function () {
-    SoundManager.playCancel();
+Window_ZzySCFChest.prototype.playCancelSound = function()
+{
+	SoundManager.playCancel();
+}
+
+Window_ZzySCFChest.prototype.playOkSound = function() 
+{
+	if(!Zzy.SCF.PlaySE(1))
+	{SoundManager.playOk();}	
 };
 
-Window_ZzySCFChest.prototype.playOkSound = function () {
-    if (!Zzy.SCF.PlaySE(1)) {
-        SoundManager.playOk();
-    }
+Window_ZzySCFChest.prototype.playBuzzerSound = function() 
+{
+	if(!Zzy.SCF.PlaySE(2))
+    {SoundManager.playBuzzer();}
 };
 
-Window_ZzySCFChest.prototype.playBuzzerSound = function () {
-    if (!Zzy.SCF.PlaySE(2)) {
-        SoundManager.playBuzzer();
-    }
-};
 
-Window_ZzySCFChest.prototype.itemCan = function () {
-    return !!this._list[this.index()];
-};
+Window_ZzySCFChest.prototype.itemCan = function()
+{
+	return !!this._list[this.index()];
+}
 
-Window_ZzySCFChest.prototype.processCursorMove = function () {
+
+Window_ZzySCFChest.prototype.processCursorMove = function() {
     if (this.isCursorMovable()) {
         var lastIndex = this.index();
-        if (Input.isRepeated("down")) {
-            this.cursorDown(Input.isTriggered("down"));
+        if (Input.isRepeated('down')) {
+            this.cursorDown(Input.isTriggered('down'));
         }
-        if (Input.isRepeated("up")) {
-            this.cursorUp(Input.isTriggered("up"));
+        if (Input.isRepeated('up')) {
+            this.cursorUp(Input.isTriggered('up'));
         }
-        if (Input.isRepeated("right")) {
-            this.cursorRight(Input.isTriggered("right"));
+        if (Input.isRepeated('right')) {
+            this.cursorRight(Input.isTriggered('right'));
         }
-        if (Input.isRepeated("left")) {
-            this.cursorLeft(Input.isTriggered("left"));
+        if (Input.isRepeated('left')) {
+            this.cursorLeft(Input.isTriggered('left'));
         }
-        if (!this.isHandled("pagedown") && Input.isTriggered("pagedown")) {
+        if (!this.isHandled('pagedown') && Input.isTriggered('pagedown')) {
             this.cursorPagedown();
         }
-        if (!this.isHandled("pageup") && Input.isTriggered("pageup")) {
+        if (!this.isHandled('pageup') && Input.isTriggered('pageup')) {
             this.cursorPageup();
         }
         if (this.index() !== lastIndex) {
@@ -1467,13 +1598,15 @@ Window_ZzySCFChest.prototype.processCursorMove = function () {
     }
 };
 
-Window_ZzySCFChest.prototype.playSelectSound = function () {
-    if (!Zzy.SCF.PlaySE(5)) {
-        SoundManager.playCursor();
-    }
-};
 
-Window_ZzySCFChest.prototype.onTouch = function (triggered) {
+Window_ZzySCFChest.prototype.playSelectSound = function()
+{
+	if(!Zzy.SCF.PlaySE(5))
+	{SoundManager.playCursor();}		
+}
+
+Window_ZzySCFChest.prototype.onTouch = function(triggered)
+{
     var lastIndex = this.index();
     var x = this.canvasToLocalX(TouchInput.x);
     var y = this.canvasToLocalY(TouchInput.y);
@@ -1498,241 +1631,291 @@ Window_ZzySCFChest.prototype.onTouch = function (triggered) {
     }
 };
 
+
+
+
 //================================================================
 //Window_ZzySCFHelp
 //================================================================
 
-function Window_ZzySCFHelp() {
+function Window_ZzySCFHelp() 
+{
     this.initialize.apply(this, arguments);
 }
 
 Window_ZzySCFHelp.prototype = Object.create(Window_Help.prototype);
 Window_ZzySCFHelp.prototype.constructor = Window_ZzySCFHelp;
 
-Window_ZzySCFHelp.prototype.initialize = function () {
+Window_ZzySCFHelp.prototype.initialize = function() 
+{
     Window_Help.prototype.initialize.call(this);
-    this.movePos = 0;
-    this._ChestWindow = undefined;
-    this.isRefresh = true;
-    this.srcIndex = undefined;
+	this.movePos = 0;
+	this._ChestWindow = undefined;
+	this.isRefresh = true;
+	this.srcIndex = undefined;
 };
 
-Window_ZzySCFHelp.prototype.CallOpen = function () {
-    //位移过程
-    this.Show();
-    this.open(); //呼叫打开
-};
+Window_ZzySCFHelp.prototype.CallOpen = function()
+{
+	//位移过程
+	this.Show();
+	this.open();//呼叫打开	
+	
+}
 
-Window_ZzySCFHelp.prototype.BindChestWindow = function (pointer) {
-    this._ChestWindow = pointer;
-    this.srcIndex = this._ChestWindow._index;
-};
 
-Window_ZzySCFHelp.prototype.updateOpen = function () {
-    if (this._opening) {
+Window_ZzySCFHelp.prototype.BindChestWindow = function(pointer)
+{
+	this._ChestWindow = pointer;
+	this.srcIndex = this._ChestWindow._index;
+	
+}
+
+Window_ZzySCFHelp.prototype.updateOpen = function() 
+{
+    if (this._opening) 
+	{
         this.movePos += Zzy.SCF.TempSpeed2;
-        if (this.movePos >= 0) {
-            this.movePos = 0;
+        if(this.movePos >= 0)
+		{
+			this.movePos = 0;
             this._opening = false;
         }
-        this.y = this.movePos;
+		this.y = this.movePos;
     }
 };
 
-Window_ZzySCFHelp.prototype.updateClose = function () {
-    if (this._closing) {
+Window_ZzySCFHelp.prototype.updateClose = function() 
+{
+    if (this._closing) 
+	{
         this.movePos -= Zzy.SCF.TempSpeed2;
-        if (this.movePos <= -this.height) {
-            this.movePos = -this.height;
+        if(this.movePos <= -this.height)
+		{
+			this.movePos = -this.height;
             this._closing = false;
-            this.Hide(); //执行隐藏
+			this.Hide();//执行隐藏
         }
-        this.y = this.movePos;
+		this.y = this.movePos;
     }
 };
 
-Window_ZzySCFHelp.prototype.open = function () {
-    this.movePos = -this.height;
+
+Window_ZzySCFHelp.prototype.open = function() 
+{
+	this.movePos = -this.height;
     this._opening = true;
     this._closing = false;
 };
 
-Window_ZzySCFHelp.prototype.close = function () {
-    this.movePos = 0;
+Window_ZzySCFHelp.prototype.close = function() 
+{
+	this.movePos = 0;
     this._closing = true;
     this._opening = false;
 };
 
-Window_ZzySCFHelp.prototype.Hide = function () {
-    this.visible = false;
-    this.opacity = 0;
-};
+Window_ZzySCFHelp.prototype.Hide = function()
+{
+	this.visible = false;
+	this.opacity = 0;
+}
 
-Window_ZzySCFHelp.prototype.Show = function () {
-    this.visible = true;
-    this.opacity = 255;
-};
+Window_ZzySCFHelp.prototype.Show = function()
+{
+	this.visible = true;
+	this.opacity = 255;	
+}
 
-Window_ZzySCFHelp.prototype.update = function () {
-    if (this._ChestWindow._index !== this.srcIndex) {
-        this.srcIndex = this._ChestWindow._index;
-        this.isRefresh = true;
-    }
+Window_ZzySCFHelp.prototype.update = function()
+{
+	if(this._ChestWindow._index !== this.srcIndex)
+	{
+		this.srcIndex = this._ChestWindow._index;
+		this.isRefresh = true;
+	}
 
-    if (this.isRefresh) {
-        this.setInfo(this._ChestWindow._list[this.srcIndex]);
-        this.isRefresh = false;
-    }
-};
+	if(this.isRefresh)
+	{
+		this.setInfo(this._ChestWindow._list[this.srcIndex]);
+		this.isRefresh = false;
+	}
+	
+}
 
-Window_ZzySCFHelp.prototype.setInfo = function (info) {
-    if (!info) {
-        this.setText("");
-    } else {
-        var item = undefined;
-        switch (info.typeId) {
-            case 2:
-                item = $dataItems[info.itemId];
-                break;
-            case 3:
-                item = $dataWeapons[info.itemId];
-                break;
-            case 4:
-                item = $dataArmors[info.itemId];
-                break;
-            default:
-        }
 
-        this.setText(item ? item.description : "");
-    }
-};
+Window_ZzySCFHelp.prototype.setInfo = function(info)
+{
+	if(!info)
+	{this.setText('');}
+	else
+	{
+		var item = undefined;
+		switch(info.typeId)
+		{
+			case 2:item = $dataItems[info.itemId];break;
+			case 3:item = $dataWeapons[info.itemId];break;
+			case 4:item = $dataArmors[info.itemId];break;
+			default:
+		}
+		
+		this.setText(item ? item.description : '');
+	}
+}
+
+
+
+
+
 
 //================================================================
 //Window_ZzySCFSelect
 //================================================================
 
-function Window_ZzySCFSelect() {
+function Window_ZzySCFSelect() 
+{
     this.initialize.apply(this, arguments);
 }
 
 Window_ZzySCFSelect.prototype = Object.create(Window_Selectable.prototype);
 Window_ZzySCFSelect.prototype.constructor = Window_ZzySCFSelect;
 
-Window_ZzySCFSelect.prototype.initialize = function () {
-    var height = this.GetHeight();
-    this._list = []; //存放数组
-    Window_Selectable.prototype.initialize.call(this, 0, 0, Graphics.boxWidth, height);
-    this.startY = 0;
-    this.movePos = 0;
-
-    this.setList();
-    this.refresh();
-    this.activate(); //设置为活跃
+Window_ZzySCFSelect.prototype.initialize = function() 
+{
+	var height = this.GetHeight();
+	this._list = [];//存放数组
+    Window_Selectable.prototype.initialize.call(this,0,0,Graphics.boxWidth,height);
+	this.startY = 0;
+	this.movePos = 0;
+	
+	this.setList();
+	this.refresh();
+	this.activate();//设置为活跃
 };
 
-Window_ZzySCFSelect.prototype.GetHeight = function () {
-    return this.getCount() ? this.fittingHeight(1) : 0;
-};
+Window_ZzySCFSelect.prototype.GetHeight = function()
+{
+	return this.getCount() ? this.fittingHeight(1) : 0;
+}
 
-Window_ZzySCFSelect.prototype.CallOpen = function () {
-    //位移过程
-    this.Show();
-    this.open(); //呼叫打开
-};
+Window_ZzySCFSelect.prototype.CallOpen = function()
+{
+	//位移过程
+	this.Show();
+	this.open();//呼叫打开	
+	
+}
 
-Window_ZzySCFSelect.prototype.updateOpen = function () {
-    if (this._opening) {
+Window_ZzySCFSelect.prototype.updateOpen = function() 
+{
+    if (this._opening) 
+	{
         this.movePos -= Zzy.SCF.TempSpeed3;
-        if (this.movePos <= 0) {
-            this.movePos = 0;
+        if(this.movePos <= 0)
+		{
+			this.movePos = 0;
             this._opening = false;
-            this.refresh();
+			this.refresh();
         }
-        this.y = this.startY + this.movePos;
+		this.y = this.startY+this.movePos;
     }
 };
 
-Window_ZzySCFSelect.prototype.updateClose = function () {
-    if (this._closing) {
+Window_ZzySCFSelect.prototype.updateClose = function() 
+{
+    if (this._closing) 
+	{
         this.movePos += Zzy.SCF.TempSpeed3;
-        if (this.movePos >= this.height) {
-            this.movePos = this.height;
+        if(this.movePos >= this.height)
+		{
+			this.movePos = this.height;
             this._closing = false;
-            this.Hide(); //执行隐藏
+			this.Hide();//执行隐藏
         }
-        this.y = this.startY + this.movePos;
+		this.y = this.startY+this.movePos;
     }
 };
 
-Window_ZzySCFSelect.prototype.open = function () {
-    this.movePos = this.height;
+Window_ZzySCFSelect.prototype.open = function() 
+{
+	this.movePos = this.height;
     this._opening = true;
     this._closing = false;
 };
 
-Window_ZzySCFSelect.prototype.close = function () {
-    this.movePos = 0;
+Window_ZzySCFSelect.prototype.close = function() 
+{
+	this.movePos = 0;
     this._closing = true;
     this._opening = false;
 };
 
-Window_ZzySCFSelect.prototype.Hide = function () {
-    this.visible = false;
-    this.opacity = 0;
-};
-
-Window_ZzySCFSelect.prototype.Show = function () {
-    this.visible = true;
-    this.opacity = 255;
-};
-
-Window_ZzySCFSelect.prototype.maxCols = function () {
-    return this.getCount();
-};
-
-Window_ZzySCFSelect.prototype.getCount = function () //指令数值
+Window_ZzySCFSelect.prototype.Hide = function()
 {
-    var ev = $gameMap.event(Zzy.SCF.TempCallInfo.evId);
-    var count = 0;
-    count += $gameSystem.GetZzySCFIsCAllTake(ev) ? 1 : 0;
-    count += $gameSystem.GetZzySCFIsCClose(ev) ? 1 : 0;
-    return count;
-};
+	this.visible = false;
+	this.opacity = 0;
+}
 
-Window_ZzySCFSelect.prototype.setList = function () //设置列表
+Window_ZzySCFSelect.prototype.Show = function()
 {
-    this._list = [];
-    var ev = $gameMap.event(Zzy.SCF.TempCallInfo.evId);
-    if ($gameSystem.GetZzySCFIsCAllTake(ev)) {
-        var info = {};
-        info.text = $gameSystem.GetZzySCFCAllTakeText(ev); //显示文本
-        info.commandId = 1;
-        this._list.push(info);
-    }
-    if ($gameSystem.GetZzySCFIsCClose(ev)) {
-        var info = {};
-        info.text = $gameSystem.GetZzySCFCCloseText(ev);
-        info.commandId = 2;
-        this._list.push(info);
-    }
+	this.visible = true;
+	this.opacity = 255;	
+}
+
+Window_ZzySCFSelect.prototype.maxCols = function()
+{
+	return this.getCount();
+}
+
+Window_ZzySCFSelect.prototype.getCount = function()//指令数值
+{
+	var ev = $gameMap.event(Zzy.SCF.TempCallInfo.evId);
+	var count = 0;
+	count += $gameSystem.GetZzySCFIsCAllTake(ev) ? 1 : 0;
+	count += $gameSystem.GetZzySCFIsCClose(ev) ? 1 : 0;
+	return count;	
+}
+
+Window_ZzySCFSelect.prototype.setList = function()//设置列表
+{
+	this._list = [];
+	var ev = $gameMap.event(Zzy.SCF.TempCallInfo.evId);
+	if($gameSystem.GetZzySCFIsCAllTake(ev))
+	{
+		var info = {};
+		info.text = $gameSystem.GetZzySCFCAllTakeText(ev);//显示文本
+		info.commandId = 1;
+		this._list.push(info);
+	}
+	if($gameSystem.GetZzySCFIsCClose(ev))
+	{
+		var info = {};
+		info.text = $gameSystem.GetZzySCFCCloseText(ev);
+		info.commandId = 2;
+		this._list.push(info);
+	}
+}
+
+Window_ZzySCFSelect.prototype.drawItem = function(index)
+{
+	var rect = this.itemRectForText(index);
+	var align = this.itemTextAlign();
+	this.resetTextColor();
+	this.changePaintOpacity(true);
+	this.drawText(this._list[index].text, rect.x, rect.y, rect.width, align);
+}
+
+Window_ZzySCFSelect.prototype.itemTextAlign = function() {
+    return 'center';
 };
 
-Window_ZzySCFSelect.prototype.drawItem = function (index) {
-    var rect = this.itemRectForText(index);
-    var align = this.itemTextAlign();
-    this.resetTextColor();
-    this.changePaintOpacity(true);
-    this.drawText(this._list[index].text, rect.x, rect.y, rect.width, align);
-};
-
-Window_ZzySCFSelect.prototype.itemTextAlign = function () {
-    return "center";
-};
-
-Window_ZzySCFSelect.prototype.drawAllItems = function () {
+Window_ZzySCFSelect.prototype.drawAllItems = function() 
+{
     var topIndex = this.topIndex();
-
-    for (var i = 0; i < this.maxPageItems(); i++) {
+	
+	
+    for (var i = 0; i < this.maxPageItems(); i++) 
+	{
         var index = topIndex + i;
         if (index < this.maxItems()) {
             this.drawItem(index);
@@ -1740,11 +1923,13 @@ Window_ZzySCFSelect.prototype.drawAllItems = function () {
     }
 };
 
-Window_ZzySCFSelect.prototype.maxItems = function () {
+Window_ZzySCFSelect.prototype.maxItems = function() 
+{
     return this.getCount();
 };
 
-Window_ZzySCFSelect.prototype.processCursorMove = function () {
+Window_ZzySCFSelect.prototype.processCursorMove = function()
+{
     if (this.isCursorMovable()) {
         var lastIndex = this.index();
         if (this.index() !== lastIndex) {
@@ -1753,369 +1938,436 @@ Window_ZzySCFSelect.prototype.processCursorMove = function () {
     }
 };
 
-Window_ZzySCFSelect.prototype.processHandling = function () //跳过键盘响应
+
+
+
+
+Window_ZzySCFSelect.prototype.processHandling = function() //跳过键盘响应
 {
-    if (this.isOpenAndActive()) {
+    if (this.isOpenAndActive()) 
+	{
+
     }
 };
 
-Window_ZzySCFSelect.prototype.processOk = function () {
-    if (this.itemCan()) {
+
+Window_ZzySCFSelect.prototype.processOk = function() 
+{
+    if (this.itemCan()) 
+	{
         this.playOkSound();
         this.updateInputData();
         this.callOkHandler();
-    } else {
+    } 
+	else 
+	{
         this.playBuzzerSound();
     }
 };
 
-Window_ZzySCFSelect.prototype.playCancelSound = function () {
-    SoundManager.playCancel();
+Window_ZzySCFSelect.prototype.playCancelSound = function()
+{
+	SoundManager.playCancel();
+}
+
+Window_ZzySCFSelect.prototype.playOkSound = function() 
+{
+	var info = this._list[this._index];
+	
+	if(!info)
+	{
+		SoundManager.playOk();
+		return;
+	}
+	switch(info.commandId)
+	{
+		case 1:
+			if(!Zzy.SCF.PlaySE(3))
+			{SoundManager.playOk();}
+		case 2:
+			if(!Zzy.SCF.PlaySE(4))
+			{SoundManager.playOk();}
+	}
+	
+    
 };
 
-Window_ZzySCFSelect.prototype.playOkSound = function () {
-    var info = this._list[this._index];
-
-    if (!info) {
-        SoundManager.playOk();
-        return;
-    }
-    switch (info.commandId) {
-        case 1:
-            if (!Zzy.SCF.PlaySE(3)) {
-                SoundManager.playOk();
-            }
-        case 2:
-            if (!Zzy.SCF.PlaySE(4)) {
-                SoundManager.playOk();
-            }
-    }
-};
-
-Window_ZzySCFSelect.prototype.playBuzzerSound = function () {
+Window_ZzySCFSelect.prototype.playBuzzerSound = function() 
+{
     SoundManager.playBuzzer();
 };
 
-Window_ZzySCFSelect.prototype.itemCan = function () {
-    return !!this._list[this.index()];
-};
-
-Window_ZzySCFSelect.prototype.OnProcessOk = function () {
-    var index = this.index();
-    var info = this._list[index];
-
-    if (info) {
-        switch (info.commandId) {
-            case 1: //全部拿走
-                this.AllTakeProcess();
-                break;
-
-            case 2: //关闭宝箱
-                this.PopScene(); //退出
-                break;
-        }
-    }
-};
-
-Window_ZzySCFSelect.prototype.PopScene = function () {
-    if (SceneManager._scene instanceof Scene_ZzySCFChest) {
-        SceneManager._scene.popScene(); //退出
-    }
-};
-
-Window_ZzySCFSelect.prototype.AllTakeProcess = function () //全部拿取
+Window_ZzySCFSelect.prototype.itemCan = function()
 {
-    if (SceneManager._scene instanceof Scene_ZzySCFChest) {
-        SceneManager._scene.AllTakeChest(); //
-    }
-};
+	return !!this._list[this.index()];
+}
+
+Window_ZzySCFSelect.prototype.OnProcessOk = function()
+{
+	var index = this.index();
+	var info = this._list[index];
+	
+	if(info)
+	{
+		switch(info.commandId)
+		{
+			case 1://全部拿走
+			this.AllTakeProcess();
+			break;
+			
+			case 2://关闭宝箱
+			this.PopScene();//退出
+			break;
+		}		
+		
+	}
+}
+
+
+Window_ZzySCFSelect.prototype.PopScene = function()
+{
+	if(SceneManager._scene instanceof Scene_ZzySCFChest)
+	{
+		SceneManager._scene.popScene();//退出
+	}
+	
+}
+
+Window_ZzySCFSelect.prototype.AllTakeProcess = function()//全部拿取
+{
+	if(SceneManager._scene instanceof Scene_ZzySCFChest)
+	{
+		SceneManager._scene.AllTakeChest();//
+	}
+	
+	
+}
 
 //================================================================
 //Window_ZzySCFYuanShen
 //================================================================
 //原神模式窗口
-function Window_ZzySCFYuanShen() {
+function Window_ZzySCFYuanShen() 
+{
     this.initialize.apply(this, arguments);
 }
 
 Window_ZzySCFYuanShen.prototype = Object.create(Window_ZzySCFChestBase.prototype);
 Window_ZzySCFYuanShen.prototype.constructor = Window_ZzySCFYuanShen;
 
-Window_ZzySCFYuanShen.prototype.initialize = function () {
-    var w = this.getWidth();
-    var h = this.getHeight();
-    Window_ZzySCFChestBase.prototype.initialize.call(this, -w, -h, w, h);
+Window_ZzySCFYuanShen.prototype.initialize = function() 
+{
+	var w = this.getWidth();
+	var h = this.getHeight();
+    Window_ZzySCFChestBase.prototype.initialize.call(this,-w,-h,w,h);
 
-    //缓入缓出
-    this.fadeIn = false;
-    this.fadeOut = false;
+	//缓入缓出
+	this.fadeIn = false;
+	this.fadeOut = false;
+	
+	this.froceClose = false;//强制关闭
+	this.closeEvId = 0;//强制关闭时的ID
+	this.emptyClear = false;//空白检测,优化效率
 
-    this.froceClose = false; //强制关闭
-    this.closeEvId = 0; //强制关闭时的ID
-    this.emptyClear = false; //空白检测,优化效率
+	this.CfadeFrame = 0;
 
-    this.CfadeFrame = 0;
-
-    this._list = [];
-    this.InitData();
-
-    //设置选择点,开启活跃
-    this.select(0);
-    this.activate();
-    this.visible = false;
+	this._list = [];
+	this.InitData();
+	
+	//设置选择点,开启活跃
+	this.select(0);
+	this.activate();
+	this.visible = false;
 };
 
-Window_ZzySCFYuanShen.prototype.InitData = function () {
-    //设置透明度和出现
-    this.opacity = $gameSystem._ZzySCFYWindowOp;
-    this.visible = true;
-    this.froceClose = false;
+Window_ZzySCFYuanShen.prototype.InitData = function()
+{
+	//设置透明度和出现
+	this.opacity = $gameSystem._ZzySCFYWindowOp;
+	this.visible = true;
+	this.froceClose = false;
+}
+
+Window_ZzySCFYuanShen.prototype.getWidth = function()
+{
+	return $gameSystem._ZzySCFYWindowWidth;
+	
+}
+
+Window_ZzySCFYuanShen.prototype.getHeight = function()
+{
+	var num = $gameSystem._ZzySCFYMaxList;
+	num = num ? num : 1;
+	return this.fittingHeight(num);
+}
+
+Window_ZzySCFYuanShen.prototype.update = function()
+{
+	if($gameSystem.GetZzySCFShowMode() !== 2)return;
+	Window_ZzySCFChestBase.prototype.update.call(this);
+
+	this.updateAutoSelect();//刷新自动选择目标
+	this.updatePosition();//刷新窗口位置
+	this.updateDyn();//刷新动态
+
+}
+
+Window_ZzySCFYuanShen.prototype.updateAutoSelect = function()
+{
+	if(!$gameSystem._ZzySCFYIsAutoOpen)return;
+	if(this.visible)return;
+	
+	
+	var mapId = $gameMap.mapId();
+	var aList = $gameSystem.GetZzySCFYunChestFlag(mapId);
+	
+	for(var i=0;i<aList.length;i++)
+	{
+		var info = {mapId:mapId,evId:aList[i]};
+		
+		if(this.froceClose && this.closeEvId === info.evId)//同一个忽略
+		{return;}
+		
+		if(this.CheckChestRange(info))//判断是否在范围中
+		{
+			Zzy.SCF.TempCallInfo = info;
+			
+			this.select(0);
+			this.refreshList();
+			this.refresh();
+			return;
+		}
+	}
+
+}
+
+
+Window_ZzySCFYuanShen.prototype.updateDyn = function()
+{
+	if(this.CheckChestEmpty())//如果为空则不会显示
+	{this.ExeClose();}
+	else
+	{
+		if(this.CheckChestRange())//检测是否在范围中,确认是否显示
+		{
+			if(this.froceClose)
+			{this.ExeClose();}	
+			else
+			{this.ExeOpen();}
+		}
+		else
+		{
+			this.froceClose = false;
+			this.ExeClose();
+		}		
+	}
+	
+}
+
+Window_ZzySCFYuanShen.prototype.CheckChestEmpty = function()
+{
+	if(!Zzy.SCF.TempCallInfo)return false;
+	return $gameSystem.IsZzySCFYunEmptyCheck(Zzy.SCF.TempCallInfo.mapId,Zzy.SCF.TempCallInfo.evId);
+}
+
+
+
+Window_ZzySCFYuanShen.prototype.ExeOpen = function()
+{
+	this.fadeIn = true;
+	this.fadeOut = false;	
+		this.visible = true;
+		if(this.CfadeFrame < $gameSystem._ZzySCFYFadeFrame)
+		{this.CfadeFrame++;}
+		else
+		{this.CfadeFrame = $gameSystem._ZzySCFYFadeFrame;}
+		//this.opacity = $gameSystem._ZzySCFYWindowOp * this.CfadeFrame / $gameSystem._ZzySCFYFadeFrame;
+		this.alpha = this.CfadeFrame / $gameSystem._ZzySCFYFadeFrame;
+		
+	this.emptyClear = true;//等待检测
+}
+
+Window_ZzySCFYuanShen.prototype.ExeClose = function()
+{
+		this.fadeIn = false;
+		this.fadeOut = true;	
+		if(this.CfadeFrame > 0)
+		{this.CfadeFrame--;}
+		else
+		{
+			this.CfadeFrame = 0;
+			this.visible = false;
+			//关闭后此处需要进行空白检测
+			if(this.emptyClear)
+			{
+				this.emptyClear = false;
+				var isEmpty = true;
+				//进行检测
+				var info = $gameSystem.GetZzySCFStorage(Zzy.SCF.TempCallInfo.mapId,Zzy.SCF.TempCallInfo.evId);
+				for(var i=0;i<info.length;i++)
+				{
+					if(info[i])
+					{
+						isEmpty = false;
+						break;
+					}
+				}
+				if(isEmpty)
+				{
+					$gameSystem.AddZzySCFYunEmptyCheck(Zzy.SCF.TempCallInfo.mapId,Zzy.SCF.TempCallInfo.evId);//加入空白
+				}
+			}
+			
+			
+		}
+		//this.opacity = $gameSystem._ZzySCFYWindowOp * this.CfadeFrame / $gameSystem._ZzySCFYFadeFrame;
+		this.alpha = this.CfadeFrame / $gameSystem._ZzySCFYFadeFrame;
+}
+
+Window_ZzySCFYuanShen.prototype.updatePosition = function()
+{
+	
+	if(!Zzy.SCF.TempCallInfo)return;
+	if($gameMap.mapId() !== Zzy.SCF.TempCallInfo.mapId)return;
+	
+	var ev = $gameMap.event(Zzy.SCF.TempCallInfo.evId);
+	if(ev)
+	{
+		this.x = ev.screenX() + $gameSystem._ZzySCFYOffsetX;
+		this.y = ev.screenY() + $gameSystem._ZzySCFYOffsetY;
+		
+		
+		if($gameSystem._ZzySCFYIsLimitWindow)//限制边界
+		{
+			var tw = this.x+this.width;
+			var th = this.y+this.height;
+			
+			if(tw > Graphics.boxWidth)
+			{this.x -= (tw-Graphics.boxWidth);}
+			else if(this.x < 0)
+			{this.x = 0;}
+		
+			if(th > Graphics.boxHeight)
+			{this.y -= (th-Graphics.boxHeight);}
+			else if(this.y < 0)
+			{this.y = 0;}
+		}
+	}
+
+}
+
+Window_ZzySCFYuanShen.prototype.CheckChestRange = function(info)//检测范围
+{
+	var tempInfo = undefined;
+	if(!info)
+	{tempInfo = Zzy.SCF.TempCallInfo;}
+	else
+	{tempInfo = info;}
+	
+	if(!tempInfo)return false;
+	if($gameMap.mapId() !== tempInfo.mapId)return false;
+	
+	var ev = $gameMap.event(tempInfo.evId);
+	if(!ev)return false;
+	
+	if(Math.abs(ev.x - $gamePlayer.x) <= $gameSystem._ZzySCFYTakeRange && 
+	Math.abs(ev.y - $gamePlayer.y) <= $gameSystem._ZzySCFYTakeRange)
+	{
+		//判断宝箱内道具成品数
+		var storage = $gameSystem.GetZzySCFStorage(tempInfo.mapId,tempInfo.evId);
+		if(!storage || !storage.length)return false;
+
+		return true;
+	}
+	return false;
+	
+}
+
+
+Window_ZzySCFYuanShen.prototype.itemTextAlign = function() 
+{
+    return 'center';
 };
 
-Window_ZzySCFYuanShen.prototype.getWidth = function () {
-    return $gameSystem._ZzySCFYWindowWidth;
-};
-
-Window_ZzySCFYuanShen.prototype.getHeight = function () {
-    var num = $gameSystem._ZzySCFYMaxList;
-    num = num ? num : 1;
-    return this.fittingHeight(num);
-};
-
-Window_ZzySCFYuanShen.prototype.update = function () {
-    if ($gameSystem.GetZzySCFShowMode() !== 2) return;
-    Window_ZzySCFChestBase.prototype.update.call(this);
-
-    this.updateAutoSelect(); //刷新自动选择目标
-    this.updatePosition(); //刷新窗口位置
-    this.updateDyn(); //刷新动态
-};
-
-Window_ZzySCFYuanShen.prototype.updateAutoSelect = function () {
-    if (!$gameSystem._ZzySCFYIsAutoOpen) return;
-    if (this.visible) return;
-
-    var mapId = $gameMap.mapId();
-    var aList = $gameSystem.GetZzySCFYunChestFlag(mapId);
-
-    for (var i = 0; i < aList.length; i++) {
-        var info = { mapId: mapId, evId: aList[i] };
-
-        if (this.froceClose && this.closeEvId === info.evId) {
-            //同一个忽略
-            return;
-        }
-
-        if (this.CheckChestRange(info)) {
-            //判断是否在范围中
-            Zzy.SCF.TempCallInfo = info;
-
-            this.select(0);
-            this.refreshList();
-            this.refresh();
-            return;
-        }
-    }
-};
-
-Window_ZzySCFYuanShen.prototype.updateDyn = function () {
-    if (this.CheckChestEmpty()) {
-        //如果为空则不会显示
-        this.ExeClose();
-    } else {
-        if (this.CheckChestRange()) {
-            //检测是否在范围中,确认是否显示
-            if (this.froceClose) {
-                this.ExeClose();
-            } else {
-                this.ExeOpen();
-            }
-        } else {
-            this.froceClose = false;
-            this.ExeClose();
-        }
-    }
-};
-
-Window_ZzySCFYuanShen.prototype.CheckChestEmpty = function () {
-    if (!Zzy.SCF.TempCallInfo) return false;
-    return $gameSystem.IsZzySCFYunEmptyCheck(Zzy.SCF.TempCallInfo.mapId, Zzy.SCF.TempCallInfo.evId);
-};
-
-Window_ZzySCFYuanShen.prototype.ExeOpen = function () {
-    this.fadeIn = true;
-    this.fadeOut = false;
-    this.visible = true;
-    if (this.CfadeFrame < $gameSystem._ZzySCFYFadeFrame) {
-        this.CfadeFrame++;
-    } else {
-        this.CfadeFrame = $gameSystem._ZzySCFYFadeFrame;
-    }
-    //this.opacity = $gameSystem._ZzySCFYWindowOp * this.CfadeFrame / $gameSystem._ZzySCFYFadeFrame;
-    this.alpha = this.CfadeFrame / $gameSystem._ZzySCFYFadeFrame;
-
-    this.emptyClear = true; //等待检测
-};
-
-Window_ZzySCFYuanShen.prototype.ExeClose = function () {
-    this.fadeIn = false;
-    this.fadeOut = true;
-    if (this.CfadeFrame > 0) {
-        this.CfadeFrame--;
-    } else {
-        this.CfadeFrame = 0;
-        this.visible = false;
-        //关闭后此处需要进行空白检测
-        if (this.emptyClear) {
-            this.emptyClear = false;
-            var isEmpty = true;
-            //进行检测
-            var info = $gameSystem.GetZzySCFStorage(Zzy.SCF.TempCallInfo.mapId, Zzy.SCF.TempCallInfo.evId);
-            for (var i = 0; i < info.length; i++) {
-                if (info[i]) {
-                    isEmpty = false;
-                    break;
-                }
-            }
-            if (isEmpty) {
-                $gameSystem.AddZzySCFYunEmptyCheck(Zzy.SCF.TempCallInfo.mapId, Zzy.SCF.TempCallInfo.evId); //加入空白
-            }
-        }
-    }
-    //this.opacity = $gameSystem._ZzySCFYWindowOp * this.CfadeFrame / $gameSystem._ZzySCFYFadeFrame;
-    this.alpha = this.CfadeFrame / $gameSystem._ZzySCFYFadeFrame;
-};
-
-Window_ZzySCFYuanShen.prototype.updatePosition = function () {
-    if (!Zzy.SCF.TempCallInfo) return;
-    if ($gameMap.mapId() !== Zzy.SCF.TempCallInfo.mapId) return;
-
-    var ev = $gameMap.event(Zzy.SCF.TempCallInfo.evId);
-    if (ev) {
-        this.x = ev.screenX() + $gameSystem._ZzySCFYOffsetX;
-        this.y = ev.screenY() + $gameSystem._ZzySCFYOffsetY;
-
-        if ($gameSystem._ZzySCFYIsLimitWindow) {
-            //限制边界
-            var tw = this.x + this.width;
-            var th = this.y + this.height;
-
-            if (tw > Graphics.boxWidth) {
-                this.x -= tw - Graphics.boxWidth;
-            } else if (this.x < 0) {
-                this.x = 0;
-            }
-
-            if (th > Graphics.boxHeight) {
-                this.y -= th - Graphics.boxHeight;
-            } else if (this.y < 0) {
-                this.y = 0;
-            }
-        }
-    }
-};
-
-Window_ZzySCFYuanShen.prototype.CheckChestRange = function (
-    info //检测范围
-) {
-    var tempInfo = undefined;
-    if (!info) {
-        tempInfo = Zzy.SCF.TempCallInfo;
-    } else {
-        tempInfo = info;
-    }
-
-    if (!tempInfo) return false;
-    if ($gameMap.mapId() !== tempInfo.mapId) return false;
-
-    var ev = $gameMap.event(tempInfo.evId);
-    if (!ev) return false;
-
-    if (
-        Math.abs(ev.x - $gamePlayer.x) <= $gameSystem._ZzySCFYTakeRange &&
-        Math.abs(ev.y - $gamePlayer.y) <= $gameSystem._ZzySCFYTakeRange
-    ) {
-        //判断宝箱内道具成品数
-        var storage = $gameSystem.GetZzySCFStorage(tempInfo.mapId, tempInfo.evId);
-        if (!storage || !storage.length) return false;
-
-        return true;
-    }
-    return false;
-};
-
-Window_ZzySCFYuanShen.prototype.itemTextAlign = function () {
-    return "center";
-};
-
-Window_ZzySCFYuanShen.prototype.drawAllItems = function () {
+Window_ZzySCFYuanShen.prototype.drawAllItems = function() 
+{
     var topIndex = this.topIndex();
-    for (var i = 0; i < this.maxPageItems(); i++) {
+    for (var i = 0; i < this.maxPageItems(); i++) 
+	{
         var index = topIndex + i;
-        if (index < this.maxItems()) {
+        if (index < this.maxItems()) 
+		{
             this.drawItem(index);
         }
     }
 };
 
-Window_ZzySCFYuanShen.prototype.drawItem = function (index) {
-    var info = this._list[index];
-    if (info) {
-        var rect = this.itemRectForText(index);
-        var align = this.itemTextAlign();
+Window_ZzySCFYuanShen.prototype.drawItem = function(index)
+{
+	var info = this._list[index];
+	if(info)
+	{	
+		var rect = this.itemRectForText(index);
+		var align = this.itemTextAlign();
 
-        this.changePaintOpacity(true);
+		this.changePaintOpacity(true);
+		
+		var item = undefined;
+		this.resetTextColor();
+		switch(info.typeId)
+		{
+			case 1://金币
+				item = {};
+				item.iconIndex = $gameSystem._ZzySCFCoinIcon;
+				item.name = this.currencyUnit();
+				item.isCoin = true;
+				this.changeTextColor($gameSystem.GetZzySCFCoinColor());
+			break;
+			case 2:item = $dataItems[info.itemId];
+			this.setZzySCFItemColor(item);
+			break;
+			case 3:item = $dataWeapons[info.itemId];
+			this.setZzySCFItemColor(item);
+			break;
+			case 4:item = $dataArmors[info.itemId];
+			this.setZzySCFItemColor(item);
+			break;
+		}
+		
+		
+		if(item)
+		{
+			//透明度
+			this.drawItemBk(rect,index);//绘制底色框	
+			
+			var numberWidth = 0;
+			if(item.isCoin)
+			{
+				numberWidth = this.coinWidth();
+			}
+			else
+			{
+				numberWidth = this.numberWidth();
+			}			
+			
+			this.drawItemName(item, rect.x, rect.y, rect.width - numberWidth);
+			this.drawItemNumber(info, rect.x, rect.y, rect.width);
+		}
 
-        var item = undefined;
-        this.resetTextColor();
-        switch (info.typeId) {
-            case 1: //金币
-                item = {};
-                item.iconIndex = $gameSystem._ZzySCFCoinIcon;
-                item.name = this.currencyUnit();
-                item.isCoin = true;
-                this.changeTextColor($gameSystem.GetZzySCFCoinColor());
-                break;
-            case 2:
-                item = $dataItems[info.itemId];
-                this.setZzySCFItemColor(item);
-                break;
-            case 3:
-                item = $dataWeapons[info.itemId];
-                this.setZzySCFItemColor(item);
-                break;
-            case 4:
-                item = $dataArmors[info.itemId];
-                this.setZzySCFItemColor(item);
-                break;
-        }
+	}
 
-        if (item) {
-            //透明度
-            this.drawItemBk(rect, index); //绘制底色框
+}
 
-            var numberWidth = 0;
-            if (item.isCoin) {
-                numberWidth = this.coinWidth();
-            } else {
-                numberWidth = this.numberWidth();
-            }
+Window_ZzySCFYuanShen.prototype.setZzySCFItemColor = function(item)
+{
+	if(!item.zzySCF || !item.zzySCF.color)
+	{this.resetTextColor();}
+	else
+	{this.changeTextColor(item.zzySCF.color);}
+}
 
-            this.drawItemName(item, rect.x, rect.y, rect.width - numberWidth);
-            this.drawItemNumber(info, rect.x, rect.y, rect.width);
-        }
-    }
-};
 
-Window_ZzySCFYuanShen.prototype.setZzySCFItemColor = function (item) {
-    if (!item.zzySCF || !item.zzySCF.color) {
-        this.resetTextColor();
-    } else {
-        this.changeTextColor(item.zzySCF.color);
-    }
-};
-
-Window_ZzySCFYuanShen.prototype.drawItemName = function (item, x, y, width) {
+Window_ZzySCFYuanShen.prototype.drawItemName = function(item, x, y, width) {
     width = width || 312;
     if (item) {
         var iconBoxWidth = Window_Base._iconWidth + 4;
@@ -2124,80 +2376,102 @@ Window_ZzySCFYuanShen.prototype.drawItemName = function (item, x, y, width) {
     }
 };
 
-Window_ZzySCFYuanShen.prototype.drawItemBk = function (rect, index) {
-    var dis = $gameSystem._ZzySCFYDistance;
-    var nRect = { x: rect.x + dis, y: rect.y + dis, width: rect.width - dis * 2, height: rect.height - dis * 2 };
-    var Rect1 = {};
-    var Rect2 = {};
+Window_ZzySCFYuanShen.prototype.drawItemBk = function(rect,index)
+{
+	
+	var dis = $gameSystem._ZzySCFYDistance;
+	var nRect = {x:rect.x+dis,y:rect.y+dis,width:rect.width-dis*2,height:rect.height-dis*2};
+	var Rect1 = {};
+	var Rect2 = {};
+	
+	var c1 = $gameSystem._ZzySCFYColor1;
+	var c2 = $gameSystem._ZzySCFYColor2;
+	
+	var isVer = $gameSystem._ZzySCFYIsHorShow ? false : true;
+	
+	if(isVer)
+	{
+		Rect1 = {x:nRect.x,y:nRect.y,width:nRect.width,height:nRect.height/2};
+		Rect2 = {x:nRect.x,y:nRect.y+nRect.height/2,width:nRect.width,height:nRect.height/2};			
+	}
+	else
+	{
+		Rect1 = {x:nRect.x,y:nRect.y,width:nRect.width/2,height:nRect.height};
+		Rect2 = {x:nRect.x+nRect.width/2,y:nRect.y,width:nRect.width/2,height:nRect.height};		
+	}
+	
+	this.contents.gradientFillRect(Rect1.x,Rect1.y,Rect1.width,Rect1.height,c2,c1,isVer);
+	this.contents.gradientFillRect(Rect2.x,Rect2.y,Rect2.width,Rect2.height,c1,c2,isVer);
+}
 
-    var c1 = $gameSystem._ZzySCFYColor1;
-    var c2 = $gameSystem._ZzySCFYColor2;
 
-    var isVer = $gameSystem._ZzySCFYIsHorShow ? false : true;
 
-    if (isVer) {
-        Rect1 = { x: nRect.x, y: nRect.y, width: nRect.width, height: nRect.height / 2 };
-        Rect2 = { x: nRect.x, y: nRect.y + nRect.height / 2, width: nRect.width, height: nRect.height / 2 };
-    } else {
-        Rect1 = { x: nRect.x, y: nRect.y, width: nRect.width / 2, height: nRect.height };
-        Rect2 = { x: nRect.x + nRect.width / 2, y: nRect.y, width: nRect.width / 2, height: nRect.height };
-    }
 
-    this.contents.gradientFillRect(Rect1.x, Rect1.y, Rect1.width, Rect1.height, c2, c1, isVer);
-    this.contents.gradientFillRect(Rect2.x, Rect2.y, Rect2.width, Rect2.height, c1, c2, isVer);
-};
-
-Window_ZzySCFYuanShen.prototype.maxItems = function () //最大数值
+Window_ZzySCFYuanShen.prototype.maxItems = function() //最大数值
 {
     return this._list ? this._list.length : 0;
 };
 
-Window_ZzySCFYuanShen.prototype.reClick = function () {
-    this.froceClose = false;
-    this.select(0);
-};
 
-Window_ZzySCFYuanShen.prototype.refreshList = function () //刷新List
+Window_ZzySCFYuanShen.prototype.reClick = function()
 {
-    this.evId = Zzy.SCF.TempCallInfo.evId;
-    this.mapId = Zzy.SCF.TempCallInfo.mapId;
-    //获取list
-    this._list = $gameSystem.GetZzySCFStorage(this.mapId, this.evId);
-};
+	this.froceClose = false;
+	this.select(0);
+}
 
-Window_ZzySCFYuanShen.prototype.drawItemNumber = function (info, x, y, width) {
-    if (this.needsNumber()) {
-        this.drawText(String(info.value), x, y, width, "right");
+
+Window_ZzySCFYuanShen.prototype.refreshList = function()//刷新List
+{
+	this.evId = Zzy.SCF.TempCallInfo.evId;
+	this.mapId = Zzy.SCF.TempCallInfo.mapId;
+	//获取list
+	this._list = $gameSystem.GetZzySCFStorage(this.mapId,this.evId);
+
+}
+
+Window_ZzySCFYuanShen.prototype.drawItemNumber = function(info, x, y, width) 
+{
+    if (this.needsNumber()) 
+	{
+        this.drawText(String(info.value), x, y, width, 'right');
     }
 };
 
-Window_ZzySCFYuanShen.prototype.needsNumber = function () {
+Window_ZzySCFYuanShen.prototype.needsNumber = function() 
+{
     return true;
 };
 
-Window_ZzySCFYuanShen.prototype.numberWidth = function () {
+Window_ZzySCFYuanShen.prototype.numberWidth = function() 
+{
     return this.textWidth(Zzy.Param.SCFCountNumWidth);
 };
 
-Window_ZzySCFYuanShen.prototype.coinWidth = function () {
-    return this.textWidth(Zzy.Param.SCFCountCoinWidth);
-};
+Window_ZzySCFYuanShen.prototype.coinWidth = function()
+{
+	return this.textWidth(Zzy.Param.SCFCountCoinWidth);
+}
 
-Window_ZzySCFYuanShen.prototype.currencyUnit = function () {
+
+Window_ZzySCFYuanShen.prototype.currencyUnit = function() {
     return TextManager.currencyUnit;
 };
 
-Window_ZzySCFYuanShen.prototype.processCursorMove = function () {
-    if (this.isCursorMovable()) {
+Window_ZzySCFYuanShen.prototype.processCursorMove = function() 
+{
+    if (this.isCursorMovable()) 
+	{
         var lastIndex = this.index();
 
-        if (this.index() !== lastIndex) {
-            this.playSelectSound();
+        if (this.index() !== lastIndex) 
+		{
+			this.playSelectSound();
         }
     }
 };
 
-Window_ZzySCFYuanShen.prototype.onTouch = function (triggered) {
+Window_ZzySCFYuanShen.prototype.onTouch = function(triggered)
+{
     var lastIndex = this.index();
     var x = this.canvasToLocalX(TouchInput.x);
     var y = this.canvasToLocalY(TouchInput.y);
@@ -2222,16 +2496,22 @@ Window_ZzySCFYuanShen.prototype.onTouch = function (triggered) {
     }
 };
 
-Window_ZzySCFYuanShen.prototype.playSelectSound = function () {
-    if (!Zzy.SCF.PlaySE(5)) {
-        SoundManager.playCursor();
-    }
-};
 
-Window_ZzySCFYuanShen.prototype.processTouch = function () {
-    if (!this.visible) return;
-    if (this.isOpenAndActive()) {
-        if (TouchInput.isTriggered() && this.isTouchedInsideFrame()) {
+
+Window_ZzySCFYuanShen.prototype.playSelectSound = function()
+{
+	if(!Zzy.SCF.PlaySE(5))
+	{SoundManager.playCursor();}		
+}
+
+
+Window_ZzySCFYuanShen.prototype.processTouch = function() 
+{
+	if(!this.visible)return;
+    if (this.isOpenAndActive()) 
+	{
+		if (TouchInput.isTriggered() && this.isTouchedInsideFrame()) 
+	    {
             this._touching = true;
             this.onTouch(true);
         } else if (TouchInput.isCancelled()) {
@@ -2251,658 +2531,796 @@ Window_ZzySCFYuanShen.prototype.processTouch = function () {
     }
 };
 
-Window_ZzySCFYuanShen.prototype.itemCan = function () {
-    return !!this._list[this.index()];
-};
 
-Window_ZzySCFYuanShen.prototype.processOk = function () {
-    if (!this.visible) return;
-    if (this.itemCan()) {
+Window_ZzySCFYuanShen.prototype.itemCan = function()
+{
+	return !!this._list[this.index()];
+}
+
+
+Window_ZzySCFYuanShen.prototype.processOk = function() 
+{
+	if(!this.visible)return;
+    if (this.itemCan()) 
+	{
         this.playOkSound();
         this.updateInputData();
         this.callOkHandler();
-    } else {
+    } 
+	else 
+	{
         this.playBuzzerSound();
     }
 };
 
-Window_ZzySCFYuanShen.prototype.processCancel = function () {
-    this.playCancelSound();
+
+Window_ZzySCFYuanShen.prototype.processCancel = function() 
+{
+	this.playCancelSound();
     this.updateInputData();
     this.callCancelHandler();
 };
 
-Window_ZzySCFYuanShen.prototype.playCancelSound = function () {
-    SoundManager.playCancel();
+Window_ZzySCFYuanShen.prototype.playCancelSound = function()
+{
+	SoundManager.playCancel();
+}
+
+Window_ZzySCFYuanShen.prototype.playOkSound = function() 
+{
+	if(!Zzy.SCF.PlaySE(1))
+	{SoundManager.playOk();}	
 };
 
-Window_ZzySCFYuanShen.prototype.playOkSound = function () {
-    if (!Zzy.SCF.PlaySE(1)) {
-        SoundManager.playOk();
-    }
+Window_ZzySCFYuanShen.prototype.playBuzzerSound = function() 
+{
+	if(!Zzy.SCF.PlaySE(2))
+    {SoundManager.playBuzzer();}
 };
 
-Window_ZzySCFYuanShen.prototype.playBuzzerSound = function () {
-    if (!Zzy.SCF.PlaySE(2)) {
-        SoundManager.playBuzzer();
-    }
-};
+Window_ZzySCFYuanShen.prototype.OnProcessOk = function()
+{
+	//双击取出道具
+	var index = this.index();
+	var info = this._list[index];
+	if(info)
+	{
+		this.GetListInfo(index);
+		
+		var value = info.value;//数量
+		var id = info.itemId;
+		
+		if($gameSystem._ZzySCFIsCAutoLine)
+		{
+			//向前遍历
+			
+			var tList = $gameSystem.GetZzySCFStorage(this.mapId,this.evId);
+			var len = tList.length;
+			
+			for(var i=index;i<len-1;i++)
+			{
+				tList[i] = tList[i+1];
+			}
+			tList[len-1] = undefined;
+		}
+		else
+		{
+			$gameSystem._ZzySCFStorage[this.mapId][this.evId][index] = undefined;
+		}
+		this.refreshList();//刷新list
+		this.refresh();
 
-Window_ZzySCFYuanShen.prototype.OnProcessOk = function () {
-    //双击取出道具
-    var index = this.index();
-    var info = this._list[index];
-    if (info) {
-        this.GetListInfo(index);
+		if(this._list[0] === undefined)//不存在了
+		{
+			this.froceClose = true;
+			this.closeEvId = Zzy.SCF.TempCallInfo ? Zzy.SCF.TempCallInfo.evId : 0;
+		}
+		return true;
+	}
+	return false;
+}
 
-        var value = info.value; //数量
-        var id = info.itemId;
+Window_ZzySCFYuanShen.prototype.GetListInfo = function(index)
+{
+		var info = this._list[index];
+	
+		if(info)
+		{
+			var value = info.value;//数量
+			var id = info.itemId;			
+			
+			var gItem = undefined;
+			
+			switch(info.typeId)
+			{
+				case 1:$gameParty.gainGold(value);break;
+				case 2:
+				var item = $dataItems[id];
+				$gameParty.gainItem(item,value);
+				gItem = item;
+				break;
+				case 3:
+				var weapon = $dataWeapons[id];
+				$gameParty.gainItem(weapon,value);
+				gItem = weapon;
+				break;
+				case 4:
+				var armor = $dataArmors[id];
+				$gameParty.gainItem(armor,value);
+				gItem = armor;
+				break;
+			}		
 
-        if ($gameSystem._ZzySCFIsCAutoLine) {
-            //向前遍历
+			//---更新--- 有获取道具插件时
+			if(LiuYue.LiuYue_GainItemTips)
+			{
+				if($gameSystem.GetZzyGITPluginEnable())
+				{
+					Zzy.GIT.GainPrompt(gItem, value);
+				}
+			}
+		}	
+}
 
-            var tList = $gameSystem.GetZzySCFStorage(this.mapId, this.evId);
-            var len = tList.length;
 
-            for (var i = index; i < len - 1; i++) {
-                tList[i] = tList[i + 1];
-            }
-            tList[len - 1] = undefined;
-        } else {
-            $gameSystem._ZzySCFStorage[this.mapId][this.evId][index] = undefined;
-        }
-        this.refreshList(); //刷新list
-        this.refresh();
-
-        if (this._list[0] === undefined) {
-            //不存在了
-            this.froceClose = true;
-            this.closeEvId = Zzy.SCF.TempCallInfo ? Zzy.SCF.TempCallInfo.evId : 0;
-        }
-        return true;
-    }
-    return false;
-};
-
-Window_ZzySCFYuanShen.prototype.GetListInfo = function (index) {
-    var info = this._list[index];
-
-    if (info) {
-        var value = info.value; //数量
-        var id = info.itemId;
-
-        switch (info.typeId) {
-            case 1:
-                $gameParty.gainGold(value);
-                break;
-            case 2:
-                var item = $dataItems[id];
-                $gameParty.gainItem(item, value);
-                break;
-            case 3:
-                var weapon = $dataWeapons[id];
-                $gameParty.gainItem(weapon, value);
-                break;
-            case 4:
-                var armor = $dataArmors[id];
-                $gameParty.gainItem(armor, value);
-                break;
-        }
-    }
-};
 
 //================================================================
 //DataManager
 //================================================================
 Zzy.SCF.DataManager_isDatabaseLoaded = DataManager.isDatabaseLoaded;
-DataManager.isDatabaseLoaded = function () {
-    if (!Zzy.SCF.DataManager_isDatabaseLoaded.call(this)) return false;
+DataManager.isDatabaseLoaded = function()
+{
+	if (!Zzy.SCF.DataManager_isDatabaseLoaded.call(this)) return false;
+	
+	//添加标签内容
+	this.ZzySCFLoadNoteCase1($dataItems);//物品
+	this.ZzySCFLoadNoteCase1($dataArmors);//护甲
+	this.ZzySCFLoadNoteCase1($dataWeapons);//武器
+	return true;
+}
 
-    //添加标签内容
-    this.ZzySCFLoadNoteCase1($dataItems); //物品
-    this.ZzySCFLoadNoteCase1($dataArmors); //护甲
-    this.ZzySCFLoadNoteCase1($dataWeapons); //武器
-    return true;
-};
 
 //================================================================
 //DataManager
 //================================================================
 
-DataManager.ZzySCFLoadNoteCase1 = function (objArr) {
-    for (var i = 1; i < objArr.length; i++) {
-        var obj = objArr[i];
-        var noteData = obj.note.split(/[\r\n]+/);
+DataManager.ZzySCFLoadNoteCase1 = function(objArr)
+{
+  for (var i = 1; i < objArr.length; i++) 
+  {
+    var obj = objArr[i];
+    var noteData = obj.note.split(/[\r\n]+/);
+	
+	obj.zzySCF = obj.zzySCF || {};
+	
+	for(var j=0;j<noteData.length;j++)
+	{
+		var lineStr = noteData[j];
+		
+		if(lineStr.match(/<ZZYSCF COLOR:[ ](.*)>/i))//显示颜色
+		{
+			var color = String(RegExp.$1);
+			obj.zzySCF['color'] = color;
+		}
+	}
+  }	
+}
 
-        obj.zzySCF = obj.zzySCF || {};
 
-        for (var j = 0; j < noteData.length; j++) {
-            var lineStr = noteData[j];
 
-            if (lineStr.match(/<ZZYSCF COLOR:[ ](.*)>/i)) {
-                //显示颜色
-                var color = String(RegExp.$1);
-                obj.zzySCF["color"] = color;
-            }
-        }
-    }
-};
 
 //================================================================
 //Game_Interpreter
 //================================================================
 Zzy.SCF.Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function (command, args) {
-    Zzy.SCF.Game_Interpreter_pluginCommand.call(this, command, args);
-    if (command === "ZzySCF") {
-        this.ZzySCFCommand(args);
-    }
-};
+Game_Interpreter.prototype.pluginCommand = function(command, args)
+{
+	Zzy.SCF.Game_Interpreter_pluginCommand.call(this,command,args);
+	if(command === 'ZzySCF')
+	{
+		this.ZzySCFCommand(args);
+	}
+	
+}
 
-Game_Interpreter.prototype.ZzySCFCommand = function (args) {
-    var command = String(args[0]);
+Game_Interpreter.prototype.ZzySCFCommand = function(args)
+{
+	var command = String(args[0]);
 
-    switch (command) {
-        case "OverlapMode":
-            var mode = Zzy.SCF.OverlapModeToID(String(args[1]));
-            Zzy.SCF.OverlapMode(mode);
+	switch(command)
+	{
+		case 'OverlapMode':
+		var mode = Zzy.SCF.OverlapModeToID(String(args[1]));
+		Zzy.SCF.OverlapMode(mode);
+		
+		//$gameSystem._ZzySCFOverlapMode = mode;
+		break;	
+		
+		case 'ShowMode':
+		var mode = Zzy.SCF.ShowModeToID(String(args[1]));
+		Zzy.SCF.ShowMode(mode);
+		
+		//$gameSystem._ZzySCFShowMode = mode;
+		break;
+		
+		case 'IsFilterText':
+		var enable = eval(String(args[1]));
+		Zzy.SCF.IsFilterText(enable);
+		
+		//$gameSystem._ZzySCFIsFilterText = enable;
+		break;
+		
+		case 'CoinIcon':
+		var iconIndex = parseInt(args[1]);
+		Zzy.SCF.CoinIcon(iconIndex);
+		
+		//$gameSystem._ZzySCFCoinIcon = iconIndex;
+		break;
+		
+		case 'CMaxCols':
+		var cols = parseInt(args[1]);
+		Zzy.SCF.CMaxCols(cols);
+		
+		//$gameSystem._ZzySCFCMaxCols = cols;
+		break;
+		
+		case 'IsCAllTake':
+		var enable = eval(String(args[1]));
+		Zzy.SCF.IsCAllTake(enable);
+		
+		//$gameSystem._ZzySCFIsCAllTake = enable;
+		break;
+		
+		case 'CAllTakeText':
+		var tText = String(args[1]);
+		Zzy.SCF.CAllTakeText(tText);
+		
+		//$gameSystem._ZzySCFCAllTakeText = tText;
+		break;
+		
+		case 'IsCClose':
+		var enable = eval(String(args[1]));
+		Zzy.SCF.IsCClose(enable);
+		
+		//$gameSystem._ZzySCFIsCClose = enable;
+		break;
+		
+		case 'CCloseText':
+		var tText = String(args[1]);
+		Zzy.SCF.CCloseText(tText);
+		
+		//$gameSystem._ZzySCFCCloseText = tText;
+		break;
+		
+		case 'IsCAutoLine':
+		var enable = eval(String(args[1]));
+		Zzy.SCF.IsCAutoLine(enable);
+		
+		//$gameSystem._ZzySCFIsCAutoLine = enable;
+		break;
+		
+		case 'YMaxCols':
+		var cols = parseInt(args[1]);
+		Zzy.SCF.YMaxCols(cols);
+		
+		//$gameSystem._ZzySCFYMaxCols = cols;
+		break;
+		
+		case 'YMaxList':
+		var list = parseInt(args[1]);
+		Zzy.SCF.YMaxList(list);
+		
+		//$gameSystem._ZzySCFYMaxList = list;
+		break;
+		
+		case 'YWindowWidth':
+		var width = parseInt(args[1]);
+		Zzy.SCF.YWindowWidth(width);
+		
+		//$gameSystem._ZzySCFYWindowWidth = width;
+		break;
+		
+		case 'YWindowOp':
+		var op = parseInt(args[1]);
+		Zzy.SCF.YWindowOp(op);
+		
+		//$gameSystem._ZzySCFYWindowOp = op;
+		break;
+		
+		case 'YTakeRange':
+		var range = parseInt(args[1]);
+		Zzy.SCF.YTakeRange(range);
+		
+		//$gameSystem._ZzySCFYTakeRange = range;
+		break;
+		
+		case 'YColor1':
+		var color = String(args[1]);
+		Zzy.SCF.YColor1(color);
+		
+		//$gameSystem._ZzySCFYColor1 = color;
+		break;
+		
+		case 'YColor2':
+		var color = String(args[1]);
+		Zzy.SCF.YColor2(color);
+		
+		//$gameSystem._ZzySCFYColor2 = color;
+		break;
+		
+		case 'YOffsetX':
+		var ofx = Number(args[1]);
+		Zzy.SCF.YOffsetX(ofx);
+		
+		//$gameSystem._ZzySCFYOffsetX = ofx;
+		break;
+		
+		case 'YOffsetY':
+		var ofy = Number(args[1]);
+		Zzy.SCF.YOffsetY(ofy);
+		
+		//$gameSystem._ZzySCFYOffsetY = ofy;
+		break;
 
-            //$gameSystem._ZzySCFOverlapMode = mode;
-            break;
+		case 'YFadeFrame':
+		var fFrame = parseInt(args[1]);
+		Zzy.SCF.YFadeFrame(fFrame);
+		
+		//$gameSystem._ZzySCFYFadeFrame = fFrame;
+		break;
+		
+		case 'YDistance':
+		var dis = parseInt(args[1]);
+		Zzy.SCF.YDistance(dis);
+		
+		//$gameSystem._ZzySCFYDistance = dis;
+		break;
+		
+		case 'YIsHorShow':
+		var enable = eval(String(args[1]));
+		Zzy.SCF.YIsHorShow(enable);
+		
+		//$gameSystem._ZzySCFYIsHorShow = enable;
+		break;
+		
+		case 'YIsAutoOpen':
+		var enable = eval(String(args[1]));
+		Zzy.SCF.YIsAutoOpen(enable);
+		
+		//$gameSystem._ZzySCFYIsAutoOpen = enable;
+		break;
+		
+		case 'YIsLimitWindow':
+		var enable = eval(String(args[1]));
+		Zzy.SCF.YIsLimitWindow(enable);
+		
+		//$gameSystem._ZzySCFYIsLimitWindow = enable;		
+		break;
 
-        case "ShowMode":
-            var mode = Zzy.SCF.ShowModeToID(String(args[1]));
-            Zzy.SCF.ShowMode(mode);
-
-            //$gameSystem._ZzySCFShowMode = mode;
-            break;
-
-        case "IsFilterText":
-            var enable = eval(String(args[1]));
-            Zzy.SCF.IsFilterText(enable);
-
-            //$gameSystem._ZzySCFIsFilterText = enable;
-            break;
-
-        case "CoinIcon":
-            var iconIndex = parseInt(args[1]);
-            Zzy.SCF.CoinIcon(iconIndex);
-
-            //$gameSystem._ZzySCFCoinIcon = iconIndex;
-            break;
-
-        case "CMaxCols":
-            var cols = parseInt(args[1]);
-            Zzy.SCF.CMaxCols(cols);
-
-            //$gameSystem._ZzySCFCMaxCols = cols;
-            break;
-
-        case "IsCAllTake":
-            var enable = eval(String(args[1]));
-            Zzy.SCF.IsCAllTake(enable);
-
-            //$gameSystem._ZzySCFIsCAllTake = enable;
-            break;
-
-        case "CAllTakeText":
-            var tText = String(args[1]);
-            Zzy.SCF.CAllTakeText(tText);
-
-            //$gameSystem._ZzySCFCAllTakeText = tText;
-            break;
-
-        case "IsCClose":
-            var enable = eval(String(args[1]));
-            Zzy.SCF.IsCClose(enable);
-
-            //$gameSystem._ZzySCFIsCClose = enable;
-            break;
-
-        case "CCloseText":
-            var tText = String(args[1]);
-            Zzy.SCF.CCloseText(tText);
-
-            //$gameSystem._ZzySCFCCloseText = tText;
-            break;
-
-        case "IsCAutoLine":
-            var enable = eval(String(args[1]));
-            Zzy.SCF.IsCAutoLine(enable);
-
-            //$gameSystem._ZzySCFIsCAutoLine = enable;
-            break;
-
-        case "YMaxCols":
-            var cols = parseInt(args[1]);
-            Zzy.SCF.YMaxCols(cols);
-
-            //$gameSystem._ZzySCFYMaxCols = cols;
-            break;
-
-        case "YMaxList":
-            var list = parseInt(args[1]);
-            Zzy.SCF.YMaxList(list);
-
-            //$gameSystem._ZzySCFYMaxList = list;
-            break;
-
-        case "YWindowWidth":
-            var width = parseInt(args[1]);
-            Zzy.SCF.YWindowWidth(width);
-
-            //$gameSystem._ZzySCFYWindowWidth = width;
-            break;
-
-        case "YWindowOp":
-            var op = parseInt(args[1]);
-            Zzy.SCF.YWindowOp(op);
-
-            //$gameSystem._ZzySCFYWindowOp = op;
-            break;
-
-        case "YTakeRange":
-            var range = parseInt(args[1]);
-            Zzy.SCF.YTakeRange(range);
-
-            //$gameSystem._ZzySCFYTakeRange = range;
-            break;
-
-        case "YColor1":
-            var color = String(args[1]);
-            Zzy.SCF.YColor1(color);
-
-            //$gameSystem._ZzySCFYColor1 = color;
-            break;
-
-        case "YColor2":
-            var color = String(args[1]);
-            Zzy.SCF.YColor2(color);
-
-            //$gameSystem._ZzySCFYColor2 = color;
-            break;
-
-        case "YOffsetX":
-            var ofx = Number(args[1]);
-            Zzy.SCF.YOffsetX(ofx);
-
-            //$gameSystem._ZzySCFYOffsetX = ofx;
-            break;
-
-        case "YOffsetY":
-            var ofy = Number(args[1]);
-            Zzy.SCF.YOffsetY(ofy);
-
-            //$gameSystem._ZzySCFYOffsetY = ofy;
-            break;
-
-        case "YFadeFrame":
-            var fFrame = parseInt(args[1]);
-            Zzy.SCF.YFadeFrame(fFrame);
-
-            //$gameSystem._ZzySCFYFadeFrame = fFrame;
-            break;
-
-        case "YDistance":
-            var dis = parseInt(args[1]);
-            Zzy.SCF.YDistance(dis);
-
-            //$gameSystem._ZzySCFYDistance = dis;
-            break;
-
-        case "YIsHorShow":
-            var enable = eval(String(args[1]));
-            Zzy.SCF.YIsHorShow(enable);
-
-            //$gameSystem._ZzySCFYIsHorShow = enable;
-            break;
-
-        case "YIsAutoOpen":
-            var enable = eval(String(args[1]));
-            Zzy.SCF.YIsAutoOpen(enable);
-
-            //$gameSystem._ZzySCFYIsAutoOpen = enable;
-            break;
-
-        case "YIsLimitWindow":
-            var enable = eval(String(args[1]));
-            Zzy.SCF.YIsLimitWindow(enable);
-
-            //$gameSystem._ZzySCFYIsLimitWindow = enable;
-            break;
-
-        case "CoinColor":
-            var color = String(args[1]);
-            Zzy.SCF.CoinColor(color);
-
-            //$gameSystem._ZzySCFCoinColor = color;
-            break;
-    }
-};
+		case 'CoinColor':
+		var color = String(args[1]);
+		Zzy.SCF.CoinColor(color);
+		
+		//$gameSystem._ZzySCFCoinColor = color;
+		break;
+	}
+}
 
 Zzy.SCF.Game_Interpreter_update = Game_Interpreter.prototype.update;
-Game_Interpreter.prototype.update = function () {
-    if (this.eventId()) {
-        var ev = $gameMap.event(this.eventId());
-        if (ev && ev.ZzySCFIsChest()) {
-            //代表是箱子
-            this._ZzySCFIsChestMode = true; //开启箱子模式
-            this._ZzySCFWaitCall = true;
-        }
-    }
-
-    Zzy.SCF.Game_Interpreter_update.call(this);
-
-    var isFirst = false;
-    if (this._ZzySCFWaitCall && !this.isRunning()) {
-        //做呼叫准备
-        this._ZzySCFWaitCall = false;
-        $gameSystem.ZzySCFSetWaitCall(this.ZzySCFCallStorageInfo());
-        isFirst = true;
-    }
-    this._ZzySCFIsChestMode = false; //关闭宝箱收集模式
-
-    if (!isFirst) {
-        if ($gameSystem._ZzySCFWaitOfChest && !this.isRunning()) {
-            $gameSystem.ZzySCFSetWaitCall($gameSystem._ZzySCFWaitOfChest);
-            $gameSystem._ZzySCFWaitOfChest = undefined;
-        }
-    }
-};
-
-Game_Interpreter.prototype.ZzySCFCallStorageInfo = function () //制作呼叫仓库数据信息
+Game_Interpreter.prototype.update = function() 
 {
-    var info = {};
-    info.evId = this.eventId();
-    info.mapId = $gameMap.mapId();
+	if(this.eventId())
+	{
+		var ev = $gameMap.event(this.eventId());
+		if(ev && ev.ZzySCFIsChest())//代表是箱子
+		{
+			this._ZzySCFIsChestMode = true;//开启箱子模式
+			this._ZzySCFWaitCall = true;
+		}
+	}
+	
+	Zzy.SCF.Game_Interpreter_update.call(this);
+	
+	var isFirst = false;
+	if(this._ZzySCFWaitCall && !this.isRunning())//做呼叫准备
+	{
+		this._ZzySCFWaitCall = false;
+		$gameSystem.ZzySCFSetWaitCall(this.ZzySCFCallStorageInfo());
+		isFirst = true;
+	}
+	this._ZzySCFIsChestMode = false;//关闭宝箱收集模式
+	
+	if(!isFirst)
+	{	
+		if($gameSystem._ZzySCFWaitOfChest && !this.isRunning())
+		{
+			$gameSystem.ZzySCFSetWaitCall($gameSystem._ZzySCFWaitOfChest);
+			$gameSystem._ZzySCFWaitOfChest = undefined;
+		}		
+	}
 
-    return info;
+	
 };
+
+
+
+
+
+Game_Interpreter.prototype.ZzySCFCallStorageInfo = function()//制作呼叫仓库数据信息
+{
+	var info = {};
+	info.evId = this.eventId();
+	info.mapId = $gameMap.mapId();
+	
+
+	return info;
+}
+
+
 
 //呼叫金币函数
 Zzy.SCF.Game_Interpreter_command125 = Game_Interpreter.prototype.command125;
-Game_Interpreter.prototype.command125 = function () {
-    if (this._ZzySCFIsChestMode) {
-        var value = this.operateValue(this._params[0], this._params[1], this._params[2]);
-        if (value >= 0) {
-            $gameSystem.ZzySCFRecordInfo(this.eventId(), value, 0, 1);
-            return true;
-        }
-    }
-    return Zzy.SCF.Game_Interpreter_command125.call(this);
+Game_Interpreter.prototype.command125 = function() 
+{
+	if(this._ZzySCFIsChestMode)
+	{
+		var value = this.operateValue(this._params[0], this._params[1], this._params[2]);
+		if(value >= 0)
+		{
+			$gameSystem.ZzySCFRecordInfo(this.eventId(),value,0,1);
+			return true;
+		}
+	}
+	return Zzy.SCF.Game_Interpreter_command125.call(this);
+
 };
+
 
 //呼叫道具函数
 Zzy.SCF.Game_Interpreter_command126 = Game_Interpreter.prototype.command126;
-Game_Interpreter.prototype.command126 = function () {
-    if (this._ZzySCFIsChestMode) {
-        var value = this.operateValue(this._params[1], this._params[2], this._params[3]);
-        if (value >= 0) {
-            $gameSystem.ZzySCFRecordInfo(this.eventId(), value, this._params[0], 2);
-            return true;
-        }
-    }
+Game_Interpreter.prototype.command126 = function() 
+{
 
-    return Zzy.SCF.Game_Interpreter_command126.call(this);
+
+	if(this._ZzySCFIsChestMode)
+	{
+		var value = this.operateValue(this._params[1], this._params[2], this._params[3]);
+		if(value >= 0)
+		{
+			$gameSystem.ZzySCFRecordInfo(this.eventId(),value,this._params[0],2);
+			return true;
+		}	
+	}
+	
+	return Zzy.SCF.Game_Interpreter_command126.call(this);
+
 };
 
 //呼叫武器函数
 Zzy.SCF.Game_Interpreter_command127 = Game_Interpreter.prototype.command127;
-Game_Interpreter.prototype.command127 = function () {
-    if (this._ZzySCFIsChestMode) {
-        var value = this.operateValue(this._params[1], this._params[2], this._params[3]);
-        if (value >= 0) {
-            $gameSystem.ZzySCFRecordInfo(this.eventId(), value, this._params[0], 3);
-            return true;
-        }
-    }
-    return Zzy.SCF.Game_Interpreter_command127.call(this);
+Game_Interpreter.prototype.command127 = function() 
+{
+	if(this._ZzySCFIsChestMode)
+	{
+		var value = this.operateValue(this._params[1], this._params[2], this._params[3]);
+		if(value >= 0)
+		{
+			$gameSystem.ZzySCFRecordInfo(this.eventId(),value,this._params[0],3);
+			return true;
+		}
+	}
+	return Zzy.SCF.Game_Interpreter_command127.call(this);
+
 };
 
 //呼叫护甲函数
 Zzy.SCF.Game_Interpreter_command128 = Game_Interpreter.prototype.command128;
-Game_Interpreter.prototype.command128 = function () {
-    if (this._ZzySCFIsChestMode) {
-        var value = this.operateValue(this._params[1], this._params[2], this._params[3]);
-        if (value >= 0) {
-            $gameSystem.ZzySCFRecordInfo(this.eventId(), value, this._params[0], 4);
-            return true;
-        }
-    }
-    return Zzy.SCF.Game_Interpreter_command128.call(this);
+Game_Interpreter.prototype.command128 = function() 
+{
+	if(this._ZzySCFIsChestMode)
+	{
+		var value = this.operateValue(this._params[1], this._params[2], this._params[3]);
+		if(value >= 0)
+		{
+			$gameSystem.ZzySCFRecordInfo(this.eventId(),value,this._params[0],4);	
+			return true;
+		}
+	}
+	return Zzy.SCF.Game_Interpreter_command128.call(this);
+
 };
 
 //呼叫文本函数
 Zzy.SCF.Game_Interpreter_command101 = Game_Interpreter.prototype.command101;
-Game_Interpreter.prototype.command101 = function () {
-    if ($gameSystem._ZzySCFIsFilterText && this._ZzySCFIsChestMode) {
-        //是否忽略脚本
-        return true;
-    }
+Game_Interpreter.prototype.command101 = function()
+{
+	if($gameSystem._ZzySCFIsFilterText && this._ZzySCFIsChestMode)//是否忽略脚本
+	{
+		return true;
+	}
+	
+	return Zzy.SCF.Game_Interpreter_command101.call(this);
+}
 
-    return Zzy.SCF.Game_Interpreter_command101.call(this);
-};
 
 //============================================================================================
 //Game_Event
 //============================================================================================
 
 Zzy.SCF.Game_Event_setupPage = Game_Event.prototype.setupPage;
-Game_Event.prototype.setupPage = function () //加载事件信息
+Game_Event.prototype.setupPage = function() //加载事件信息
 {
-    Zzy.SCF.Game_Event_setupPage.call(this);
-    this.ZzySCFInitData(); //调用初始化数据
-};
+	Zzy.SCF.Game_Event_setupPage.call(this);
+	this.ZzySCFInitData();//调用初始化数据
+}
+	
+	
 
-Game_Event.prototype.ZzySCFInitData = function () {
-    if (!this.page()) return;
+Game_Event.prototype.ZzySCFInitData = function()
+{
+	if (!this.page()) return;
 
-    var list = this.list();
-    var len = list.length;
+  var list = this.list();
+  var len = list.length;
 
-    this.zzySCF = {};
-
-    for (var i = 0; i < len; ++i) {
-        var ev = list[i];
-
-        if ([108, 408].contains(ev.code)) {
-            if (ev.parameters[0].match(/<ZZYSCF[ ]CHEST>/i)) {
-                //设置为箱子
-                this.zzySCF.IsChest = true;
-            }
-        }
+	this.zzySCF = {};
+	
+  for (var i = 0; i < len; ++i) 
+  {
+    var ev = list[i];
+	
+	
+    if ([108, 408].contains(ev.code)) 
+	{
+		
+      if(ev.parameters[0].match(/<ZZYSCF[ ]CHEST>/i))//设置为箱子
+	  {
+		 this.zzySCF.IsChest = true;
+	  }  
+	  
     }
-};
+  }	
+
+}
 Zzy.SCF.Game_Event_initialize = Game_Event.prototype.initialize;
-Game_Event.prototype.initialize = function (mapId, eventId) {
-    Zzy.SCF.Game_Event_initialize.call(this, mapId, eventId);
-    this._ZzySCFNotRepeat = 0;
+Game_Event.prototype.initialize = function(mapId, eventId) 
+{
+	Zzy.SCF.Game_Event_initialize.call(this,mapId,eventId);
+	this._ZzySCFNotRepeat = 0;
+
 };
+
+
 
 Zzy.SCF.Game_Event_start = Game_Event.prototype.start;
-Game_Event.prototype.start = function () //玩家产生触碰时
+Game_Event.prototype.start = function()//玩家产生触碰时
 {
-    Zzy.SCF.Game_Event_start.call(this);
-
-    if ($gameSystem.IsZzySCFStorage($gameMap.mapId(), this.eventId()) && this._ZzySCFNotRepeat <= 0) {
-        $gameSystem._ZzySCFWaitOfChest = { mapId: $gameMap.mapId(), evId: this.eventId() };
-        this._ZzySCFNotRepeat = Zzy.SCF.TempNotRepeatFrame; //忽略三帧
-    }
-};
+	Zzy.SCF.Game_Event_start.call(this);
+		
+	if($gameSystem.IsZzySCFStorage($gameMap.mapId(),this.eventId()) && this._ZzySCFNotRepeat <= 0)
+	{
+		$gameSystem._ZzySCFWaitOfChest = {mapId:$gameMap.mapId(),evId:this.eventId()};	
+		this._ZzySCFNotRepeat = Zzy.SCF.TempNotRepeatFrame;//忽略三帧
+	}
+}
 
 Zzy.SCF.Game_Event_update = Game_Event.prototype.update;
-Game_Event.prototype.update = function () {
-    Zzy.SCF.Game_Event_update.call(this);
-    this.updateZzySCFNotRepeat();
-};
-Game_Event.prototype.updateZzySCFNotRepeat = function () {
-    if (!this._ZzySCFNotRepeat) return;
+Game_Event.prototype.update = function()
+{
+	Zzy.SCF.Game_Event_update.call(this);
+	this.updateZzySCFNotRepeat();
+	
+}
+Game_Event.prototype.updateZzySCFNotRepeat = function()
+{
+	if(!this._ZzySCFNotRepeat)return;
+	
+	if(this._ZzySCFNotRepeat > 0){this._ZzySCFNotRepeat--;}
+	else{this._ZzySCFNotRepeat = 0;}
+}
 
-    if (this._ZzySCFNotRepeat > 0) {
-        this._ZzySCFNotRepeat--;
-    } else {
-        this._ZzySCFNotRepeat = 0;
-    }
-};
 
-Game_Event.prototype.MakeZzySCFInfo = function () {
-    var info = {};
-    info.mapId = $gameMap.mapId();
-    info.evId = this.eventId();
-    return info;
-};
 
-Game_Event.prototype.ZzySCFIsChest = function () {
-    if (!this.zzySCF || !this.zzySCF.IsChest) return false;
-    return true;
-};
 
-Game_Event.prototype.ZzySCFExeChestCommand = function () {};
+Game_Event.prototype.MakeZzySCFInfo = function()
+{
+	var info = {};
+	info.mapId = $gameMap.mapId();
+	info.evId = this.eventId();
+	return info;
+}
+
+
+
+Game_Event.prototype.ZzySCFIsChest = function()
+{
+	if(!this.zzySCF || !this.zzySCF.IsChest)return false;
+	return true;
+}
+
+Game_Event.prototype.ZzySCFExeChestCommand = function()
+{
+	
+	
+	
+}
 
 //============================================================================================
 //Game_Interpreter
 //============================================================================================
 Zzy.SCF.Game_Interpreter_initialize = Game_Interpreter.prototype.initialize;
-Game_Interpreter.prototype.initialize = function (depth) {
-    Zzy.SCF.Game_Interpreter_initialize.call(this, depth);
-    this._ZzySCFEventId = 0; //使用事件ID
+Game_Interpreter.prototype.initialize = function(depth) 
+{
+	Zzy.SCF.Game_Interpreter_initialize.call(this,depth);
+	this._ZzySCFEventId = 0;//使用事件ID
+	
 };
+
+
 
 //------------------------------Zzy.SCF.Function-------------------------------
 
-Zzy.SCF.OverlapModeToID = function (str) {
-    switch (str) {
-        case "Single":
-            return 1;
-        case "Overlap":
-            return 2;
-        case "Event":
-            return 3;
-    }
-    console.log("Error:来自LiuYue_SeniorChest,检查叠加模式填写是否正确");
-    return;
-    return 1;
-};
+Zzy.SCF.OverlapModeToID = function(str)
+{
+	switch(str)
+	{
+		case 'Single':return 1;
+		case 'Overlap':return 2;	
+		case 'Event':return 3;
+	}
+	console.log('Error:来自LiuYue_SeniorChest,检查叠加模式填写是否正确');return;
+	return 1;
+}
 
-Zzy.SCF.ShowModeToID = function (str) {
-    switch (str) {
-        case "Chest":
-            return 1;
-        case "YuanShen":
-            return 2;
-    }
-    console.log("Error:来自LiuYue_SeniorChest,检查显示模式填写是否正确");
-    return;
-    return 1;
-};
+Zzy.SCF.ShowModeToID = function(str)
+{
+	switch(str)
+	{
+		case 'Chest':return 1;
+		case 'YuanShen':return 2;	
+	}
+	console.log('Error:来自LiuYue_SeniorChest,检查显示模式填写是否正确');return;
+	return 1;
+}
 
-Zzy.SCF.PlaySE = function (
-    soundID //播放声音
-) {
-    var se = Zzy.Param.SCFAllSE[soundID];
-    if (se && se.name) {
-        AudioManager.playSe(se);
-        return true;
-    }
-    return false;
-};
+Zzy.SCF.PlaySE = function(soundID)//播放声音
+{
+	var se = Zzy.Param.SCFAllSE[soundID];
+	if(se && se.name)
+	{
+		AudioManager.playSe(se);
+		return true;
+	}
+	return false;
+}
 
-Zzy.SCF.OverlapMode = function (mode) {
-    $gameSystem._ZzySCFOverlapMode = mode;
-};
 
-Zzy.SCF.ShowMode = function (mode) {
-    $gameSystem._ZzySCFShowMode = mode;
-};
 
-Zzy.SCF.IsFilterText = function (enable) {
-    $gameSystem._ZzySCFIsFilterText = enable;
-};
 
-Zzy.SCF.CoinIcon = function (iconIndex) {
-    $gameSystem._ZzySCFCoinIcon = iconIndex;
-};
 
-Zzy.SCF.CMaxCols = function (cols) {
-    $gameSystem._ZzySCFCMaxCols = cols;
-};
+Zzy.SCF.OverlapMode = function(mode)
+{
+	$gameSystem._ZzySCFOverlapMode = mode;
+}
 
-Zzy.SCF.IsCAllTake = function (enable) {
-    $gameSystem._ZzySCFIsCAllTake = enable;
-};
+Zzy.SCF.ShowMode = function(mode)
+{
+	$gameSystem._ZzySCFShowMode = mode;
+}
 
-Zzy.SCF.CAllTakeText = function (tText) {
-    $gameSystem._ZzySCFCAllTakeText = tText;
-};
+Zzy.SCF.IsFilterText = function(enable)
+{
+	$gameSystem._ZzySCFIsFilterText = enable;
+}
 
-Zzy.SCF.IsCClose = function (enable) {
-    $gameSystem._ZzySCFIsCClose = enable;
-};
+Zzy.SCF.CoinIcon = function(iconIndex)
+{
+	$gameSystem._ZzySCFCoinIcon = iconIndex;
+}
 
-Zzy.SCF.CCloseText = function (tText) {
-    $gameSystem._ZzySCFCCloseText = tText;
-};
+Zzy.SCF.CMaxCols = function(cols)
+{
+	$gameSystem._ZzySCFCMaxCols = cols;
+}
 
-Zzy.SCF.IsCAutoLine = function (enable) {
-    $gameSystem._ZzySCFIsCAutoLine = enable;
-};
+Zzy.SCF.IsCAllTake = function(enable)
+{
+	$gameSystem._ZzySCFIsCAllTake = enable;
+}
 
-Zzy.SCF.YMaxCols = function (cols) {
-    $gameSystem._ZzySCFYMaxCols = cols;
-};
+Zzy.SCF.CAllTakeText = function(tText)
+{
+	$gameSystem._ZzySCFCAllTakeText = tText;
+}
 
-Zzy.SCF.YMaxList = function (list) {
-    $gameSystem._ZzySCFYMaxList = list;
-};
+Zzy.SCF.IsCClose = function(enable)
+{
+	$gameSystem._ZzySCFIsCClose = enable;
+}
 
-Zzy.SCF.YWindowWidth = function (width) {
-    $gameSystem._ZzySCFYWindowWidth = width;
-};
+Zzy.SCF.CCloseText = function(tText)
+{
+	$gameSystem._ZzySCFCCloseText = tText;
+}
 
-Zzy.SCF.YWindowOp = function (op) {
-    $gameSystem._ZzySCFYWindowOp = op;
-};
+Zzy.SCF.IsCAutoLine = function(enable)
+{
+	$gameSystem._ZzySCFIsCAutoLine = enable;
+}
 
-Zzy.SCF.YTakeRange = function (range) {
-    $gameSystem._ZzySCFYTakeRange = range;
-};
+Zzy.SCF.YMaxCols = function(cols)
+{
+	$gameSystem._ZzySCFYMaxCols = cols;
+}
 
-Zzy.SCF.YColor1 = function (color) {
-    $gameSystem._ZzySCFYColor1 = color;
-};
+Zzy.SCF.YMaxList = function(list)
+{
+	$gameSystem._ZzySCFYMaxList = list;
+}
 
-Zzy.SCF.YColor2 = function (color) {
-    $gameSystem._ZzySCFYColor2 = color;
-};
+Zzy.SCF.YWindowWidth = function(width)
+{
+	$gameSystem._ZzySCFYWindowWidth = width;
+}
 
-Zzy.SCF.YOffsetX = function (ofx) {
-    $gameSystem._ZzySCFYOffsetX = ofx;
-};
+Zzy.SCF.YWindowOp = function(op)
+{
+	$gameSystem._ZzySCFYWindowOp = op;
+}
 
-Zzy.SCF.YOffsetY = function (ofy) {
-    $gameSystem._ZzySCFYOffsetY = ofy;
-};
+Zzy.SCF.YTakeRange = function(range)
+{
+	$gameSystem._ZzySCFYTakeRange = range;
+}
 
-Zzy.SCF.YFadeFrame = function (fFrame) {
-    $gameSystem._ZzySCFYFadeFrame = fFrame;
-};
+Zzy.SCF.YColor1 = function(color)
+{
+	$gameSystem._ZzySCFYColor1 = color;
+}
 
-Zzy.SCF.YDistance = function (dis) {
-    $gameSystem._ZzySCFYDistance = dis;
-};
+Zzy.SCF.YColor2 = function(color)
+{
+	$gameSystem._ZzySCFYColor2 = color;
+}
 
-Zzy.SCF.YIsHorShow = function (enable) {
-    $gameSystem._ZzySCFYIsHorShow = enable;
-};
+Zzy.SCF.YOffsetX = function(ofx)
+{
+	$gameSystem._ZzySCFYOffsetX = ofx;
+}
 
-Zzy.SCF.YIsAutoOpen = function (enable) {
-    $gameSystem._ZzySCFYIsAutoOpen = enable;
-};
+Zzy.SCF.YOffsetY = function(ofy)
+{
+	$gameSystem._ZzySCFYOffsetY = ofy;
+}
 
-Zzy.SCF.YIsLimitWindow = function (enable) {
-    $gameSystem._ZzySCFYIsLimitWindow = enable;
-};
+Zzy.SCF.YFadeFrame = function(fFrame)
+{
+	$gameSystem._ZzySCFYFadeFrame = fFrame;
+}
 
-Zzy.SCF.CoinColor = function (color) {
-    $gameSystem._ZzySCFCoinColor = color;
-};
+Zzy.SCF.YDistance = function(dis)
+{
+	$gameSystem._ZzySCFYDistance = dis;
+}
+
+Zzy.SCF.YIsHorShow = function(enable)
+{
+	$gameSystem._ZzySCFYIsHorShow = enable;
+}
+
+Zzy.SCF.YIsAutoOpen = function(enable)
+{
+	$gameSystem._ZzySCFYIsAutoOpen = enable;
+}
+
+Zzy.SCF.YIsLimitWindow = function(enable)
+{
+	$gameSystem._ZzySCFYIsLimitWindow = enable;
+}
+
+Zzy.SCF.CoinColor = function(color)
+{
+	$gameSystem._ZzySCFCoinColor = color;
+}
+
+

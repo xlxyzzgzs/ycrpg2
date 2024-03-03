@@ -1,5 +1,5 @@
 /*:
- * @plugindesc v1.04 LiuYue_GainItemTips 获取道具显示
+ * @plugindesc v1.05 LiuYue_GainItemTips 获取道具显示
  * @author 流逝的岁月
  *
  * @help
@@ -82,7 +82,7 @@
  *----------------------------------------------------------
  *
  *
- *
+ * 我叫坂本：v1.05 修复进入商店界面后,购买物品也会出现提示
  * 我叫坂本：v1.04 添加文本宽度自适应功能
  * 我叫坂本：v1.03 修改结构代码,减少冲突,修复一个字体过大导致图标文本重叠的bug
  * 我叫坂本：v1.02 修复单独插件测试报错,修复拆卸装备出现信息的逻辑问题,添加排序显示优先级
@@ -356,6 +356,24 @@
  * @desc 显示数量的文本格式,%1会被替换为道具数量
  * @default x %1
  *
+ *
+ * @param ---高级---
+ * @default
+ *
+ * @param ExSceneGain
+ * @text 额外的记录界面
+ * @parent ---高级---
+ * @type text
+ * @desc 如果想让这个界面下获取的物品可以被提示记录,请通过逗号追加对应的界面名称
+ * @default Scene_Shop,Scene_ZzySCFChest
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  * @param ---音效---
  * @default
  *
@@ -429,7 +447,7 @@ LiuYue.LiuYue_GainItemTips = true;//插件启动
  
 var Zzy = Zzy || {};
 Zzy.GIT = Zzy.GIT || {};
-Zzy.GIT.version = 1.04;
+Zzy.GIT.version = 1.05;
 Zzy.Parameters = PluginManager.parameters('LiuYue_GainItemTips');
 Zzy.Param = Zzy.Param || {}; 
 
@@ -493,6 +511,27 @@ Zzy.Param.GITGLRank = parseInt(Zzy.Parameters['GLRank']);
 Zzy.Param.GITIconScale = Number(Zzy.Parameters['IconScale']);//图标大小
 Zzy.Param.GITIsIconFlash = eval(Zzy.Parameters['IsIconFlash']);
 Zzy.Param.GITIconFlashFrame = parseInt(Zzy.Parameters['IconFlashFrame']);
+
+
+
+
+//---更新--- v1.05 指定场景获取道具具有提示效果
+
+Zzy.GIT.ExSceneGain = String(Zzy.Parameters['ExSceneGain'] || 'Scene_Shop,Scene_ZzySCFChest');
+Zzy.GIT.TransExSceneGain = function()
+{
+	var strArr = Zzy.GIT.ExSceneGain.split(',');
+	var struct = {};
+	for(var i=0;i<strArr.length;i++)
+	{
+		var str = strArr[i];
+		struct[str] = true;
+	}
+	return struct;
+}
+Zzy.GIT.GainSceneStruct = Zzy.GIT.TransExSceneGain();
+
+
 
 
 //--------------------------------------声音-------------------------------------
@@ -1372,9 +1411,7 @@ Game_Interpreter.prototype.command126 = function()
 	var value = this.operateValue(this._params[1], this._params[2], this._params[3]);
 	
 	if($gameSystem.GetZzyGITPluginEnable())
-	{
-		Zzy.GIT.GainPrompt($dataItems[this._params[0]], value);
-	}
+	{Zzy.GIT.GainPrompt($dataItems[this._params[0]], value);}
     return result;
 };
 
@@ -1385,9 +1422,7 @@ Game_Interpreter.prototype.command127 = function()
 	var value = this.operateValue(this._params[1], this._params[2], this._params[3]);
 	
 	if($gameSystem.GetZzyGITPluginEnable())
-	{
-		Zzy.GIT.GainPrompt($dataWeapons[this._params[0]], value);
-	}
+	{Zzy.GIT.GainPrompt($dataWeapons[this._params[0]], value);}
     return result;
 };
 
@@ -1398,16 +1433,42 @@ Game_Interpreter.prototype.command128 = function()
 	var value = this.operateValue(this._params[1], this._params[2], this._params[3]);
 	
 	if($gameSystem.GetZzyGITPluginEnable())
-	{
-		Zzy.GIT.GainPrompt($dataArmors[this._params[0]], value);
-	}
+	{Zzy.GIT.GainPrompt($dataArmors[this._params[0]], value);}
     return result;
 };
+
+
+
+
 
 
 //=======================================================================
 //Game_Party
 //=======================================================================
+
+
+
+Zzy.GIT.Game_Party_gainItem = Game_Party.prototype.gainItem;
+Game_Party.prototype.gainItem = function(item, amount, includeEquip) 
+{
+	//此处使用获取前,获取后 消耗的方式来计算增益物品提示
+	var prevNum = 0;
+	if($gameSystem.GetZzyGITPluginEnable())
+	{prevNum = this.numItems(item);}
+	Zzy.GIT.Game_Party_gainItem.call(this,item,amount,includeEquip);
+	if($gameSystem.GetZzyGITPluginEnable())
+	{
+		var sName = SceneManager._scene.constructor.name;
+		if(Zzy.GIT.GainSceneStruct[sName])		
+		{
+			var afterNum = this.numItems(item);
+			var realAmount = afterNum - prevNum;		
+			if(realAmount)Zzy.GIT.GainPrompt(item, realAmount);
+		}		
+	}
+};
+
+
 Zzy.GIT.Game_Party_gainGold = Game_Party.prototype.gainGold;
 Game_Party.prototype.gainGold = function(amount)
 {
@@ -1417,6 +1478,9 @@ Game_Party.prototype.gainGold = function(amount)
 		Zzy.GIT.GainGoldPrompt(amount);
 	}
 }
+
+
+
 
 //=======================================================================
 //Sprite_ZzyGITIcon
