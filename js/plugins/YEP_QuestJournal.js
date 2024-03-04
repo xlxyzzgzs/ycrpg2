@@ -4063,30 +4063,13 @@ Window_Selectable.prototype.RefreshZzyXTQJ = function()
 
 
 
-
+//asd
 //---魔改--- v1.00 重写 processTouch 此处可能会造成不兼容的情况
-Window_QuestData.prototype.processTouch = function() {
-    if (this.isOpenAndActive() || SceneManager._scene._listWindow.active) 
-	{
-        if (TouchInput.isTriggered() && this.isTouchedInsideFrame()) {
-            this._touching = true;
-            this.onTouch(true);
-        } else if (TouchInput.isCancelled()) {
-            if (this.isCancelEnabled()) {
-                this.processCancel();
-            }
-        }
-        if (this._touching) {
-            if (TouchInput.isPressed()) {
-                this.onTouch(false);
-            } else {
-                this._touching = false;
-            }
-        }
-    } else {
-        this._touching = false;
-    }
+Window_QuestData.prototype.processTouch = function() 
+{
 	
+	
+	Window_Selectable.prototype.processTouch.call(this);
 	
 	//刷新关闭Touch
 	if(!this._touching)
